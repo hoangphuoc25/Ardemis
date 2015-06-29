@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title><h:outputText value="#{dictionaryControler.dictionary['Book List']}"/></title>
+</h:head>
+<h:body>
+
+	<h:form id="form01">
+		<p:toolbar>
+			<p:toolbarGroup align="left">
+		 		<p:breadCrumb>
+					<p:menuitem value="#{dictionaryControler.dictionary['Main Menu']}" action="#{bookListControler.returnToMenu}" immediate="true"></p:menuitem>
+					<p:menuitem value="#{dictionaryControler.dictionary['Book List']}" action="#"></p:menuitem>
+				</p:breadCrumb>
+			</p:toolbarGroup>
+			<p:toolbarGroup align="right">
+				<h:outputText value="#{bookListControler.conversationState}"/>
+				<p:commandButton value="#{dictionaryControler.dictionary['Logoff']}" action="#{bookListControler.logoff}"/>
+			</p:toolbarGroup>
+		</p:toolbar>
+		<p:fieldset legend="#{dictionaryControler.dictionary['Refine']}" toggleable="true">
+			 <p:panelGrid columns="3">
+			 	<p:panelGrid columns="2">
+			 		<p:outputLabel for="publisherCombo" value="#{dictionaryControler.dictionary['Publisher']}"/>
+			 		<p:selectOneMenu id="publisherCombo" value="#{bookListControler.publisher}" editable="false">
+						<f:selectItem itemLabel="Select one" itemValue="-1"/>
+						<f:selectItems value="#{bookListControler.publisherList}" var="publisher"
+							itemLabel="#{publisher.name}" itemValue="#{publisher.seq}"/>
+						<!-- 'form01' update required in order to start a conversation scope-->
+						<p:ajax listener="#{bookListControler.reload}" update="form01"/>
+					</p:selectOneMenu>
+			 	</p:panelGrid>
+			 	<p:panelGrid columns="2">
+			 		<p:outputLabel for="serieseCombo" value="#{dictionaryControler.dictionary['Seriese']}"/>
+			 		<p:selectOneMenu id="serieseCombo" value="#{bookListControler.seriese}" editable="false" >
+						<f:selectItem itemLabel="Select one" itemValue="-1"/>
+						<f:selectItems value="#{bookListControler.serieseList}" var="seriese"
+							itemLabel="#{seriese.name}" itemValue="#{seriese.seq}"/>
+						<p:ajax listener="#{bookListControler.reload}" update="form01"/>
+					</p:selectOneMenu>
+			 	</p:panelGrid>
+			 	<p:panelGrid columns="2">
+			 		<p:outputLabel for="authorButton" value="#{dictionaryControler.dictionary['Author']}"/>
+					<p:commandButton id="authorButton" value="#{dictionaryControler.dictionary['Select author(s)']}" ajax="true" update="form01"
+						action="#{bookListControler.reload}" oncomplete="authorDialog_w.show();"/>
+			 	</p:panelGrid>
+			 </p:panelGrid>
+		</p:fieldset>
+		<p:dataTable id="bookTable" value="#{bookListControler.bookList}" var="book"
+				selectionMode="single" selection="#{bookListControler.selectedBook}"
+				rows="5" paginator="true" paginatorAlwaysVisible="true" paginatorPosition="bottom"
+				first="#{bookListControler.first}"
+				paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}" >
+			<p:ajax event="rowSelect" oncomplete="detailDialog_w.show();" update=":form01:detailDialog"/>
+			<p:column style="width:50%">
+				<f:facet name="header">
+					<h:outputText value="#{dictionaryControler.dictionary['Title']}"/>
+				</f:facet>
+				<h:outputText value="#{book.title}"/>
+			</p:column>
+			<p:column style="width:10%">
+				<f:facet name="header">
+					<h:outputText value="#{dictionaryControler.dictionary['No']}"/>
+				</f:facet>
+				<h:outputText value="#{book.no}"/>
+			</p:column>
+			<p:column style="width:40%">
+				<f:facet name="header">
+					<h:outputText value="#{dictionaryControler.dictionary['Price']}"/>
+				</f:facet>
+				<h:outputText value="#{book.price}"/>
+			</p:column>
+		</p:dataTable>
+		<p:ajaxStatus style="text-align: center;">
+			<f:facet name="start">
+				<h:outputText value="#{dictionaryControler.dictionary['Loading']}"/><br/>
+				<p:graphicImage value="/images/loading.gif" />
+			</f:facet>
+			<f:facet name="complete">
+				<h:outputText value=""/>
+			</f:facet>
+		</p:ajaxStatus>
+		<p:dialog id="detailDialog" widgetVar="detailDialog_w" modal="true" resizable="false" draggable="true" header="#{dictionaryControler.dictionary['Book Detail']}">
+			<p:focus context="detailDialog" for="okBtn"/>
+			<p:panelGrid columns="2">
+				<h:outputText value="#{dictionaryControler.dictionary['Title']}"/>
+				<h:outputText value="#{bookListControler.selectedBook.title}"/>
+				<h:outputText value="#{dictionaryControler.dictionary['No']}"/>
+				<h:outputText value="#{bookListControler.selectedBook.no}"/>
+				<h:outputText value="#{dictionaryControler.dictionary['Price']}"/>
+				<h:outputText value="#{bookListControler.selectedBook.price}"/>
+				<h:outputText value="#{dictionaryControler.dictionary['Puglisher']}"/>
+				<h:outputText value="#{bookListControler.selectedBook.publisherDto.name}"/>
+				<h:outputText value="#{dictionaryControler.dictionary['Series']}"/>
+				<h:outputText value="#{bookListControler.selectedBook.serieseDto.name}"/>
+			</p:panelGrid>
+				<p:dataTable id="authorTable" value="#{bookListControler.selectedBook.bookAuthorList}" var="bookAuthor">
+					<f:facet name="header">
+						<h:outputText value="#{dictionaryControler.dictionary['Author List']}"/>
+					</f:facet>
+					<p:column>
+						<h:outputText value="#{bookAuthor.authorKbnDto.name}"/>
+					</p:column>
+					<p:column>
+						<h:outputText value="#{bookAuthor.authorDto.name}"/>
+					</p:column>
+				</p:dataTable>
+			<p:commandButton id="okBtn" value="#{dictionaryControler.dictionary['OK']}" ajax="true" onclick="detailDialog_w.hide();" update="form01"/>
+		</p:dialog>
+		<p:dialog draggable="true" resizable="true" modal="true" id="authorDialog" header="#{dictionaryControler.dictionary['Author Selection']}"
+			closable="false" minWidth="200" widgetVar="authorDialog_w">
+			<p:focus context="authorDialog"/>
+			<h:outputText value="#{dictionaryControler.dictionary['Please type Author\'s name for select']}"/>
+			<p:panelGrid columns="2">
+				<h:outputText value="#{dictionaryControler.dictionary['Author name']}"/>
+				<p:autoComplete id="authorName" value="#{authorSelectControler.selectedAuthor}" completeMethod="#{authorSelectControler.authorComplete}">
+					<p:ajax event="itemSelect" listener="#{authorSelectControler.select}" update="selectedList,authorName"></p:ajax>
+				</p:autoComplete>
+			</p:panelGrid>
+			<p:dataTable id="selectedList" value="#{authorSelectControler.selectedList}" var="selected"
+				rows="5" paginator="true" paginatorAlwaysVisible="false" paginatorPosition="bottom"
+				paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}">
+				<p:column>
+					<f:facet name="header">
+						<h:outputText value="#{dictionaryControler.dictionary['Selected Author(s)']}"/>
+					</f:facet>
+					<h:outputText value="#{selected.authorDto.name}"></h:outputText>
+				</p:column>
+				<p:column>
+					<f:facet name="header">
+						<h:outputText value="#{dictionaryControler.dictionary['Delete mark']}"/>
+					</f:facet>
+					<h:selectBooleanCheckbox value="#{selected.select}"/>
+				</p:column>
+			</p:dataTable>
+			<p:commandButton value="#{dictionaryControler.dictionary['Delete Selected']}" ajax="true" update="selectedList" actionListener="#{authorSelectControler.selectionDelete}"/>
+			<p:commandButton value="#{dictionaryControler.dictionary['OK']}" ajax="true" actionListener="#{bookListControler.authorSelect}" update="form01"/>
+		</p:dialog>
+	</h:form>
+</h:body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core">
+
+<f:loadBundle basename="resources.application" var="msg"/>
+
+<head>
+    <title><h:outputText value="#{msg.loginForm}" /></title>
+</head>
+
+<body>
+<h1><h:outputText value="#{msg.login}" /></h1>
+
+<form method="post" action="j_security_check" name="loginform">
+<table>
+<tr>
+<td><h:outputText value="#{msg.userName}" /></td>
+<td><input type="text" id="username" name="j_username" size="32"/></td>
+</tr>
+<tr>
+<td><h:outputText value="#{msg.password}" /></td>
+<td><input type="password" id="password" name="j_password" size="32"/></td>
+</tr>
+<tr>
+<td><input type="submit" value="#{msg.gologin}"/></td>
+<td><input type="reset" value="#{msg.reset}"/></td>
+</tr>
+</table>
+</form>
+
+<script type="text/javascript">
+	document.getElementById("username").focus();
+	history.forward();
+</script>
+
+</body>
+</html>

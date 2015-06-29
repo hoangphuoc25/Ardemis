@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title><h:outputText value="#{dictionaryControler.dictionary['Main Menu']}"/></title>
+</h:head>
+<h:body>
+	<h:form id="form01">
+		<p:toolbar>
+			<p:toolbarGroup align="left">
+				<h:outputText value="#{dictionaryControler.dictionary['User']}:"/>
+				<h:outputText value="#{mainMenuControler.userName}"/>
+			</p:toolbarGroup>
+			<p:toolbarGroup align="right">
+				<p:commandButton value="#{dictionaryControler.dictionary['Logoff']}" action="#{mainMenuControler.logoff}"/>
+			</p:toolbarGroup>
+		</p:toolbar>
+		<p:accordionPanel id="menupanel" style="width:150px;">
+			<p:tab title="#{dictionaryControler.dictionary['Main Contents']}">
+				<p:commandButton id="menu01" value="#{dictionaryControler.dictionary['Book List']}" ajax="false" action="#{mainMenuControler.transfer}" onclick="blockui.show();" widgetVar="menu01_w">
+					<f:setPropertyActionListener target="#{mainMenuControler.nextMenu}" value="/faces/bookList"/>
+				</p:commandButton>
+			</p:tab>
+			<p:tab title="#{dictionaryControler.dictionary['Master Maintenance']}">
+				<p:commandButton id="menu02" value="#{dictionaryControler.dictionary['User']}" ajax="false" action="#{mainMenuControler.transfer}" onclick="blockui.show();" >
+					<f:setPropertyActionListener target="#{mainMenuControler.nextMenu}" value="/master/userMeintenance"/>
+				</p:commandButton>
+			</p:tab>
+		</p:accordionPanel>
+		<p:messages globalOnly="true"/>
+		<p:blockUI block="form01" widgetVar="blockui" >
+			<h:outputText value="#{dictionaryControler.dictionary['Loading']}"/><br/>
+			<p:graphicImage value="/images/loading.gif" />
+		</p:blockUI>
+	</h:form>
+</h:body>
+</html>

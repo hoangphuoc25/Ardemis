@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title><h:outputText value="#{dictionaryControler.dictionary['User Mentenace']}"/></title>
+</h:head>
+<h:body>
+
+	<h:form id="form01">
+		<p:toolbar>
+			<p:toolbarGroup align="left">
+		 		<p:breadCrumb>
+					<p:menuitem value="#{dictionaryControler.dictionary['Main Menu']}" action="#{userMeintenanceControler.returnToMenu}" immediate="true"></p:menuitem>
+					<p:menuitem value="#{dictionaryControler.dictionary['User Meintenance']}" action="#"></p:menuitem>
+				</p:breadCrumb>
+			</p:toolbarGroup>
+			<p:toolbarGroup align="right">
+				<h:outputText value="#{userMeintenanceControler.conversationState}"/>
+				<p:commandButton value="#{dictionaryControler.dictionary['Logoff']}" action="#{userMeintenanceControler.logoff}" update="form01"/>
+			</p:toolbarGroup>
+		</p:toolbar>
+		<p:fieldset legend="Refine" toggleable="true">
+			 <p:panelGrid columns="3">
+			 	<p:panelGrid columns="2">
+			 		<p:outputLabel for="officeCombo" value="#{dictionaryControler.dictionary['Office']}"/>
+			 		<p:selectOneMenu id="officeCombo" value="#{userMeintenanceControler.selectedOffice}" editable="false">
+						<f:selectItem itemLabel="Select one" itemValue="-1"/>
+						<f:selectItems value="#{userMeintenanceControler.officeList}" var="office"
+							itemLabel="#{office.name}" itemValue="#{office.seq}"/>
+						<p:ajax listener="#{userMeintenanceControler.reload}" update="form01"/>
+					</p:selectOneMenu>
+			 	</p:panelGrid>
+			 </p:panelGrid>
+		</p:fieldset>
+		<p:dataTable id="userTable" value="#{userMeintenanceControler.userList}" var="user"
+				selectionMode="single" selection="#{userMeintenanceControler.selectedUser}"
+				rows="5" paginator="true" paginatorAlwaysVisible="true" paginatorPosition="bottom"
+				first="#{userMeintenanceControler.first}"
+				paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}" >
+			<p:ajax event="rowSelect" oncomplete="detailDialog_w.show();" update=":form01:detailDialog"/>
+			<p:column style="width:10%">
+				<f:facet name="header">
+					<h:outputText value="#{dictionaryControler.dictionary['id']}"/>
+				</f:facet>
+				<h:outputText value="#{user.id}"/>
+			</p:column>
+			<p:column style="width:30%">
+				<f:facet name="header">
+					<h:outputText value="#{dictionaryControler.dictionary['First Name']}"/>
+				</f:facet>
+				<h:outputText value="#{user.firstName}"/>
+			</p:column>
+			<p:column style="width:30%">
+				<f:facet name="header">
+					<h:outputText value="#{dictionaryControler.dictionary['Last Name']}"/>
+				</f:facet>
+				<h:outputText value="#{user.lastName}"/>
+			</p:column>
+			<p:column style="width:30%">
+				<f:facet name="header">
+					<h:outputText value="#{dictionaryControler.dictionary['E-Mail']}"/>
+				</f:facet>
+				<h:outputText value="#{user.email}"/>
+			</p:column>
+		</p:dataTable>
+		<p:commandButton value="#{dictionaryControler.dictionary['New User']}" actionListener="#{userMeintenanceControler.startAdd}"
+				oncomplete="detailDialog_w.show();" update=":form01:detailDialog" rendered="#{userMeintenanceControler.selectedOffice > 0}"/>
+		<p:ajaxStatus style="text-align: center;">
+			<f:facet name="start">
+				<h:outputText value="#{dictionaryControler.dictionary['Loading']}"/><br/>
+				<p:graphicImage value="/images/loading.gif" />
+			</f:facet>
+			<f:facet name="complete">
+				<h:outputText value=""/>
+			</f:facet>
+		</p:ajaxStatus>
+		<p:dialog id="detailDialog" closable="false" visible="#{userMeintenanceControler.editMode or userMeintenanceControler.addMode}" widgetVar="detailDialog_w" modal="true"
+			resizable="false" draggable="true" header="#{dictionaryControler.dictionary['User Detail']}">
+			<p:focus context="detailDialog" for="okBtn" />
+			<p:panelGrid columns="2">
+				<h:outputText value="#{dictionaryControler.dictionary['ID']}"/>
+				<h:outputText value="#{userMeintenanceControler.selectedUser.id}" rendered="#{userMeintenanceControler.browseMode or userMeintenanceControler.editMode}"/>
+				<p:inputText value="#{userMeintenanceControler.editUser.id}" rendered="#{userMeintenanceControler.addMode}" required="true" size="20" maxlength="20"
+					requiredMessage="#{dictionaryControler.dictionary['userIdRequired']}"/>
+
+				<h:outputText value="#{dictionaryControler.dictionary['First Name']}"/>
+				<h:outputText value="#{userMeintenanceControler.selectedUser.firstName}" rendered="#{userMeintenanceControler.browseMode}"/>
+				<p:inputText value="#{userMeintenanceControler.editUser.firstName}" rendered="#{userMeintenanceControler.addMode or userMeintenanceControler.editMode}"
+					required="true" size="20" maxlength="20"
+					requiredMessage="#{dictionaryControler.dictionary['firstNameRequired']}"/>
+
+				<h:outputText value="#{dictionaryControler.dictionary['Last Name']}"/>
+				<h:outputText value="#{userMeintenanceControler.selectedUser.lastName}" rendered="#{userMeintenanceControler.browseMode}"/>
+				<p:inputText value="#{userMeintenanceControler.editUser.lastName}" rendered="#{userMeintenanceControler.addMode or userMeintenanceControler.editMode}"
+					required="true" size="20" maxlength="20"
+					requiredMessage="#{dictionaryControler.dictionary['lastNameRequired']}"/>
+
+				<h:outputText value="#{dictionaryControler.dictionary['E-Mail']}"/>
+				<h:outputText value="#{userMeintenanceControler.selectedUser.email}" rendered="#{userMeintenanceControler.browseMode}"/>
+				<p:inputText value="#{userMeintenanceControler.editUser.email}" rendered="#{userMeintenanceControler.addMode or userMeintenanceControler.editMode}"
+					size="20" maxlength="100"
+					validator="#{userMeintenanceControler.emailValidate}"/>
+
+				<h:outputText value="#{dictionaryControler.dictionary['Primary Office']}"/>
+				<h:outputText value="#{userMeintenanceControler.selectedUser.primaryOffice.name}" rendered="#{userMeintenanceControler.browseMode}"/>
+				<p:selectOneMenu value="#{userMeintenanceControler.editUser.primaryOfficeSeq}" rendered="#{userMeintenanceControler.addMode or userMeintenanceControler.editMode}"
+					required="true" requiredMessage="#{dictionaryControler.dictionary['primaryOfficeRequired']}">
+					<f:selectItems value="#{userMeintenanceControler.officeList}" var="office"
+						itemLabel="#{office.name}" itemValue="#{office.seq}"/>
+				</p:selectOneMenu>
+				<h:outputText value="#{dictionaryControler.dictionary['Password']}" rendered="#{userMeintenanceControler.addMode or userMeintenanceControler.editMode}"/>
+				<p:commandButton value="Password Change" rendered="#{userMeintenanceControler.addMode or userMeintenanceControler.editMode}"
+					oncomplete="passwordDialog_w.show()" actionListener="#{userMeintenanceControler.startPasswordEdit}" immediate="true"
+					update="form01"/>
+
+			</p:panelGrid>
+			<p:dataTable id="userRoleTable" value="#{userMeintenanceControler.selectedUser.roleList}" var="userRole" rendered="#{userMeintenanceControler.browseMode}">
+				<p:column>
+					<f:facet name="header">
+						<h:outputText value="#{dictionaryControler.dictionary['Role']}"/>
+					</f:facet>
+					<h:outputText value="#{userRole.role}"/>
+				</p:column>
+			</p:dataTable>
+			<p:dataTable id="userRoleTableEdit" value="#{userMeintenanceControler.roleListModel}" var="userRole" rendered="#{userMeintenanceControler.editMode or userMeintenanceControler.addMode}"
+				selection="#{userMeintenanceControler.roleSelection}" >
+				<p:column selectionMode="multiple" style="width:28px" />
+				<p:column>
+					<f:facet name="header">
+						<h:outputText value="#{dictionaryControler.dictionary['Role']}"/>
+					</f:facet>
+					<h:outputText value="#{userRole.role}"/>
+				</p:column>
+			</p:dataTable>
+			<p:panelGrid columns="2">
+			<p:toolbar>
+				<p:toolbarGroup align="left" rendered="#{userMeintenanceControler.browseMode}">
+					<p:commandButton id="okBtn" value="#{dictionaryControler.dictionary['OK']}" ajax="true" onclick="detailDialog_w.hide();" update="form01"/>
+				</p:toolbarGroup>
+				<p:toolbarGroup align="right" rendered="#{userMeintenanceControler.browseMode}">
+					<p:commandButton id="startEditBtn" value="#{dictionaryControler.dictionary['Edit']}" ajax="true" update="detailDialog"
+						actionListener="#{userMeintenanceControler.startEdit}" oncomplete="detailDialog_w.show()"/>
+					<p:commandButton id="DeleteBtn" value="#{dictionaryControler.dictionary['Delete']}" onclick="deleteConfirmDialog_w.show()"/>
+				</p:toolbarGroup>
+				<p:toolbarGroup align="left" rendered="#{!userMeintenanceControler.browseMode}">
+					<p:commandButton id="applyBtn" value="#{dictionaryControler.dictionary['Apply']}" ajax="true"
+						actionListener="#{userMeintenanceControler.apply}"
+						update="form01"/>
+				</p:toolbarGroup>
+				<p:toolbarGroup align="right" rendered="#{!userMeintenanceControler.browseMode}">
+					<p:commandButton id="discardBtn" value="#{dictionaryControler.dictionary['Discard']}" ajax="true" actionListener="#{userMeintenanceControler.discard}"
+						immediate="true" update="form01" onclick="detailDialog_w.hide()"/>
+				</p:toolbarGroup>
+			</p:toolbar>
+			</p:panelGrid>
+			<p:messages/>
+		</p:dialog>
+		<p:dialog id="passwordDialog" widgetVar="passwordDialog_w" closable="false" resizable="false" draggable="true"
+				modal="true" header="#{dictionaryControler.dictionary['Password Setting']}" visible="#{userMeintenanceControler.passwordEdit}">
+			<h:outputText value="#{dictionaryControler.dictionary['Enter Password']}"/>
+			<p:panelGrid columns="2">
+				<h:outputText value="#{dictionaryControler.dictionary['Password']}"/>
+				<p:password value="#{userMeintenanceControler.password}" required="true" requiredMessage="#{dictionaryControler.dictionary['PasswordRequired']}"
+					rendered="#{userMeintenanceControler.passwordEdit}"/>
+				<h:outputText value="#{dictionaryControler.dictionary['PasswordConfirm']}"/>
+				<p:password value="#{userMeintenanceControler.passwordConfirm}" required="true" requiredMessage="#{dictionaryControler.dictionary['PasswordConfirmRequired']}"
+					rendered="#{userMeintenanceControler.passwordEdit}"/>
+			</p:panelGrid>
+			<p:panelGrid columns="2">
+				<p:commandButton value="#{dictionaryControler.dictionary['OK']}" actionListener="#{userMeintenanceControler.applyPassword}" update="form01"
+						oncomplete="passwordDialog_w.hide()" rendered="#{userMeintenanceControler.passwordEdit}"/>
+				<p:commandButton value="#{dictionaryControler.dictionary['Cancel']}" immediate="true" actionListener="#{userMeintenanceControler.discardPassword}"
+					update="form01" oncomplete="passwordDialog_w.hide()" rendered="#{userMeintenanceControler.passwordEdit}"/>
+			</p:panelGrid>
+		</p:dialog>
+		<p:confirmDialog id="deleteConfirmDialog" widgetVar="deleteConfirmDialog_w" message="#{dictionaryControler.dictionary['Are you sure delete this user?']}"
+                header="#{dictionaryControler.dictionary['Confirm Delete User']}" severity="alert" >
+	        <p:commandButton id="confirmBtn" value="#{dictionaryControler.dictionary['OK']}" update="form01" oncomplete="deleteConfirmDialog_w.hide()"
+    	                actionListener="#{userMeintenanceControler.deleteUser}" />
+	        <p:commandButton id="cancelBtn" value="#{dictionaryControler.dictionary['Cancel']}" onclick="deleteConfirmDialog_w.hide()" type="button" />
+		</p:confirmDialog>
+	</h:form>
+</h:body>
+</html>

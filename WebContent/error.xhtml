@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core">
+
+<f:loadBundle basename="resources.application" var="msg"/>
+
+<head>
+    <title><h:outputText value="#{msg.loginFailure}" /></title>
+</head>
+
+<body>
+<h1><h:outputText value="#{msg.loginFailure}" /></h1>
+
+<p><h:outputText value="#{msg.loginFailureMsg}" /></p>
+
+<p/>
+
+<a href="MainMenu.jsf" id="login"><h:outputText value="#{msg.login}" /></a>
+
+	<script type="text/javascript">
+		document.getElementById("login").focus();
+		history.forward();
+	</script>
+
+</body>
+</html>
