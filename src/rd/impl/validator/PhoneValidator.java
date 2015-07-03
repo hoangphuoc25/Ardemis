@@ -1,7 +1,7 @@
 package rd.impl.validator;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -10,20 +10,20 @@ import javax.faces.validator.FacesValidator;
 import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
 
-@FacesValidator(value="yearValidator")
-public class YearValidator implements Validator {
+@FacesValidator("phoneValidator")
+public class PhoneValidator implements Validator {
 
 	@Override
 	public void validate(FacesContext context, UIComponent component,
 			Object value) throws ValidatorException {
-		Date d = (Date) value;
-		Calendar c = Calendar.getInstance();
-		c.setTime(d);
-		int year = c.get(Calendar.YEAR);
-		Calendar e = Calendar.getInstance();
-		e.setTime(new Date());
-		if (year < 0 || year > e.get(Calendar.YEAR)) {
-			FacesMessage msg = new FacesMessage("Invalid date", null);
+		String phone = value.toString();
+		phone = phone.replace(" ", "");
+
+		String regex = "^\\+(?:[0-9] ?){6,14}[0-9]$";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(phone);
+		if (!matcher.matches()) {
+			FacesMessage msg = new FacesMessage("Invalid phone number");
 			msg.setSeverity(FacesMessage.SEVERITY_ERROR);
 			throw new ValidatorException(msg);
 		}

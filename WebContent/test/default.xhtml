@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<h1>Custom validator in JSF 2.0</h1>
+	<h:form id="form01">
+		<p:commandButton value="Show" oncomplete="dl1_w.show()" update=":form01" />
+		<p:dialog id="dl1" closable="false" widgetVar="dl1_w" modal="true"
+			resizable="false" draggable="true" header="Dialog">
+			<p:panelGrid columns="3">
+				<h:outputText value="Email:" />
+				<p:inputText id="email" binding="#{email}" size="20" required="true"
+						label="Email Address">
+					<f:validator validatorId="emailValidator" />
+				</p:inputText>
+				<p:message for="email" style="color:red" />
+			</p:panelGrid>
+			<p:commandButton value="Submit" oncomplete="if (args &amp;&amp; !args.validationFailed) dl1_w.hide();"/>
+		</p:dialog>
+	</h:form>
+</h:body>
+</html>

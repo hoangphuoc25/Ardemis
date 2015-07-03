@@ -14,4 +14,5 @@ public interface UserService {
 	public List<UserDto> searchByName(String name) throws IOException;
 	public void updatePassword(String user, String password) throws IOException;
 	public List<UserDto> getUserByRole(String role) throws IOException;
+	public UserDto searchByEmail(String email) throws IOException;
 }

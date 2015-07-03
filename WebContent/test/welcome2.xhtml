@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<h:form id="form01">
+		<p:dataTable id="tbl1" value="#{welcomeController.teams}" var="team" rowIndexVar="index" >
+			<p:column>
+				<f:facet name="header">
+					<h:outputText value="Id" />
+				</f:facet>
+				<h:outputText value="#{team.seq}" />
+			</p:column>
+			<p:column>
+				<f:facet name="header">
+					<h:outputText value="Name" />
+				</f:facet>
+				<h:outputText value="#{team.name}" />
+			</p:column>
+			<p:column>
+				<f:facet name="header">
+					<h:outputText value="buttons" />
+				</f:facet>
+				<h:commandButton actionListener="#{welcomeController.def(team)}" rendered="#{team.seq != 4}" value="def">
+					<f:ajax render=":form01" />
+				</h:commandButton>
+				<h:outputText value="This is rendered" rendered="#{team.seq==4}" />
+			</p:column>
+		</p:dataTable>
+		<h:commandButton actionListener="#{welcomeController.abc}" value="Delete 4">
+			<f:ajax render="form01" />
+		</h:commandButton>
+	</h:form>
+</h:body>
+</html>

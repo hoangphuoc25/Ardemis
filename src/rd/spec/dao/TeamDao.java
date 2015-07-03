@@ -11,4 +11,5 @@ public interface TeamDao {
 	public TeamDto getById(Transaction transaction, int seq) throws IOException;
 	public void deleteTeam(Transaction transaction, TeamDto team) throws IOException;
 	public List<TeamDto> getAll(Transaction transaction) throws IOException;
+	public int getSeq(Transaction transaction) throws IOException;
 }

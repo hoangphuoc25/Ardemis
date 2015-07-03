@@ -12,4 +12,5 @@ public interface NoteService {
 	public void updateNote(NoteDto note) throws IOException;
 	public List<NoteDto> getBySender(String id) throws IOException;
 	public List<NoteDto> getByReceiver(String id) throws IOException;
+	public int getSeq() throws IOException;
 }

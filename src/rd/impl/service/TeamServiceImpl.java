@@ -77,4 +77,16 @@ public class TeamServiceImpl implements TeamService, Serializable {
 			throw e;
 		}
 	}
+	public int getSeq() throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			int seq = teamDao.getSeq(transaction);
+			transaction.commit();
+			return seq;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

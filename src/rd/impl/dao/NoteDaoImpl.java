@@ -1,7 +1,6 @@
 package rd.impl.dao;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,6 +8,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,23 +20,18 @@ import rd.spec.dao.NoteDao;
 import rd.spec.dao.Transaction;
 import rd.spec.dao.UserDao;
 
-public class NoteDaoImpl implements NoteDao, Serializable {
-
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
-
+public class NoteDaoImpl implements NoteDao {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
 
 	private UserDao userDao;
 
+	@Inject
 	public NoteDaoImpl(UserDao userDao) {
 		this.userDao = userDao;
 	}
 
 	public NoteDto getById(Transaction transaction, int seq) throws IOException {
-		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -83,6 +79,7 @@ public class NoteDaoImpl implements NoteDao, Serializable {
 
 	public void addNote(Transaction transaction, NoteDto note) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		logger.error("ADDING NOTE");
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -96,6 +93,7 @@ public class NoteDaoImpl implements NoteDao, Serializable {
 			prepareStatement.setDate(5, new java.sql.Date(note.getCreatedDate().getTime()));
 
 			resultSet = prepareStatement.executeQuery();
+			logger.error("QUERY EXECUTED");
 
 		} catch (SQLException e) {
 			throw new IOException(e);
@@ -117,7 +115,7 @@ public class NoteDaoImpl implements NoteDao, Serializable {
 		}
 	}
 
-	private int getSeq(Transaction transaction) throws IOException {
+	public int getSeq(Transaction transaction) throws IOException {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -154,7 +152,7 @@ public class NoteDaoImpl implements NoteDao, Serializable {
 	}
 
 	private static String GET_SEQ = "select max(seq)+1 from t_note";
-	private static String ADD_NOTE = "insert into t_note (seq, from_user, to_user, content, created_date) value (?, ?, ?, ?, ?)";
+	private static String ADD_NOTE = "insert into t_note (seq, from_user, to_user, content, created_date) values (?, ?, ?, ?, ?)";
 
 	public void deleteNote(Transaction transaction, int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -239,6 +237,7 @@ public class NoteDaoImpl implements NoteDao, Serializable {
 			while (resultSet.next()) {
 				result.add(makeNoteDto(transaction, resultSet));
 			}
+			logger.error(""+result.size());
 			return result;
 
 		} catch (SQLException e) {

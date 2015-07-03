@@ -2,6 +2,7 @@ package rd.impl.service;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -61,6 +62,18 @@ public class ProductServiceImpl implements ProductService, Serializable {
 			transaction.begin();
 			productDao.updateProduct(transaction, product);
 			transaction.commit();
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<ProductDto> searchByName(String name) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ProductDto> search = productDao.searchByName(transaction, name);
+			transaction.commit();
+			return search;
 		} catch (IOException e) {
 			transaction.rollback();
 			throw e;

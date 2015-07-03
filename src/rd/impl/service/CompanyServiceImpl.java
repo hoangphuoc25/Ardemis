@@ -102,4 +102,28 @@ public class CompanyServiceImpl implements CompanyService, Serializable {
 			throw e;
 		}
 	}
+	public List<CompanyDto> getAll() throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<CompanyDto> result = companyDao.getAll(transaction);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public int getSeq() throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			int seq = companyDao.getSeq(transaction);
+			transaction.commit();
+			return seq;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

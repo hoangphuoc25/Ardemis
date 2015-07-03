@@ -18,14 +18,14 @@ public class UserServiceImpl implements UserService, Serializable {
 	 *
 	 */
 	private static final long serialVersionUID = 6618357296233537217L;
-	private Transaction transaction;
-	private UserDao userDao;
+	@Inject private Transaction transaction;
+	@Inject private UserDao userDao;
 
-	@Inject
-	public UserServiceImpl(Transaction transaction, UserDao s_userDao){
-		this.transaction =  transaction;
-		this.userDao = s_userDao;
-	}
+//	@Inject
+//	public UserServiceImpl(Transaction transaction, UserDao s_userDao){
+//		this.transaction =  transaction;
+//		this.userDao = s_userDao;
+//	}
 
 	@Override
 	public UserDto findUserById(String id) throws IOException {
@@ -121,6 +121,18 @@ public class UserServiceImpl implements UserService, Serializable {
 			List<UserDto> usrs = userDao.getUserByRole(transaction, role);
 			transaction.commit();
 			return usrs;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public UserDto searchByEmail(String email) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			UserDto user = userDao.searchByEmail(transaction, email);
+			transaction.commit();
+			return user;
 		} catch (IOException e) {
 			transaction.rollback();
 			throw e;

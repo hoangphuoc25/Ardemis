@@ -12,7 +12,18 @@
 </h:head>
 <h:body>
 	<h:form id="form01">
-		
+		<p:panelGrid columns="3">
+			<h:outputText value="Name" />
+			<p:inputText id="name" value="#{salespersonController.newCust.name}" required="true" />
+			<p:message for="name" />
+
+			<h:outputText value="Phone" />
+			<p:inputText id="phone" value="#{salespersonController.newCust.phone}" required="true">
+				<f:validator validatorId="phoneValidator" />
+			</p:inputText>
+			<p:message for="phone" />
+		</p:panelGrid>
+		<h:commandButton value="Add" actionListener="#{salespersonController.addNew}" action="salesperson"/>
 	</h:form>
 </h:body>
 </html>

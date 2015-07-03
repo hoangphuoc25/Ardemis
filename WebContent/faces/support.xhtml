@@ -1,10 +1,60 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
-</head>
-<body>
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<h:form id="form01">
+		<p:dataTable value="#{supportController.pendingRequests}" var="request"
+				selectionMode="single" selection="#{supportController.selectedRequest}"
+				rowKey="#{request.seq}">
+			<p:column headerText="Name">
+				<h:outputText value="#{request.name}" />
+			</p:column>
+			<p:column headerText="Company">
+				<h:outputText value="#{request.company}" />
+			</p:column>
+			<p:column headerText="Categoryid">
+				<h:outputText value="#{request.categoryId}" />
+			</p:column>
+			<p:column headerText="Phone">
+				<h:outputText value="#{request.phone}" />
+			</p:column>
+			<p:column headerText="Email">
+				<h:outputText value="#{request.email}" />
+			</p:column>
+			<p:column headerText="Detail">
+				<h:outputText value="#{request.detail}" />
+			</p:column>
+			<p:column headerText="Status">
+				<h:outputText value="#{request.status}" />
+			</p:column>
 
-</body>
+			<p:dialog id="respDialog" closable="false"
+					widgetVar="respDialog_w" modal="true" resizable="false" draggable="true" header="Respond to request">
+				<p:panelGrid columns="2">
+					<h:outputText value="Name" />
+					<h:outputText value="#{supportController.selectedRequest.name}" />
+					<h:outputText value="Email" />
+					<h:outputText value="#{supportController.selectedRequest.email}" />
+					<h:outputText value="Phone" />
+					<h:outputText value="#{supportController.selectedRequest.phone}" />
+					<p:column headerText="Detail">
+						<h:outputText value="#{supportController.selectedRequest.detail}" />
+					</p:column>
+					<p:column headerText="Response">
+						<p:inputText value="#{supportController.response}" />
+					</p:column>
+				</p:panelGrid>
+			</p:dialog>
+		</p:dataTable>
+	</h:form>
+</h:body>
 </html>

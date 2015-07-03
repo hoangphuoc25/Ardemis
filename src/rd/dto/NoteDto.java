@@ -57,4 +57,8 @@ public class NoteDto {
 		this.note = note;
 		this.createdDate = createdDate;
 	}
+
+	public NoteDto() {
+		super();
+	}
 }

@@ -37,13 +37,13 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 
 	private static final String GET_SEQ = "select max(seq)+1 from t_clientcompany";
 	private static final String GET_COMPANY_BY_INDUSTRY = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark from t_clientcompany where industry=?";
-	private static final String UPDATE_COMPANY = "update t_clientcompany set name=?, com_size=?, industry=?, com_type=?, year_founded=?, location=?, phone=? remark=? where seq=?";
+	private static final String UPDATE_COMPANY = "update t_clientcompany set name=?, com_size=?, industry=?, com_type=?, year_founded=?, location=?, phone=?, remark=? where seq=?";
 	private static final String DELETE_COMPANY = "delete from t_clientcompany where seq=?";
-	private static final String INSERT_COMPANY = "insert into t_clientcompany (seq, name, com_size, industry, com_type, year_founded, location, phone, remark) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	private static final String INSERT_COMPANY= "insert into t_clientcompany (seq, name, com_size, industry, com_type, year_founded, location, phone, remark) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	private static String GET_BY_ID = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark from t_clientcompany where seq=?";
-	private static String GET_BY_INDUSTRY = "select seq, name, com_size, industry, com_type, year_founded, location, remark, phone from t_company where industry like ?";
+	private static String GET_BY_INDUSTRY = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark from t_clientcompany where industry like ?";
 
-	private int getSeq(Transaction transaction) throws IOException {
+	public int getSeq(Transaction transaction) throws IOException {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -90,7 +90,7 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 			prepareStatement.setString(2, com.getSize());
 			prepareStatement.setString(3, com.getIndustry());
 			prepareStatement.setString(4, com.getType());
-			prepareStatement.setInt(5, com.getYearfounded());
+			prepareStatement.setInt(5, com.getYearFounded());
 			prepareStatement.setString(6, com.getLocation());
 			prepareStatement.setString(7, com.getPhone());
 			prepareStatement.setString(8, com.getRemark());
@@ -164,10 +164,11 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 			prepareStatement.setString(3, comp.getSize());
 			prepareStatement.setString(4, comp.getIndustry());
 			prepareStatement.setString(5, comp.getType());
-			prepareStatement.setInt(6, comp.getYearfounded());
+			prepareStatement.setInt(6, comp.getYearFounded());
 			prepareStatement.setString(7, comp.getLocation());
 			prepareStatement.setString(8, comp.getPhone());
 			prepareStatement.setString(9, comp.getRemark());
+
 			resultSet = prepareStatement.executeQuery();
 
 			comCache.put(comp);
@@ -321,5 +322,42 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 		return new CompanyDto(seq, name, size, industry, type, year, location, phone, remark);
 	}
 
-	private static String SEARCH_COMPANY_BY_NAME = "select seq, name, com_size, industry, com_type, year_founded, location, remark, phone from t_company where name like ?";
+	private static String SEARCH_COMPANY_BY_NAME = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark from t_clientcompany where name like ?";
+	public List<CompanyDto> getAll(Transaction transaction) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_ALL);
+			resultSet = prepareStatement.executeQuery();
+			List<CompanyDto> result = new ArrayList<CompanyDto>();
+
+			while (resultSet.next()) {
+				result.add(makeCompanyDto(resultSet));
+			}
+
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_ALL = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark from t_clientcompany";
 }

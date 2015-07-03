@@ -35,4 +35,8 @@ public class TeamDto {
 		this.remark = remark;
 	}
 
+	public TeamDto() {
+		// TODO Auto-generated constructor stub
+	}
+
 }

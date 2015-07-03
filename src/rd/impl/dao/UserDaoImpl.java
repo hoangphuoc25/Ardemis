@@ -95,7 +95,7 @@ public class UserDaoImpl implements UserDao {
 			prepareStatement.setString(1, id);
 			resultSet = prepareStatement.executeQuery();
 
-			UserDto result = new UserDto();
+			UserDto result = null;
 			if(resultSet.next()) {
 				result = makeUserDto(transaction, resultSet);
 			}
@@ -372,4 +372,40 @@ public class UserDaoImpl implements UserDao {
 		}
 	}
 	private static String GET_USER_BY_ROLE = "select u.id from s_users u join s_userrole ur on u.id=ur.id where ur.rolename = ?";
+	public UserDto searchByEmail(Transaction transaction, String email) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_BY_EMAIL);
+			prepareStatement.setString(1, email);
+			resultSet = prepareStatement.executeQuery();
+
+			UserDto result = new UserDto();
+			while (resultSet.next()) {
+				result = makeUserDto(transaction, resultSet);
+			}
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String SEARCH_BY_EMAIL = "select id, name, email, phone, team_seq, from s_users where email=?";
 }

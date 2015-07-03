@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -211,4 +213,38 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 	}
 
 	private static String UPDATE_PRODUCT = "update t_product set name=?, summary=?, target=?, price=? where seq=?";
+	public List<ProductDto> searchByName(Transaction transaction, String name) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_BY_NAME);
+			resultSet = prepareStatement.executeQuery();
+
+			List<ProductDto> result = new ArrayList<ProductDto>();
+			while (resultSet.next()) {
+			}
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String SEARCH_BY_NAME = "";
 }

@@ -49,11 +49,11 @@ public class SupportTicketDto {
 		this.company = company;
 	}
 
-	public int getCategoryid() {
+	public int getCategoryId() {
 		return categoryId;
 	}
 
-	public void setCategoryid(int categoryId) {
+	public void setCategoryId(int categoryId) {
 		this.categoryId = categoryId;
 	}
 

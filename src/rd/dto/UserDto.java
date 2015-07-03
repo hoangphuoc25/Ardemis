@@ -14,6 +14,12 @@ public class UserDto {
 	private TeamDto team;
 
 	public UserDto() {
+		this.id = "";
+		this.password = "";
+		this.name = "";
+		this.email = "";
+		this.phone = "";
+		this.team = new TeamDto();
 	}
 
 	public UserDto(String id, String password, String name, List<RoleDto> roles, String email, String phone, TeamDto team) {

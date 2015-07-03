@@ -12,6 +12,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.UserService;
@@ -21,6 +24,7 @@ import rd.spec.service.UserService;
 @SessionScoped
 public class SeessionManagerImpl implements SessionManager, Serializable{
 
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	/**
 	 *
 	 */
@@ -33,10 +37,12 @@ public class SeessionManagerImpl implements SessionManager, Serializable{
 
 	@Override
 	public UserDto getLoginUser() throws IOException {
+		logger.error("INSIDE FUNCTION");
 		if(user == null){
 			ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
 			user = userService.findUserById(externalContext.getUserPrincipal().getName());
 		}
+		logger.error(user.getName());
 		return user;
 	}
 

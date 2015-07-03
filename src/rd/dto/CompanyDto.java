@@ -60,11 +60,11 @@ public class CompanyDto {
 		this.type = type;
 	}
 
-	public int getYearfounded() {
+	public int getYearFounded() {
 		return yearFounded;
 	}
 
-	public void setYearfounded(int yearFounded) {
+	public void setYearFounded(int yearFounded) {
 		this.yearFounded = yearFounded;
 	}
 

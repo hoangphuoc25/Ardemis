@@ -22,14 +22,14 @@ import rd.utils.DatabaseUtil;
 public class TeamDaoImpl implements TeamDao {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private RoleCache roleCache;
-	private DatabaseUtil cache;
+	@Inject private RoleCache roleCache;
+	// @Inject private DatabaseUtil cache;
 
-	@Inject
-	public TeamDaoImpl(RoleCache roleCache, DatabaseUtil cache) {
-		this.roleCache = roleCache;
-		this.cache = cache;
-	}
+//	@Inject
+//	public TeamDaoImpl(RoleCache roleCache, DatabaseUtil cache) {
+//		this.roleCache = roleCache;
+//		this.cache = cache;
+//	}
 
 	public int getSeq(Transaction transaction) throws IOException {
 		PreparedStatement prepareStatement = null;
@@ -142,10 +142,10 @@ public class TeamDaoImpl implements TeamDao {
 	}
 
 	public TeamDto getById(Transaction transaction, int seq) throws IOException {
-		if (cache.getTeamList().containsKey(seq)) {
-			logger.error("USING CACHE");
-			return cache.getTeamList().get(seq);
-		}
+//		if (cache.getTeamList().containsKey(seq)) {
+//			logger.error("USING CACHE");
+//			return cache.getTeamList().get(seq);
+//		}
 
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;

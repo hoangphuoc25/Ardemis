@@ -1,10 +1,144 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
-</head>
-<body>
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
 
-</body>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+</h:head>
+<h:body>
+	<h:form id="form01">
+		<div class="navbar">
+	    <div class="navbar-inner">
+	      <div class="container">
+	        <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-responsive-collapse">
+	          <span class="icon-bar"></span>
+	          <span class="icon-bar"></span>
+	          <span class="icon-bar"></span>
+	        </a>
+	        <a class="brand" href="#">Ardemis</a>
+	        <div class="nav-collapse collapse navbar-responsive-collapse">
+	          <ul class="nav">
+	            <li class="active"><a href="#">Home</a></li>
+	            <li><h:commandLink action="#{listingController.toEmployeePage}" value="Employee Page" /></li>
+	            <li><a href="#">Reports</a></li>
+	            <li class="dropdown">
+	              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Customer<b class="caret"></b></a>
+	              <ul class="dropdown-menu">
+	                <li><h:outputLink value="#{request.contextPath}/faces/employee.jsf">Employee Page</h:outputLink></li>
+	                <li><a href="#">Another action</a></li>
+	                <li><a href="#">Something else here</a></li>
+	                <li class="divider"></li>
+	                <li class="nav-header">Nav header</li>
+	                <li><a href="#">Separated link</a></li>
+	                <li><a href="#">One more separated link</a></li>
+	              </ul>
+	            </li>
+	          </ul>
+	          </div>
+				</div>
+			</div>
+		</div>
+
+
+		<p:tabView id="tabview">
+			<p:tab title="Tab 1">
+		<p:dataTable id="table1" rowIndexVar="row" value="#{salespersonController.customerList}" var="comp"
+				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+				rows="15" rowKey="#{comp.seq}">
+
+			<p:column headerText="Name">
+				<h:outputText value="#{comp.name}" />
+			</p:column>
+			<p:column headerText="Size">
+				<h:outputText value="#{comp.size}" />
+			</p:column>
+			<p:column headerText="Industry">
+				<h:outputText value="#{comp.industry}" />
+			</p:column>
+			<p:column headerText="Type">
+				<h:outputText value="#{comp.type}" />
+			</p:column>
+			<p:column headerText="Year Founded">
+				<h:outputText value="#{comp.yearFounded}" />
+			</p:column>
+			<p:column headerText="Location">
+				<h:outputText value="#{comp.location}" />
+			</p:column>
+			<p:column headerText="Phone">
+				<h:outputText value="#{comp.phone}" />
+			</p:column>
+			<p:column headerText="Remark">
+				<h:outputText value="#{comp.remark}" />
+			</p:column>
+
+			<p:column headerText="Link">
+				<a href="https://www.google.com.sg/?gws_rd=ssl#q=#{comp.name}" target="_blank" style="color: blue;">Google search</a>
+			</p:column>
+		</p:dataTable>
+
+		<p:commandButton value="Add new" actionListener="#{salespersonController.startAdd}" oncomplete="custDialog_w.show()" update=":form01"/>
+		<br/>
+
+		<h:outputText value="Search name" />
+		<p:inputText binding="#{a}"/>
+		<p:commandButton actionListener="#{salespersonController.search(a.value)}" value="Search" update=":form01" />
+
+		<p:dialog id="custDialog" closable="false" widgetVar="custDialog_w" rendered="#{salespersonController.addMode}" visible="#{salespersonController.addMode}"
+				modal="true" resizable="false" draggable="true" header="Customer detail">
+			<p:panelGrid columns="3">
+				<h:outputText value="Name" />
+				<p:inputText id="comName" value="#{salespersonController.newCust.name}" required="true" requiredMessage="Name is required" />
+				<p:message for="comName" />
+
+				<h:outputText value="Company size" />
+				<p:inputText id="comSize" value="#{salespersonController.newCust.size}" />
+				<p:message for="comSize" />
+
+				<h:outputText value="Industry" />
+				<p:inputText id="comInd" value="#{salespersonController.newCust.industry}" required="true" requiredMessage="Industry is required"/>
+				<p:message for="comInd" />
+
+				<h:outputText value="Type" />
+				<p:inputText id="comType" value="#{salespersonController.newCust.type}" />
+				<p:message for="comType" />
+
+				<h:outputText value="Year founded" />
+				<p:inputText id="comYear" value="#{salespersonController.newCust.yearFounded}" />
+				<p:message for="comYear" />
+
+				<h:outputText value="Location" />
+				<p:inputText id="comLocation" value="#{salespersonController.newCust.location}" required="true" requiredMessage="Location is required" />
+				<p:message for="comLocation" />
+
+				<h:outputText value="Phone" />
+				<p:inputText id="comPhone" value="#{salespersonController.newCust.phone}" required="true" requiredMessage="Phone is required">
+					<f:validator validatorId="phoneValidator" />
+				</p:inputText>
+				<p:message for="comPhone" />
+
+				<h:outputText value="Remark" />
+				<p:inputText id="comRemark" value="#{salespersonController.newCust.remark}" />
+				<p:message for="comRemark" />
+			</p:panelGrid>
+
+			<p:commandButton value="Add" ajax="true" actionListener="#{salespersonController.addNewCompany}" update=":form01"
+				oncomplete="if (args &amp;&amp; !args.validationFailed) custDialog_w.hide()" />
+			<p:commandButton id="applyBtn" value="Apply" ajax="true" actionListener="#{salespersonController.addNewCompany}" update=":form01" />
+
+			</p:dialog>
+			</p:tab>
+			<p:tab title="Create note">
+
+			</p:tab>
+		</p:tabView>
+	</h:form>
+</h:body>
 </html>

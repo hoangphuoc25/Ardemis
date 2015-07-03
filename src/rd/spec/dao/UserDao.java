@@ -15,4 +15,5 @@ public interface UserDao {
 	public List<UserDto> getUserByRole(Transaction transaction, String role) throws IOException;
 	public List<UserDto> getUserByTeam(Transaction transaction, int teamSeq) throws IOException;
 	public List<UserDto> searchByName(Transaction transaction, String name) throws IOException;
+	public UserDto searchByEmail(Transaction transaction, String email) throws IOException;
 }

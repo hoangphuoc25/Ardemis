@@ -12,4 +12,5 @@ public interface NoteDao {
 	public void updateNote(Transaction transaction, NoteDto note) throws IOException;
 	public List<NoteDto> getBySender(Transaction transaction, String id) throws IOException;
 	public List<NoteDto> getByReceiver(Transaction transaction, String id) throws IOException;
+	public int getSeq(Transaction transaction) throws IOException;
 }

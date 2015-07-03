@@ -12,4 +12,6 @@ public interface CompanyService {
 	public CompanyDto getById(int seq) throws IOException;
 	public List<CompanyDto> getByIndustry(String industry) throws IOException;
 	public List<CompanyDto> searchCompanyByName(String name) throws IOException;
+	public List<CompanyDto> getAll() throws IOException;
+	public int getSeq() throws IOException;
 }

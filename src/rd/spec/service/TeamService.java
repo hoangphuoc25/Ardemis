@@ -11,4 +11,5 @@ public interface TeamService {
 	public TeamDto getById(int seq) throws IOException;
 	public void deleteTeam(TeamDto team) throws IOException;
 	public List<TeamDto> getAll() throws IOException;
+	public int getSeq() throws IOException;
 }

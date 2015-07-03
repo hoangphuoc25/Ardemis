@@ -6,63 +6,69 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import rd.dto.NoteDto;
 import rd.spec.dao.NoteDao;
 import rd.spec.dao.Transaction;
 import rd.spec.service.NoteService;
 
 public class NoteServiceImpl implements NoteService, Serializable {
-	private static final long serialVersionUID = 4822474486634242542L;
+
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private static final long serialVersionUID = -1L;
+
 	private Transaction transaction;
 	private NoteDao noteDao;
 
 	@Inject
 	public NoteServiceImpl(Transaction transaction, NoteDao noteDao) {
-		this.transaction = transaction;
-		this.noteDao = noteDao;
+		this.setTransaction(transaction);
+		this.setNoteDao(noteDao);
 	}
 
 	public NoteDto getById(int seq) throws IOException {
 		try {
-			transaction.begin();
-			NoteDto note = noteDao.getById(transaction, seq);
-			transaction.commit();
+			getTransaction().begin();
+			NoteDto note = getNoteDao().getById(getTransaction(), seq);
+			getTransaction().commit();
 			return note;
 		} catch (IOException e) {
-			transaction.rollback();
+			getTransaction().rollback();
 			throw e;
 		}
 	}
 
 	public void addNote(NoteDto note) throws IOException {
 		try {
-			transaction.begin();
-			noteDao.addNote(transaction, note);
-			transaction.commit();
+			getTransaction().begin();
+			getNoteDao().addNote(getTransaction(), note);
+			getTransaction().commit();
 		} catch (IOException e) {
-			transaction.rollback();
+			getTransaction().rollback();
 			throw e;
 		}
 	}
 
 	public void deleteNote(int seq) throws IOException {
 		try {
-			transaction.begin();
-			noteDao.deleteNote(transaction, seq);
-			transaction.commit();
+			getTransaction().begin();
+			getNoteDao().deleteNote(getTransaction(), seq);
+			getTransaction().commit();
 		} catch (IOException e) {
-			transaction.rollback();
+			getTransaction().rollback();
 			throw e;
 		}
 	}
 
 	public void updateNote(NoteDto note) throws IOException {
 		try {
-			transaction.begin();
-			noteDao.updateNote(transaction, note);
-			transaction.commit();
+			getTransaction().begin();
+			getNoteDao().updateNote(getTransaction(), note);
+			getTransaction().commit();
 		} catch (IOException e) {
-			transaction.rollback();
+			getTransaction().rollback();
 			throw e;
 		}
 	}
@@ -70,12 +76,12 @@ public class NoteServiceImpl implements NoteService, Serializable {
 	public List<NoteDto> getBySender(String id) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		try {
-			transaction.begin();
-			List<NoteDto> result = noteDao.getBySender(transaction, id);
-			transaction.commit();
+			getTransaction().begin();
+			List<NoteDto> result = getNoteDao().getBySender(getTransaction(), id);
+			getTransaction().commit();
 			return result;
 		} catch (IOException e) {
-			transaction.rollback();
+			getTransaction().rollback();
 			throw e;
 		}
 	}
@@ -83,10 +89,38 @@ public class NoteServiceImpl implements NoteService, Serializable {
 	public List<NoteDto> getByReceiver(String id) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		try {
-			transaction.begin();
-			List<NoteDto> result = noteDao.getByReceiver(transaction, id);
-			transaction.commit();
+			getTransaction().begin();
+			List<NoteDto> result = getNoteDao().getByReceiver(getTransaction(), id);
+			getTransaction().commit();
 			return result;
+		} catch (IOException e) {
+			getTransaction().rollback();
+			throw e;
+		}
+	}
+
+	public NoteDao getNoteDao() {
+		return noteDao;
+	}
+
+	public void setNoteDao(NoteDao noteDao) {
+		this.noteDao = noteDao;
+	}
+
+	public Transaction getTransaction() {
+		return transaction;
+	}
+
+	public void setTransaction(Transaction transaction) {
+		this.transaction = transaction;
+	}
+	public int getSeq() throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			int seq = noteDao.getSeq(transaction);
+			transaction.commit();
+			return seq;
 		} catch (IOException e) {
 			transaction.rollback();
 			throw e;

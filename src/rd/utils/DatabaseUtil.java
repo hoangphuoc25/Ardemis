@@ -9,13 +9,16 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import rd.dto.RoleDto;
 import rd.dto.TeamDto;
 import rd.spec.service.RoleService;
 import rd.spec.service.TeamService;
 
+@Named
 @Singleton
 public class DatabaseUtil {
 

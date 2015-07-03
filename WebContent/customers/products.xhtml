@@ -12,7 +12,10 @@
 </h:head>
 <h:body>
 	<h:form id="form01">
-		
+		<p>Notes</p>
+		<h:dataTable value="#{noteController.notes}" var="note">
+			<h:outputText value="#{note.note}" />
+		</h:dataTable>
 	</h:form>
 </h:body>
 </html>
