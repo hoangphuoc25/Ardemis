@@ -12,29 +12,29 @@
 </h:head>
 <h:body>
 	<h:form id="form01">
-		<p:dialog id="noteDialog" closable="false" rendered="#{noteController.addMode}" visible="#{noteController.addMode}"
-				widgetVar="noteDialog_w" modal="true" resizable="false" draggable="true" header="New Note">
-			<p:panelGrid columns="3">
-				<h:outputText value="New customer id" />
-				<p:inputText id="newid" value="#{noteController.newUser.id}">
-					<f:validator binding="#{userValidator}" />
-				</p:inputText>
-				<h:message for="newid" />
-
-				<h:outputText value="Note to customer" />
-				<p:inputText id="noteContent" value="#{noteController.newNote.note}" />
-				<h:message for="noteContent" />
-			</p:panelGrid>
-			<p:commandButton value="Submit" action="#{noteController.addUserAndNote}" update=":form01" oncomplete="if (args &amp;&amp; !args.validationFailed) noteDialog_w.hide()"/>
-		</p:dialog>
+		<p:messages />
+		<h:messages />
 
 		<p:commandButton value="Add new Note" actionListener="#{noteController.startAdd}" update=":form01" oncomplete="noteDialog_w.show()" />
+		<p:dialog id="noteDialog" closable="false" visible="#{noteController.addMode}"
+				widgetVar="noteDialog_w" modal="true" resizable="false" draggable="true" header="New Note">
+			<p:messages />
+			<h:panelGrid columns="2">
+				<h:outputText value="New customer id" />
+				<p:inputText id="newid" value="#{noteController.newUser.id}" validator="#{noteController.userValidator}">
+				</p:inputText>
+
+				<h:outputText value="Note to customer" />
+				<p:inputTextarea id="noteContent" value="#{noteController.newNote.note}" />
+			</h:panelGrid>
+			<p:commandButton value="Submit" action="#{noteController.addUserAndNote}" update="@all" ajax="true"/>
+		</p:dialog>
 
 		<p:dataTable id="tbl1" rowIndexVar="row" value="#{noteController.notes}" var="note"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 				rows="15" >
 			<p:column headerText="To User">
-				<h:outputText value="#{note.toUser.name}" />
+				<h:outputText value="#{note.toUser.id}" />
 			</p:column>
 			<p:column headerText="Note">
 				<h:outputText value="#{note.note}" />
@@ -44,7 +44,23 @@
 					<f:convertDateTime pattern="dd-MM-yyyy" />
 				</h:outputText>
 			</p:column>
+			<p:column headerText="Action">
+				<h:commandButton value="Delete" action="#{noteController.remove(note)}" update=":form01" />
+			</p:column>
 		</p:dataTable>
+
+		<p:commandButton value="Add new note v2" actionListener="#{noteController.startAdd}" oncomplete="noteDialog_w.show()" />
+
+		<p:ajaxStatus style="text-align: center;">
+			<f:facet name="start">
+				<h:outputText value="Loading" />
+				<br/>
+				<p:graphicImage value="/images/loading.gif" />
+			</f:facet>
+			<f:facet name="complete">
+				<h:outputText value=""/>
+			</f:facet>
+		</p:ajaxStatus>
 	</h:form>
 </h:body>
 </html>

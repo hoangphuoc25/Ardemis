@@ -10,11 +10,14 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.enterprise.context.ApplicationScoped;
+import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import rd.dto.ProductDto;
 import rd.dto.RoleDto;
 import rd.dto.TeamDto;
+import rd.spec.service.ProductService;
 import rd.spec.service.RoleService;
 import rd.spec.service.TeamService;
 
@@ -29,9 +32,11 @@ public class DatabaseUtil {
 	private Map<String, String> language;
 	private List<String> ticketStatus;
 	private Map<Integer, TeamDto> teamList;
+	private List<SelectItem> teams;
 
 	@Inject private RoleService roleService;
 	@Inject private TeamService teamService;
+	@Inject private ProductService productService;
 
 	@PostConstruct
 	public void init() throws IOException {
@@ -141,4 +146,36 @@ public class DatabaseUtil {
 	public void setTeamList(Map<Integer, TeamDto> teamList) {
 		this.teamList = teamList;
 	}
+
+	public List<SelectItem> getProds() throws IOException {
+		if (prods == null || prods.size() == 0) {
+			prods = new ArrayList<SelectItem>();
+			List<ProductDto> all = productService.getAll();
+			for (ProductDto item: all) {
+				prods.add(new SelectItem(item.getSeq(), item.getName()));
+			}
+		}
+		return prods;
+	}
+
+	public void setProds(List<SelectItem> prods) {
+		this.prods = prods;
+	}
+
+	public List<SelectItem> getTeams() throws IOException {
+		if (teams == null || teams.size() == 0) {
+			teams = new ArrayList<SelectItem>();
+			List<TeamDto> all = teamService.getAll();
+			for (TeamDto t: all) {
+				teams.add(new SelectItem(t.getSeq(), t.getName()));
+			}
+		}
+		return teams;
+	}
+
+	public void setTeams(List<SelectItem> teams) {
+		this.teams = teams;
+	}
+
+	private List<SelectItem> prods;
 }

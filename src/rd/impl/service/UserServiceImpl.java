@@ -127,12 +127,23 @@ public class UserServiceImpl implements UserService, Serializable {
 		}
 	}
 	public UserDto searchByEmail(String email) throws IOException {
-		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		try{
 			transaction.begin();
 			UserDto user = userDao.searchByEmail(transaction, email);
 			transaction.commit();
 			return user;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<UserDto> getUserByTeamLazy(int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<UserDto> result = userDao.getUserByTeamLazy(transaction, seq);
+			transaction.commit();
+			return result;
 		} catch (IOException e) {
 			transaction.rollback();
 			throw e;

@@ -58,7 +58,7 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 		}
 	}
 
-	private int getSeq(Transaction transaction) throws IOException {
+	public int getSeq(Transaction transaction) throws IOException {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -94,7 +94,7 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 	}
 
 	private static String GET_SEQ  = "select max(seq)+1 from t_product";
-	private static String ADD_PRODUCT = "insert into t_product (seq, name, summary, description, target, price) values (?, ?, ?, ?, ?, ?)";
+	private static String ADD_PRODUCT = "insert into t_product (seq, name, summary, target, price) values (?, ?, ?, ?, ?)";
 
 	public void removeProduct(Transaction transaction, int seq) throws IOException {
 		// ATTENTION: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -213,6 +213,7 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 	}
 
 	private static String UPDATE_PRODUCT = "update t_product set name=?, summary=?, target=?, price=? where seq=?";
+
 	public List<ProductDto> searchByName(Transaction transaction, String name) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		PreparedStatement prepareStatement = null;
@@ -221,10 +222,12 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 		try {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(SEARCH_BY_NAME);
+			prepareStatement.setString(1, "%" + name + "%");
 			resultSet = prepareStatement.executeQuery();
 
 			List<ProductDto> result = new ArrayList<ProductDto>();
 			while (resultSet.next()) {
+				result.add(makeProductDto(resultSet));
 			}
 			return result;
 		} catch (SQLException e) {
@@ -246,5 +249,78 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 			}
 		}
 	}
-	private static String SEARCH_BY_NAME = "";
+
+	private static String SEARCH_BY_NAME = "select seq, name, target, summary, price from t_product where name like ?";
+
+	public List<ProductDto> getAll(Transaction transaction) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_ALL);
+			resultSet = prepareStatement.executeQuery();
+
+			List<ProductDto> all = new ArrayList<ProductDto>();
+			while (resultSet.next()) {
+				all.add(makeProductDto(resultSet));
+			}
+			return all;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_ALL = "select seq, name, target, summary, price from t_product";
+	public ProductDto getByName(Transaction transaction, String name) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_NAME);
+			prepareStatement.setString(1, name);
+			resultSet = prepareStatement.executeQuery();
+
+			ProductDto result = null;
+			while (resultSet.next()) {
+				result = makeProductDto(resultSet);
+			}
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_BY_NAME = "select seq, name, target, summary, price from t_product where name=?";
 }

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<style>
+	.message {
+			display: block;
+			font: 15px arial;
+			padding: 5px;
+			margin: 0 0 10px;
+			white-space: pre;
+		}
+		.info {
+			background-color: #dff0d8;
+		}
+		.error {
+			background-color: #f2dede;
+		}
+		.main {
+			padding: 20px;
+		}
+	</style>
+	<h:form id="form01">
+		<h:messages infoClass="message info" fatalClass="message error" errorClass="message error"/>
+		<p:panelGrid columns="2">
+			<h:outputText value="Date" />
+			<p:calendar value="#{expenseController.newExp.receiptDate}" validator="#{expenseController.validateReceiptDate}" pattern="dd-MM-yyyy" />
+
+			<h:outputText value="Receipt no" />
+			<p:inputText value="#{expenseController.newExp.receiptNo}" />
+
+			<h:outputText value="Purpose" />
+			<p:inputText value="#{expenseController.newExp.purpose}" />
+
+			<h:outputText value="Amount" />
+			<p:inputText value="#{expenseController.newExp.amount}" validator="#{expenseController.validateAmount}" />
+		</p:panelGrid>
+		<p:commandButton value="Submit" actionListener="#{expenseController.addNewExp}" update="form01" />
+
+		<p:dataTable id="expTbl" rowIndexVar="row" value="#{expenseController.myExp}" var="expense"
+				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+				rows="15" >
+			<p:column headerText="Receiptdate">
+				<h:outputText value="#{expense.receiptDate}">
+					<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Purpose">
+				<h:outputText value="#{expense.purpose}" />
+			</p:column>
+			<p:column headerText="Receiptno">
+				<h:outputText value="#{expense.receiptNo}" />
+			</p:column>
+			<p:column headerText="Amount">
+				<h:outputText value="#{expense.amount}" />
+			</p:column>
+
+			<p:column headerText="Action">
+				<h:commandButton value="Remove" actionListener="#{expenseController.remove(expense)}" update="expTbl"/>
+			</p:column>
+		</p:dataTable>
+
+		<p:fileUpload fileUploadListener="#{expenseController.handleFileUpload}" mode="advanced" dragDropSupport="false"
+					sizeLimit="1000000" fileLimit="1" allowTypes="/(\.|\/)(xls)$/" update=":form01" />
+	</h:form>
+</h:body>
+</html>

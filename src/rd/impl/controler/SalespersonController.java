@@ -150,5 +150,10 @@ public class SalespersonController implements Serializable {
 		newCust = new CompanyDto();
 		return "/salesperson.jsf";
 	}
+
+	public void discard() {
+		newCust = null;
+		addMode = false;
+	}
 }
 

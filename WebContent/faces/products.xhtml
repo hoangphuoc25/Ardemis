@@ -12,13 +12,12 @@
 </h:head>
 <h:body>
 	<h:form id="form01">
+		<h:messages infoStyle="color: green;" fatalStyle="color: red;" errorStyle="color: red;" />
+
 		<p:dataTable id="tbl1" rowIndexVar="row" value="#{productController.products}" var="prod"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-				rows="15" selection="#{selectedProd}" selectionMode="single" rowKey="#{prod.seq}">
-			<p:ajax event="rowSelect" oncomplete="orgDialog.show();" update=":form01:newOrgDialog"/>
-			<p:column headerText="Seq">
-				<h:outputText value="#{prod.seq}" />
-			</p:column>
+				rows="15" selection="#{productController.selectedProd}" selectionMode="single" rowKey="#{prod.seq}">
+			<p:ajax event="rowSelect" oncomplete="prodDialog_w.show();" listener="#{productController.showDialog}" update=":form01"/>
 			<p:column headerText="Name">
 				<h:outputText value="#{prod.name}" />
 			</p:column>
@@ -34,9 +33,36 @@
 		</p:dataTable>
 
 		<h:outputText value="Search" />
-		<p:inputText value="#{producController.searchStr}" />
+		<p:inputText value="#{productController.searchStr}" />
 		<p:commandButton value="Search" actionListener="#{productController.search}" update=":form01" />
 
+		<p:commandButton value="Add new Product" actionListener="#{productController.startAdd}" oncomplete="prodDialog_w.show()" update="form01"/>
+
+		<p:dialog id="prodDialog" closable="false" rendered="#{productController.addMode or productController.viewMode or productController.editMode}" visible="true"
+				widgetVar="prodDialog_w" modal="true" resizable="false" draggable="true" header="Product Detail">
+			<h:messages infoStyle="color: green;" fatalStyle="color: red;" errorStyle="color: red;" />
+			<p:panelGrid columns="2">
+				<h:outputText value="Name" />
+				<p:inputText value="#{productController.newProd.name}" validator="#{productController.validateName}" rendered="#{productController.addMode or productController.editMode}" />
+				<h:outputText value="#{productController.newProd.name}" rendered="#{productController.viewMode}" />
+
+				<h:outputText value="Summary" />
+				<p:inputText value="#{productController.newProd.summary}" rendered="#{productController.addMode or productController.editMode}" />
+				<h:outputText value="#{productController.newProd.name}" rendered="#{productController.viewMode}" />
+
+				<h:outputText value="Target" />
+				<p:inputText value="#{productController.newProd.target}" rendered="#{productController.addMode or productController.editMode}"/>
+				<h:outputText value="#{productController.newProd.target}" rendered="#{productController.viewMode}" />
+
+				<h:outputText value="Price" />
+				<p:inputText value="#{productController.newProd.price}" required="true" rendered="#{productController.addMode or productController.editMode}" />
+				<h:outputText value="#{productController.newProd.price}" rendered="#{productController.viewMode}" />
+			</p:panelGrid>
+
+			<p:commandButton value="Apply" actionListener="#{productController.apply}" update=":form01" ajax="true" />
+			<p:commandButton value="Edit" actionListener="#{productController.startEdit}" update=":form01:prodDialog" ajax="true" />
+			<p:commandButton value="Delete" actionListener="#{productController.delete}" update=":form01" ajax="true" />
+		</p:dialog>
 	</h:form>
 </h:body>
 </html>

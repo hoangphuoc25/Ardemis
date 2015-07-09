@@ -1,17 +1,76 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-	  xmlns:h="http://java.sun.com/jsf/html"
-	  xmlns:f="http://java.sun.com/jsf/core"
-	  xmlns:ui="http://java.sun.com/jsf/facelets"
-	  xmlns:p="http://primefaces.org/ui"
-	  >
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
 </h:head>
 <h:body>
+
+
+
+
 	<h:form id="form01">
+
+	<p:menubar>
+			<p:submenu label="Mail">
+				<p:menuitem value="Gmail" url="http://www.google.com" />
+				<p:menuitem value="Hotmail" url="http://www.hotmail.com" />
+				<p:menuitem value="Yahoo Mail" url="http://mail.yahoo.com" />
+			</p:submenu>
+			<p:submenu label="Videos">
+				<p:menuitem value="Youtube" url="http://www.youtube.com" />
+				<p:menuitem value="Break" url="http://www.break.com" />
+				<p:menuitem value="Metacafe" url="http://www.metacafe.com" />
+			</p:submenu>
+			<p:submenu label="Social Networks">
+				<p:menuitem value="Facebook" url="http://www.facebook.com" />
+				<p:menuitem value="MySpace" url="http://www.myspace.com" />
+			</p:submenu>
+				<p:menuitem value="log out" style="float: right" action="#{managerController.logout}" actionListener="#{managerController.logout}" />
+		</p:menubar>
+		<p:panelGrid columns="3">
+			<p:panelGrid columns="2">
+				<p:outputLabel for="teamCombo" value="Select Team" />
+				<p:selectOneMenu id="teamCombo" value="#{managerController.team}"
+					editable="false">
+					<f:selectItem itemLabel="Select one" itemValue="-1" />
+					<f:selectItems value="#{databaseUtil.teams}" />
+					<p:ajax listener="#{managerController.reload}" update="form01" />
+				</p:selectOneMenu>
+			</p:panelGrid>
+		</p:panelGrid>
+		<p:dataTable id="empTable" rowIndexVar="row"
+			value="#{managerController.teamRoster}" var="sale" paginator="true"
+			paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+			rows="15" selection="#{managerController.selectedSale}"
+			selectionMode="single" rowKey="#{sale.id}"
+			rendered="#{managerController.team > 0}">
+			<p:column headerText="Name">
+				<h:outputText value="#{sale.name}" />
+			</p:column>
+			<p:column headerText="Email">
+				<h:outputText value="#{sale.email}" />
+			</p:column>
+			<p:column headerText="Phone">
+				<h:outputText value="#{sale.phone}" />
+			</p:column>
+		</p:dataTable>
+
+		<p:ajaxStatus style="text-align: center;">
+			<f:facet name="start">
+				<h:outputText value="Loading" />
+				<br />
+				<p:graphicImage value="/images/loading.gif" />
+			</f:facet>
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
 
 	</h:form>
 </h:body>

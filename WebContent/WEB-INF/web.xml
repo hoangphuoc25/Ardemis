@@ -27,6 +27,14 @@
      <exception-type>java.lang.Throwable</exception-type>
      <location>/error/exceptionError.jsf</location>
   </error-page>
+  <error-page>
+  	<error-code>404</error-code>
+  	<location>/404.jsf</location>
+  </error-page>
+  <error-page>
+  	<error-code>403</error-code>
+  	<location>/403.jsf</location>
+  </error-page>
 
   <security-constraint>
     <web-resource-collection>
@@ -74,5 +82,26 @@
     <role-name>delete</role-name>
   </security-role>
 
+	<context-param>
+		<param-name>primefaces.PRIVATE_CAPTCHA_KEY</param-name>
+		<param-value>6LdzXQkTAAAAAC7NdVLOTl1-Ij54A9P0uZN98802</param-value>
+	</context-param>
+	<context-param>
+		<param-name>primefaces.PUBLIC_CAPTCHA_KEY</param-name>
+		<param-value>6LdzXQkTAAAAAAppMNCQs8lDHWBspOYICHvzBfYe</param-value>
+	</context-param>
+
+	<filter>
+	    <filter-name>PrimeFaces FileUpload Filter</filter-name>
+	    <filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
+	</filter>
+	<filter-mapping>
+	    <filter-name>PrimeFaces FileUpload Filter</filter-name>
+	    <servlet-name>Faces Servlet</servlet-name>
+	</filter-mapping>
+	<context-param>
+	    <param-name>javax.faces.DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE</param-name>
+	    <param-value>true</param-value>
+	</context-param>
 
 </web-app>

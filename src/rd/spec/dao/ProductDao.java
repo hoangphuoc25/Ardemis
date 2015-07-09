@@ -11,4 +11,7 @@ public interface ProductDao {
 	public ProductDto getProductById (Transaction transaction, int seq) throws IOException;
 	public void updateProduct (Transaction transaction, ProductDto product) throws IOException;
 	public List<ProductDto> searchByName(Transaction transaction, String name) throws IOException;
+	public List<ProductDto> getAll(Transaction transaction) throws IOException;
+	public int getSeq(Transaction transaction) throws IOException;
+	public ProductDto getByName(Transaction transaction, String name) throws IOException;
 }

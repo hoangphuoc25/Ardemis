@@ -47,7 +47,7 @@ public class SaleExpenseDaoImpl implements SaleExpenseDao, Serializable {
 			prepareStatement = connection.prepareStatement(ADD_SALE_EXPENSE);
 			prepareStatement.setInt(1, getSeq(transaction));
 			prepareStatement.setString(2, se.getSalesperson().getId());
-			prepareStatement.setDate(3, new java.sql.Date(se.getReceiptdate().getTime()));
+			prepareStatement.setDate(3, new java.sql.Date(se.getReceiptDate().getTime()));
 			prepareStatement.setString(4, se.getPurpose());
 			prepareStatement.setString(5, se.getReceiptNo());
 			prepareStatement.setDouble(6, se.getAmount());
@@ -73,7 +73,7 @@ public class SaleExpenseDaoImpl implements SaleExpenseDao, Serializable {
 		}
 	}
 
-	private int getSeq(Transaction transaction) throws IOException {
+	public int getSeq(Transaction transaction) throws IOException {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -109,7 +109,7 @@ public class SaleExpenseDaoImpl implements SaleExpenseDao, Serializable {
 		}
 	}
 
-	private static String GET_SEQ = "select max(seq)+1 from t_call_report";
+	private static String GET_SEQ = "select max(seq)+1 from t_sale_expense";
 	private static String ADD_SALE_EXPENSE = "insert into t_sale_expense (seq, sale_id, receipt_date, purpose, receipt_no, amount) values (?, ?, ?, ?, ?, ?)";
 
 	public SaleExpenseDto getSaleExpenseById (Transaction transaction, int seq) throws IOException {
@@ -170,7 +170,7 @@ public class SaleExpenseDaoImpl implements SaleExpenseDao, Serializable {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(UPDATE_SALE_EXPENSE);
 			prepareStatement.setString(1, se.getSalesperson().getId());
-			prepareStatement.setDate(2, new java.sql.Date(se.getReceiptdate().getTime()));
+			prepareStatement.setDate(2, new java.sql.Date(se.getReceiptDate().getTime()));
 			prepareStatement.setString(3, se.getPurpose());
 			prepareStatement.setString(4, se.getReceiptNo());
 			prepareStatement.setDouble(5, se.getAmount());
@@ -198,7 +198,7 @@ public class SaleExpenseDaoImpl implements SaleExpenseDao, Serializable {
 		}
 	}
 
-	private static String UPDATE_SALE_EXPENSE = "update t_note set sale_id=?, receipt_date=?, purpose=?, receipt_no=?, amount=? where seq=?";
+	private static String UPDATE_SALE_EXPENSE = "update t_sale_expense set sale_id=?, receipt_date=?, purpose=?, receipt_no=?, amount=? where seq=?";
 
 	public void deleteSaleExpense (Transaction transaction, int seq) throws IOException {
 		// ATTENTION: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -232,4 +232,42 @@ public class SaleExpenseDaoImpl implements SaleExpenseDao, Serializable {
 	}
 
 	private static String DELETE_SALE_EXPENSE = "delete from t_sale_expense where seq=?";
+
+	public List<SaleExpenseDto> getBySalepersonId(Transaction transaction, String id) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_SALEPERSON_ID);
+			prepareStatement.setString(1, id);
+			resultSet = prepareStatement.executeQuery();
+
+			List<SaleExpenseDto> result = new ArrayList<SaleExpenseDto>();
+			while (resultSet.next()) {
+				result.add(makeSaleExpenseDto(transaction, resultSet));
+			}
+			logger.error("RESULT SIZE: " + result.size());
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_BY_SALEPERSON_ID = "select seq, sale_id, receipt_date, purpose, receipt_no, amount from t_sale_expense where sale_id=?";
 }

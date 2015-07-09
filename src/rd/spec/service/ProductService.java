@@ -11,4 +11,7 @@ public interface ProductService {
 	public ProductDto getProductById(int seq) throws IOException;
 	public void updateProduct(ProductDto product) throws IOException;
 	public List<ProductDto> searchByName(String name) throws IOException;
+	public List<ProductDto> getAll() throws IOException;
+	public int getSeq() throws IOException;
+	public ProductDto getByName(String name) throws IOException;
 }

@@ -19,6 +19,8 @@ public class SaleExpenseDto {
 		this.amount = amount;
 	}
 
+	public SaleExpenseDto() {}
+
 	public int getSeq() {
 		return seq;
 	}
@@ -35,11 +37,11 @@ public class SaleExpenseDto {
 		this.salesperson = salesperson;
 	}
 
-	public Date getReceiptdate() {
+	public Date getReceiptDate() {
 		return receiptDate;
 	}
 
-	public void setReceiptdate(Date receiptDate) {
+	public void setReceiptDate(Date receiptDate) {
 		this.receiptDate = receiptDate;
 	}
 

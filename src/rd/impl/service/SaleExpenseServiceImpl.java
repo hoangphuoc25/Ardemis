@@ -2,6 +2,7 @@ package rd.impl.service;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -66,6 +67,30 @@ public class SaleExpenseServiceImpl implements SaleExpenseService, Serializable 
 			transaction.begin();
 			saleExpenseDao.deleteSaleExpense(transaction, seq);
 			transaction.commit();
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public int getSeq() throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			int seq = saleExpenseDao.getSeq(transaction);
+			transaction.commit();
+			return seq;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<SaleExpenseDto> getBySalepersonId(String id) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<SaleExpenseDto> all = saleExpenseDao.getBySalepersonId(transaction, id);
+			transaction.commit();
+			return all;
 		} catch (IOException e) {
 			transaction.rollback();
 			throw e;

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+<f:metadata>
+	<f:viewParam name="id" value="#{employeeController.id}" />
+</f:metadata>
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<h:form id="form01">
+		<p:dataTable id="timetable" rowIndexVar="row"
+			value="#{employeeController.expList}" var="exp" paginator="true"
+			paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+			rows="15" rowKey="#{exp.seq}">
+			<p:column headerText="Date">
+				<h:outputText value="#{exp.receiptDate}">
+					<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Purpose">
+				<h:outputText value="#{exp.purpose}" />
+			</p:column>
+			<p:column headerText="Receipt no">
+				<h:outputText value="#{exp.receiptNo}" />
+			</p:column>
+			<p:column headerText="Amount">
+				<h:outputText value="#{exp.amount}" />
+			</p:column>
+		</p:dataTable>
+
+		<h:commandButton value="Download">
+			<p:fileDownload value="#{employeeController.file}" />
+		</h:commandButton>
+	</h:form>
+</h:body>
+</html>

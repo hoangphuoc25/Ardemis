@@ -236,10 +236,12 @@ public class UserDaoImpl implements UserDao {
 			prepareStatement = connection.prepareStatement(GET_USER_BY_TEAM);
 			prepareStatement.setInt(1, teamSeq);
 			resultSet = prepareStatement.executeQuery();
+
 			List<UserDto> result = new ArrayList<UserDto>();
 			while (resultSet.next()) {
 				result.add(makeUserDto(transaction, resultSet));
 			}
+			logger.error("result: " + result.size());
 			return result;
 		} catch (SQLException e) {
 			throw new IOException(e);
@@ -297,8 +299,8 @@ public class UserDaoImpl implements UserDao {
 		}
 	}
 
-	private static String SEARCH_BY_NAME = "select id, name, email, phone, team_seq, from s_users where name like ?";
-	private static String GET_USER_BY_TEAM = "";
+	private static String SEARCH_BY_NAME = "select id, name, email, phone, team_seq from s_users where name like ?";
+	private static String GET_USER_BY_TEAM = "select id, name, email, phone, team_seq from s_users where team_seq=?";
 	private static String GET_ALL = "select id, name, email, phone, team_seq from s_users";
 	private static String GET_BY_ID = "select id, name, email, phone, team_seq from s_users where id=?";
 	private static String DELETE_USER = "delete from s_users where id=?";
@@ -408,4 +410,50 @@ public class UserDaoImpl implements UserDao {
 		}
 	}
 	private static String SEARCH_BY_EMAIL = "select id, name, email, phone, team_seq, from s_users where email=?";
+	public List<UserDto> getUserByTeamLazy(Transaction transaction, int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_USER_BY_TEAM_LAZY);
+			prepareStatement.setInt(1, seq);
+			resultSet = prepareStatement.executeQuery();
+
+			List<UserDto> all = new ArrayList<UserDto>();
+			while (resultSet.next()) {
+				all.add(makeUserDtoLazy(resultSet));
+			}
+			return all;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private UserDto makeUserDtoLazy(ResultSet resultSet) throws SQLException {
+		String id = resultSet.getString(1);
+		String name = resultSet.getString(2);
+		String email = resultSet.getString(3);
+		String phone = resultSet.getString(4);
+
+		UserDto userDto = new UserDto(id, "", name, null, email, phone, null);
+		return userDto;
+	}
+
+	private static String GET_USER_BY_TEAM_LAZY = "select id, name, email, phone, team_seq from s_users where team_seq=?";
 }

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<style>
+	.message {
+			display: block;
+			font: 15px arial;
+			padding: 5px;
+			margin: 0 0 10px;
+			white-space: pre;
+		}
+		.info {
+			background-color: #dff0d8;
+		}
+		.error {
+			background-color: #f2dede;
+		}
+		.main {
+			padding: 20px;
+		}
+	</style>
+	<h:form id="form01">
+		<h:messages id="messages" infoClass="message info" fatalClass="message error" errorClass="message error"/>
+
+		<p:dataTable id="expTbl" rowIndexVar="row" value="#{expenseController.myExp}" var="expense"
+				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+				rows="15" editable="true" rowKey="#{expense.seq}" >
+			<p:ajax event="rowEdit" listener="#{expenseController.onRowEdit}" update="expTbl, :form01:messages" />
+			<p:ajax event="rowEditCancel" listener="#{expenseController.onRowEditCancel}" update="expTbl, :form01:messages" />
+			<p:column headerText="Receiptdate">
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{expense.receiptDate}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+					</f:facet>
+					<f:facet name="input">
+						<p:calendar value="#{expense.receiptDate}" />
+					</f:facet>
+				</p:cellEditor>
+			</p:column>
+			<p:column headerText="Purpose">
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{expense.purpose}" />
+					</f:facet>
+					<f:facet name="input">
+						<p:inputText value="#{expense.purpose}" />
+					</f:facet>
+				</p:cellEditor>
+
+			</p:column>
+			<p:column headerText="Receiptno">
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{expense.receiptNo}" />
+					</f:facet>
+					<f:facet name="input">
+						<p:inputText value="#{expense.receiptNo}" />
+					</f:facet>
+				</p:cellEditor>
+			</p:column>
+			<p:column headerText="Amount">
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{expense.amount}" />
+					</f:facet>
+					<f:facet name="input">
+						<p:inputText value="#{expense.amount}" />
+					</f:facet>
+				</p:cellEditor>
+			</p:column>
+			<p:column headerText="Action">
+				<h:commandButton value="Remove" actionListener="#{expenseController.remove(expense)}" update="form01"/>
+				<p:rowEditor />
+			</p:column>
+		</p:dataTable>
+	</h:form>
+</h:body>
+</html>

@@ -37,12 +37,10 @@ public class SeessionManagerImpl implements SessionManager, Serializable{
 
 	@Override
 	public UserDto getLoginUser() throws IOException {
-		logger.error("INSIDE FUNCTION");
 		if(user == null){
 			ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
 			user = userService.findUserById(externalContext.getUserPrincipal().getName());
 		}
-		logger.error(user.getName());
 		return user;
 	}
 

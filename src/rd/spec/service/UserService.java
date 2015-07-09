@@ -15,4 +15,5 @@ public interface UserService {
 	public void updatePassword(String user, String password) throws IOException;
 	public List<UserDto> getUserByRole(String role) throws IOException;
 	public UserDto searchByEmail(String email) throws IOException;
+	public List<UserDto> getUserByTeamLazy(int seq) throws IOException;
 }

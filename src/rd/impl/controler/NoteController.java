@@ -16,6 +16,7 @@ import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.primefaces.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +43,7 @@ public class NoteController implements Serializable {
 	@Inject
 	UserService userService;
 	@Inject
+	private
 	Conversation conversation;
 
 	public void conversationBegin() {
@@ -113,14 +115,16 @@ public class NoteController implements Serializable {
 		newNote = new NoteDto();
 
 		addMode = false;
+
+		sessionManager.addGlobalMessageInfo("USER CREATED", null);
+		RequestContext context = RequestContext.getCurrentInstance();
+		context.execute("noteDialog_w.hide();");
 	}
 
 	public List<NoteDto> getNotes() {
 		if (notes == null || notes.size() == 0) {
 			try {
 				notes = noteService.getBySender(sessionManager.getLoginUser().getId());
-				String userId = FacesContext.getCurrentInstance().getExternalContext().getUserPrincipal().getName();
-				notes = noteService.getBySender(userId);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -148,6 +152,7 @@ public class NoteController implements Serializable {
 	}
 
 	public boolean isAddMode() {
+		System.out.println("isAddMode: " + addMode);
 		return addMode;
 	}
 
@@ -159,6 +164,94 @@ public class NoteController implements Serializable {
 
 	public void startAdd() {
 		reload();
+		System.out.println("NoteController.startAdd()");
 		addMode = true;
+		newUser = new UserDto();
+	}
+
+	public UserDto getNewUser2() {
+		if (newUser2 == null)
+			newUser2 = new UserDto();
+		return newUser2;
+	}
+
+	public void setNewUser2(UserDto newUser2) {
+		this.newUser2 = newUser2;
+	}
+
+	public NoteDto getNewNote2() {
+		if (newNote2 == null)
+			newNote2 = new NoteDto();
+		return newNote2;
+	}
+
+	public void setNewNote2(NoteDto newNote2) {
+		this.newNote2 = newNote2;
+	}
+
+	private NoteDto newNote2;
+	private UserDto newUser2;
+
+	public void addUserAndNote2() throws IOException {
+		System.out.println("NoteController.addUserAndNote2()");
+		if (newUser2.getId().isEmpty()) {
+			logger.error(newUser2.getId());
+			sessionManager.addGlobalMessageFatal("User ID is required", null);
+			return;
+		}
+
+		userService.addUser(newUser2);
+		logger.error("new user added");
+
+		newNote2.setSeq(noteService.getSeq());
+		newNote2.setFromUser(sessionManager.getLoginUser());
+		newNote2.setToUser(newUser2);
+		newNote2.setCreatedDate(new Date());
+		noteService.addNote(newNote2);
+
+		notes.add(newNote2);
+
+		newUser2 = new UserDto();
+		newNote2 = new NoteDto();
+
+		addMode = false;
+	}
+
+    public void userValidator(FacesContext context, UIComponent component, Object value) {
+    	String id = value.toString();
+		logger.error("ID:" + id);
+		if (id == null || id.isEmpty()) {
+			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "ABCDEFGH", null));
+		}
+		try {
+			if (userService == null) {
+				logger.error("USERSERVICE IS NULL");
+			}
+			UserDto user = userService.findUserById(id);
+			if (user != null) {
+				throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "XYZ", null));
+			}
+		} catch (IOException e) {
+			logger.error("ERROR");
+			e.printStackTrace();
+		}
+    }
+
+	public Conversation getConversation() {
+		return conversation;
+	}
+
+	public void setConversation(Conversation conversation) {
+		this.conversation = conversation;
+	}
+
+	public void remove(NoteDto note) {
+		reload();
+		for (int i = notes.size() -1; i >= 0; i--) {
+			if (notes.get(i).getSeq() == note.getSeq()) {
+				notes.remove(i);
+				break;
+			}
+		}
 	}
 }

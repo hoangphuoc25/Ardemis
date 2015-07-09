@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<style>
+		.message {
+			font: 15px arial;
+			padding: 5px;
+			margin: 0 0 10px;
+			font-size:
+		}
+		.info {
+			background-color: #dff0d8;
+		}
+		.error {
+			background-color: #f2dede;
+		}
+		.main {
+			padding: 20px;
+		}
+	</style>
+	<h:form id="form01" styleClass="main">
+
+		<h:messages infoClass="message info" fatalClass="message error" errorClass="message error" />
+		<p:panelGrid columns="2" >
+			<h:outputText value="Product" />
+			<p:selectOneMenu value="#{feedbackController.product}" validator="#{feedbackController.validateProduct}" >
+				<f:selectItem itemLabel="Select Item" itemValue="-1" />
+				<f:selectItems value="#{databaseUtil.prods}" />
+			</p:selectOneMenu>
+			<h:outputText value="Rating" />
+			<p:rating value="#{feedbackController.rating}" />
+			<h:outputText value="Feedback" />
+			<p:inputTextarea value="#{feedbackController.feedback}" />
+		</p:panelGrid>
+		<p:commandButton value="Submit" actionListener="#{feedbackController.submit}" update="form01" />
+
+		<p:dataTable id="noteTbl" rowIndexVar="row" value="#{feedbackController.notes}" var="note"
+			paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+			rows="15">
+
+		<p:column headerText="From ">
+			<h:outputText value="#{note.fromUser.name}" />
+		</p:column>
+
+		<p:column headerText="Date">
+			<h:outputText value="#{note.createdDate}">
+				<f:convertDateTime pattern="dd/MM/yyyy" />
+			</h:outputText>
+		</p:column>
+
+		<p:column headerText="Message">
+			<h:outputText value="#{note.note}" />
+		</p:column>
+	</p:dataTable>
+	</h:form>
+</h:body>
+</html>

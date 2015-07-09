@@ -18,6 +18,10 @@ public class InvoiceDto {
 		this.products = products;
 	}
 
+	public InvoiceDto() {
+		customer = new CompanyDto();
+	}
+
 	public int getSeq() {
 		return seq;
 	}

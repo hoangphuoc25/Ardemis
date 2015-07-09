@@ -97,18 +97,26 @@ public class WelcomeController implements Serializable {
 		if (newTeam.getName().isEmpty()) {
 			sessionMan.addGlobalMessageFatal("INVALID INFO PROVIDED", null);
 			logger.error("invalid info. error messsage added.");
+			addMode = true;
 			return;
 		}
+		System.out.println("out of if");
 		newTeam.setSeq(teamService.getSeq());
+		System.out.println("inserted");
 		teamService.addTeam(newTeam);
-		teams.add(newTeam);
+		System.out.println("added to db");
+		getTeams().add(newTeam);
+		System.out.println("added to teams");
 		newTeam = new TeamDto();
+		System.out.println("reset ");
 		addMode = false;
+		System.out.println("set addmode=false");
+
+		sessionMan.addGlobalMessageInfo("ADDED, addmode=false", null);
 		logger.error("WelcomeController.addNewTeam()");
 	}
 
 	public boolean isAddMode() {
-		logger.error("isaddmode: " + addMode);
 		return addMode;
 	}
 

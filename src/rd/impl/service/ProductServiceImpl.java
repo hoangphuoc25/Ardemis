@@ -79,4 +79,40 @@ public class ProductServiceImpl implements ProductService, Serializable {
 			throw e;
 		}
 	}
+	public List<ProductDto> getAll() throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ProductDto> all = productDao.getAll(transaction);
+			transaction.commit();
+			return all;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public int getSeq() throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			int seq = productDao.getSeq(transaction);
+			transaction.commit();
+			return seq;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public ProductDto getByName(String name) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			ProductDto result = productDao.getByName(transaction, name);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

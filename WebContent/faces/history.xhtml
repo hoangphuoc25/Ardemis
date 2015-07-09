@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+<f:metadata>
+    <f:viewParam name="seq" value="#{historyController.seq}" />
+    <f:event type="preRenderView" listener="#{historyController.init}" />
+</f:metadata>
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+
+</h:head>
+<h:body>
+	<h:form id="form01">
+		<p>Welcome</p>
+		<p:commandButton value="abc" actionListener="#{historyController.submit}" update=":form01"/>
+		<h:outputText value="#{historyController.seq}" />
+
+		<h:messages />
+		<p:dataTable id="historyTbl" rowIndexVar="row" value="#{historyController.purchases}" var="invoice"
+				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+				rows="15">
+			<p:column headerText="Company">
+				<h:outputText value="#{invoice.customer.name}" />
+			</p:column>
+
+			<p:column headerText="Purchase date">
+				<h:outputText value="#{invoice.purchaseDate}">
+					<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
+			</p:column>
+
+			<p:column headerText="Amount">
+				<h:outputText value="#{invoice.amount}" />
+			</p:column>
+		</p:dataTable>
+
+		<p:panelGrid columns="2">
+			<h:outputText value="Company Name"/>
+			<p:inputText value="#{historyController.newInvoice.customer.name}" validator="#{historyController.validateCompany}" />
+
+			<h:outputText value="Purchase date" />
+			<p:calendar value="#{historyController.newInvoice.purchaseDate}" validator="#{historyController.validateDate}" />
+
+			<h:outputText value="Product" />
+			<p:outputPanel id="p1">
+				<p:autoComplete id="srch" minQueryLength="3" maxResults="10" value="#{historyController.search}" completeMethod="#{historyController.suggest}" >
+					<p:ajax listener="#{historyController.select}" event="itemSelect" update="p1" />
+				</p:autoComplete>
+				<p:dataTable id="tb1" rowIndexVar="row" value="#{historyController.selectedProducts}" var="prod">
+					<p:column headerText="Select">
+						<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{prod.selected}" />
+					</p:column>
+					<p:column headerText="Name">
+						<h:outputText value="#{prod.name}" />
+					</p:column>
+				</p:dataTable>
+				<p:commandButton value="Delete" actionListener="#{historyController.deleteSelected}" update="p1" />
+			</p:outputPanel>
+		</p:panelGrid>
+		<p:commandButton value="Add new order" actionListener="#{historyController.addNewInvoice}" update="form01" />
+	</h:form>
+</h:body>
+</html>

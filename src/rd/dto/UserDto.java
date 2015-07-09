@@ -14,7 +14,7 @@ public class UserDto {
 	private TeamDto team;
 
 	public UserDto() {
-		this.id = "";
+		this.id = "temp";
 		this.password = "";
 		this.name = "";
 		this.email = "";
