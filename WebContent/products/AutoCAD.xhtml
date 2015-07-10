@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+	<link
+		href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css"
+		rel="stylesheet" />
+	<style type="text/css">
+body {
+	padding-top: 20px;
+	padding-bottom: 60px;
+}
+
+/* Custom container */
+.container {
+	margin: 0 auto;
+	max-width: 1000px;
+}
+
+.container>hr {
+	margin: 60px 0;
+}
+
+/* Main marketing message and sign up button */
+.jumbotron {
+	margin: 80px 0;
+	text-align: center;
+}
+
+.jumbotron h1 {
+	font-size: 100px;
+	line-height: 1;
+}
+
+.jumbotron .lead {
+	font-size: 24px;
+	line-height: 1.25;
+}
+
+.jumbotron .btn {
+	font-size: 21px;
+	padding: 14px 24px;
+}
+
+/* Supporting marketing content */
+.marketing {
+	margin: 60px 0;
+}
+
+.marketing p+h4 {
+	margin-top: 28px;
+}
+
+/* Customize the navbar links to be fill the entire space of the .navbar */
+.navbar .navbar-inner {
+	padding: 0;
+}
+
+.navbar .nav {
+	margin: 0;
+	display: table;
+	width: 100%;
+}
+
+.navbar .nav li {
+	display: table-cell;
+	width: 1%;
+	float: none;
+}
+
+.navbar .nav li a {
+	font-weight: bold;
+	text-align: center;
+	border-left: 1px solid rgba(255, 255, 255, .75);
+	border-right: 1px solid rgba(0, 0, 0, .1);
+}
+
+.navbar .nav li:first-child a {
+	border-left: 0;
+	border-radius: 3px 0 0 3px;
+}
+
+.navbar .nav li:last-child a {
+	border-right: 0;
+	border-radius: 0 3px 3px 0;
+}
+
+.affix {
+	top: 0px;
+}
+​
+</style>
+	<link href="http://ghib.li/bootstrap/css/bootstrap-responsive.min.css"
+		rel="stylesheet" />
+	<style>
+.center {
+	text-align: center;
+}
+
+img.desaturate {
+	-webkit-filter: grayscale(100%);
+	-moz-filter: grayscale(100%);
+	-o-filter: grayscale(100%);
+	-ms-filter: grayscale(100%);
+	filter: grayscale(100%);
+	opacity: 0.6;
+	filter: alpha(opacity =     60); /* msie */
+	padding: 10px;
+}
+
+div.infrastructure {
+	text-align: center
+}
+</style>
+
+	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+	<!--[if lt IE 9]>
+      <script src="js/html5shiv.js"></script>
+    <![endif]-->
+	<script type="text/javascript" async="" src="./Ghib.li_files/ga.js"></script>
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push([ '_setAccount', 'UA-38637233-1' ]);
+		_gaq.push([ '_trackPageview' ]);
+
+		(function() {
+			var ga = document.createElement('script');
+			ga.type = 'text/javascript';
+			ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl'
+					: 'http://www')
+					+ '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0];
+			s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+</h:head>
+<h:body>
+
+	<p:menubar>
+		<p:submenu label="Products">
+			<p:menuitem value="AutoCAD" url="AutoCAD.jsf" />
+			<p:menuitem value="QuickDesk" url="quickdesk.jsf" />
+			<p:menuitem value="Revit" url="Revit.jsf" />
+			<p:menuitem value="Stormworks" url="Stormworks.jsf" />
+		</p:submenu>
+		<p:menuitem value="Feedback" url="../customers/customers.jsf" />
+	</p:menubar>
+
+	<div id="impressum" class="modal hide fade" tabindex="-1" role="dialog"
+		aria-labelledby="impressum_label" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal"
+				aria-hidden="true">×</button>
+			<h3 id="impressum_label">Impressum</h3>
+		</div>
+		<div class="modal-body">
+			<div class="row-fluid">
+				<div class="span6">
+					<div class="footer">
+						<p>© 2013 In Numero LLC</p>
+						<p>
+							<a href="mailto:#">info@ghib.li</a>
+						</p>
+						<p>
+							<a href="mailto:#">info@innumero.com</a>
+						</p>
+					</div>
+				</div>
+				<div class="span6">
+					<address>
+						<strong>In Numero LLC</strong> <br /> Grebelackerstrasse 33<br />
+						8057 Zurich, Switzerland<br /> Registration Nr:
+						CH-020.4.039.505-1<br />
+					</address>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" data-dismiss="modal"
+				aria-hidden="true">Close</button>
+		</div>
+	</div>
+
+	<div id="contact" class="modal hide fade" tabindex="-1" role="dialog"
+		aria-labelledby="contact_label" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal"
+				aria-hidden="true">×</button>
+			<h3 id="contact_label">Contact</h3>
+		</div>
+		<div class="modal-body">
+			<p>
+				Email <a href="mailto:#">info@ghib.li</a>
+			</p>
+			<p>Phone +41 (0)76 516 6601</p>
+		</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" data-dismiss="modal"
+				aria-hidden="true">Close</button>
+		</div>
+	</div>
+
+
+
+	<div class="container">
+
+		<div class="masthead">
+			<h3 class="muted">Ghib.li</h3>
+			<div class="navbar affix-top" data-spy="affix" data-offset-top="80">
+				<div class="navbar-inner">
+					<div class="container">
+						<ul class="nav">
+							<li><a href="http://ghib.li/#Home">Home</a></li>
+							<li><a href="http://ghib.li/#a_la_carte">À la carte</a></li>
+							<li><a href="http://ghib.li/#custom_made">Custom made</a></li>
+							<li><a href="http://ghib.li/#service">Service</a></li>
+							<li><a href="http://ghib.li/#infrastructure">Infrastructure</a></li>
+							<li><a href="http://ghib.li/#contact" data-toggle="modal">Contact</a></li>
+							<li><a href="http://ghib.li/#impressum" data-toggle="modal">Impressum</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<!-- /.navbar -->
+		</div>
+
+		<!-- Jumbotron -->
+		<div class="jumbotron">
+			<h1>AutoCAD</h1>
+			<p class="lead">We design, develop, deploy and manage cloud-based
+				solutions and deliver them as secure, scalable and highly-available
+				RESTful web services, to let you focus on your core business.</p>
+		</div>
+
+		<hr id="a_la_carte" />
+		<h2>À la carte</h2>
+		<div class="row-fluid">
+			<div class="span4">
+				<h3>Syntactic Analysis</h3>
+				<p>Analyze human language to extract its constituents, for
+					example, a sentence's subject and objects. Syntactic analysis can
+					be used to extract the most relevant words of a sentence, which can
+					save time and resources in the preparation of reports and
+					dashboards.</p>
+				<p>
+					<a class="btn"
+						href="http://alessandrousseglioviretta.github.com/text-analysis/"
+						target="_blank">View details »</a>
+				</p>
+			</div>
+			<div class="span4">
+				<h3>Document classification</h3>
+				<p>
+					Text classification is the task to assign a document to one or more
+					classes or categories. When the categories are positive or
+					negative, text classification is commonly referred to as <em>sentiment
+						analysis</em>. Ghib.li offers a customizable engine to automatically
+					classify multilingual text.
+				</p>
+				<p>
+					<a class="btn"
+						href="http://alessandrousseglioviretta.github.com/text-classification/"
+						target="_blank">View details »</a>
+				</p>
+			</div>
+			<div class="span4">
+				<h3>Semantic analysis</h3>
+				<p>
+					Semantic analysis aims at finding the meaning of a sentence words,
+					is more complex and less understood than syntactic analysis. We
+					integrate state-of-the-art tools like <a
+						href="http://www.opencalais.com/" target="_blank">OpenCalais</a>
+					to annotate text with a wealth of additional information, including
+					topic, social tags and entities.
+				</p>
+				<p>
+					<a class="btn"
+						href="http://alessandrousseglioviretta.github.com/text-analysis/"
+						target="_blank">View details »</a>
+				</p>
+				<p></p>
+			</div>
+		</div>
+
+		<hr id="custom_made" />
+		<h2>Custom made</h2>
+		<div class="row-fluid" />
+		<div class="span4">
+			<h3>Recommender systems</h3>
+			<p>Recommender systems model the preferences of your clients to
+				provide them with useful purchase recommendations to enhance user
+				experience, increase spending and improve loyalty.</p>
+			<p>
+				<a class="btn" href="http://ghib.li/#contact" data-toggle="modal">Get
+					in touch</a>
+			</p>
+		</div>
+		<div class="span4">
+			<h3>Behavior modelling</h3>
+			<p>
+				Prevent customer defection, enhance marketing actions and reduce
+				employee turnover by using custom-made <em>predictive analytics</em>
+				applied to your company's data.
+			</p>
+			<p>
+				<a class="btn" href="http://ghib.li/#contact" data-toggle="modal">Get
+					in touch</a>
+			</p>
+		</div>
+		<div class="span4">
+			<h3>Much more</h3>
+			<p>Data extraction, collection, analysis and modelling with
+				cost-effective, cloud-based, reliable and scalable solutions are our
+				specialty. We provide services, we do not sell software.</p>
+			<p>
+				<a class="btn" href="http://ghib.li/#contact" data-toggle="modal">Get
+					in touch</a>
+			</p>
+		</div>
+	</div>
+
+
+	<address>
+		<p>Ghib.li © 2013 In Numero LLC, Switzerland</p>
+	</address>
+
+
+
+	<!-- Le javascript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+
+	<script
+		src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+</h:body>
+</html>

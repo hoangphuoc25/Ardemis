@@ -6,9 +6,11 @@ import java.util.List;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.primefaces.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,6 +156,23 @@ public class SalespersonController implements Serializable {
 	public void discard() {
 		newCust = null;
 		addMode = false;
+	}
+
+	public void addNewCompany2() throws IOException {
+		newCust.setSeq(comService.getSeq());
+		comService.insertCompany(newCust);
+		customerList.add(newCust);
+		newCust = new CompanyDto();
+		addMode = false;
+
+		RequestContext context = RequestContext.getCurrentInstance();
+		context.execute("custDialog_w.close()");
+
+		conversationEnd();
+	}
+
+	public String link(String name) {
+		return "https://www.google.com.sg/?gws_rd=ssl#q="+name+"&tbm=nws";
 	}
 }
 

@@ -11,27 +11,21 @@
 </h:head>
 <h:body>
 
-
-
-
 	<h:form id="form01">
 
-	<p:menubar>
-			<p:submenu label="Mail">
-				<p:menuitem value="Gmail" url="http://www.google.com" />
-				<p:menuitem value="Hotmail" url="http://www.hotmail.com" />
-				<p:menuitem value="Yahoo Mail" url="http://mail.yahoo.com" />
+		<p:menubar>
+			<p:menuitem value="Dashboard" url="#{requestContext}/faces/manager.jsf" />
+			<p:submenu label="Products">
+				<p:menuitem value="AutoCAD" url="#{requestContext}/products/AutoCAD.jsf" />
+				<p:menuitem value="Quickdesk" url="#{requestContext}/products/quickdesk.jsf" />
+				<p:menuitem value="Revit" url="#{requestContext}/products/Revit.jsf" />
+				<p:menuitem value="Stormworks" url="#{requestContext}/products/Stormworks.jsf" />
 			</p:submenu>
-			<p:submenu label="Videos">
-				<p:menuitem value="Youtube" url="http://www.youtube.com" />
-				<p:menuitem value="Break" url="http://www.break.com" />
-				<p:menuitem value="Metacafe" url="http://www.metacafe.com" />
+			<p:submenu label="Reports">
+				<p:menuitem value="Expense" url="#{requestContext}/faces/expense.jsf" />
+				<p:menuitem value="Sale report" url="#{requestContext}/faces/report.jsf" />
 			</p:submenu>
-			<p:submenu label="Social Networks">
-				<p:menuitem value="Facebook" url="http://www.facebook.com" />
-				<p:menuitem value="MySpace" url="http://www.myspace.com" />
-			</p:submenu>
-				<p:menuitem value="log out" style="float: right" action="#{managerController.logout}" actionListener="#{managerController.logout}" />
+			<p:menuitem value="LOG OUT" style="float: right" action="#{managerController.logout}" />
 		</p:menubar>
 		<p:panelGrid columns="3">
 			<p:panelGrid columns="2">
@@ -45,11 +39,11 @@
 			</p:panelGrid>
 		</p:panelGrid>
 		<p:dataTable id="empTable" rowIndexVar="row"
-			value="#{managerController.teamRoster}" var="sale" paginator="true"
-			paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-			rows="15" selection="#{managerController.selectedSale}"
-			selectionMode="single" rowKey="#{sale.id}"
-			rendered="#{managerController.team > 0}">
+				value="#{managerController.teamRoster}" var="sale" paginator="true"
+				paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+				rows="15" selection="#{managerController.selectedSale}"
+				selectionMode="single" rowKey="#{sale.id}"
+				rendered="#{managerController.team > 0}">
 			<p:column headerText="Name">
 				<h:outputText value="#{sale.name}" />
 			</p:column>

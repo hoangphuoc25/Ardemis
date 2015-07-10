@@ -316,8 +316,8 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 		String type = resultSet.getString(5);
 		int year = resultSet.getInt(6);
 		String location = resultSet.getString(7);
-		String remark = resultSet.getString(8);
-		String phone = resultSet.getString(9);
+		String phone = resultSet.getString(8);
+		String remark = resultSet.getString(9);
 
 		return new CompanyDto(seq, name, size, industry, type, year, location, phone, remark);
 	}

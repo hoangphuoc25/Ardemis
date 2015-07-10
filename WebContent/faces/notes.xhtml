@@ -9,13 +9,32 @@
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
+	<style>
+		.message {
+			display: block;
+			font: 15px arial;
+			padding: 5px;
+			margin: 0 0 10px;
+			white-space: pre;
+		}
+		.info {
+			background-color: #dff0d8;
+		}
+		.error {
+			background-color: #f2dede;
+		}
+		.main {
+			padding: 20px;
+		}
+	</style>
 </h:head>
 <h:body>
 	<h:form id="form01">
-		<p:messages />
-		<h:messages />
+		<h:messages id="messages" infoClass="message info" fatalClass="message error" errorClass="message error"/>
 
-		<p:commandButton value="Add new Note" actionListener="#{noteController.startAdd}" update=":form01" oncomplete="noteDialog_w.show()" />
+		<p:commandButton value="Add new user and note" actionListener="#{noteController.startAdd}" immediate="true"
+			update=":form01" oncomplete="noteDialog_w.show()" />
+
 		<p:dialog id="noteDialog" closable="false" visible="#{noteController.addMode}"
 				widgetVar="noteDialog_w" modal="true" resizable="false" draggable="true" header="New Note">
 			<p:messages />
@@ -27,17 +46,45 @@
 				<h:outputText value="Note to customer" />
 				<p:inputTextarea id="noteContent" value="#{noteController.newNote.note}" />
 			</h:panelGrid>
-			<p:commandButton value="Submit" action="#{noteController.addUserAndNote}" update="@all" ajax="true"/>
+			<p:commandButton value="Submit" action="#{noteController.addUserAndNote}" update="@all" ajax="true" process=":form01:noteDialog" />
+			<p:commandButton value="Cancel" actionListener="#{noteController.cancelNew}" update="@all" ajax="true" process=":form01:noteDialog" immediate="true" />
+		</p:dialog>
+
+		<p:commandButton value="Send note to existing user" actionListener="#{noteController.startAddExisting}" oncomplete="extDialog_w.show()"
+			update=":form01" immediate="true" />
+
+		<p:dialog id="extDialog" closable="false" visible="#{noteController.extMode}"
+				widgetVar="extDialog_w" modal="true" resizable="false" draggable="true" header="Create note">
+			<p:messages />
+			<p:panelGrid columns="2">
+				<h:outputText value="User name" />
+				<p:autoComplete value="#{noteController.clientName}" completeMethod="#{noteController.suggestClient}"
+					minQueryLength="3" validator="#{noteController.validateClientName}"/>
+				<h:outputText value="Note" />
+				<p:inputTextarea value="#{noteController.newNote.note}" validator="#{noteController.validateNoteContent}"/>
+			</p:panelGrid>
+			<p:commandButton value="Submit" action="#{noteController.addNewNote}" update="@all" ajax="true" process=":form01:extDialog"/>
+			<p:commandButton value="Cancel" actionListener="#{noteController.cancelExisting}" update="@all" ajax="true" immediate="true" process=":form01:extDialog" />
 		</p:dialog>
 
 		<p:dataTable id="tbl1" rowIndexVar="row" value="#{noteController.notes}" var="note"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-				rows="15" >
+				rows="15" editable="true">
+			<p:ajax event="rowEdit" listener="#{noteController.onRowEdit}" update="tbl1, :form01:messages" />
+			<p:ajax event="rowEditCancel" listener="#{noteController.onRowEditCancel}" update="tbl1, :form01:messages" />
+
 			<p:column headerText="To User">
 				<h:outputText value="#{note.toUser.id}" />
 			</p:column>
 			<p:column headerText="Note">
-				<h:outputText value="#{note.note}" />
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{note.note}" />
+					</f:facet>
+					<f:facet name="input">
+						<p:inputTextarea value="#{note.note}" />
+					</f:facet>
+				</p:cellEditor>
 			</p:column>
 			<p:column headerText="Date created">
 				<h:outputText value="#{note.createdDate}">
@@ -45,11 +92,10 @@
 				</h:outputText>
 			</p:column>
 			<p:column headerText="Action">
+				<p:rowEditor />
 				<h:commandButton value="Delete" action="#{noteController.remove(note)}" update=":form01" />
 			</p:column>
 		</p:dataTable>
-
-		<p:commandButton value="Add new note v2" actionListener="#{noteController.startAdd}" oncomplete="noteDialog_w.show()" />
 
 		<p:ajaxStatus style="text-align: center;">
 			<f:facet name="start">

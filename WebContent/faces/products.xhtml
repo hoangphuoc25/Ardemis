@@ -12,6 +12,12 @@
 </h:head>
 <h:body>
 	<h:form id="form01">
+
+		<p:selectOneMenu value="#{sessionController.currency}">
+			<f:selectItem itemValue="0" itemLabel="Select " />
+			<f:selectItems value="#{sessionController.currencyList}" />
+		</p:selectOneMenu>
+
 		<h:messages infoStyle="color: green;" fatalStyle="color: red;" errorStyle="color: red;" />
 
 		<p:dataTable id="tbl1" rowIndexVar="row" value="#{productController.products}" var="prod"

@@ -10,19 +10,22 @@ import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.primefaces.context.RequestContext;
+import org.primefaces.event.RowEditEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import rd.dto.CompanyDto;
 import rd.dto.NoteDto;
+import rd.dto.SaleExpenseDto;
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.CompanyService;
 import rd.spec.service.NoteService;
 import rd.spec.service.UserService;
 
@@ -45,6 +48,7 @@ public class NoteController implements Serializable {
 	@Inject
 	private
 	Conversation conversation;
+	@Inject CompanyService compService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -252,6 +256,114 @@ public class NoteController implements Serializable {
 				notes.remove(i);
 				break;
 			}
+		}
+	}
+
+	public boolean isExtMode() {
+		return extMode;
+	}
+
+	public void setExtMode(boolean extMode) {
+		this.extMode = extMode;
+	}
+
+	private boolean extMode;
+	private String clientName;
+
+	public List<String> suggestClient(String clientName) throws IOException {
+		List<String> result = new ArrayList<String>();
+		List<UserDto> users = userService.searchByName(clientName);
+		for (UserDto user: users) {
+			result.add(user.getName() + "(" + user.getId() + ")");
+		}
+		return result;
+	}
+
+	public void startAddExisting() {
+		reload();
+		extMode = true;
+	}
+
+	public void addNewNote() throws IOException {
+		if (clientName == null || clientName.isEmpty()) {
+			sessionManager.addGlobalMessageFatal("User name is required.", null);
+			return;
+		}
+		if (newNote.getNote().isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Note content required.", null);
+			return;
+		}
+		String id = getClientName().split("[()]")[1];
+		UserDto receiver = userService.findUserById(id);
+		newNote.setFromUser(sessionManager.getLoginUser());
+		newNote.setToUser(receiver);
+		newNote.setCreatedDate(new Date());
+		noteService.addNote(newNote);
+
+		extMode = false;
+	}
+
+	public String getClientName() {
+		return clientName;
+	}
+
+	public void setClientName(String clientName) {
+		this.clientName = clientName;
+	}
+
+	public void onRowEdit(RowEditEvent event) throws IOException {
+		NoteDto note = (NoteDto) event.getObject();
+		if (note.getNote().isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Note content is required", null);
+			restoreObj(event);
+			return;
+		}
+
+		for (int i = notes.size() - 1; i >= 0; i--) {
+    		if (notes.get(i).getSeq() == note.getSeq()) {
+    			notes.set(i, note);
+    			sessionManager.addGlobalMessageInfo("Info updated successully", null);
+    			break;
+    		}
+    	}
+	}
+
+	public void onRowEditCancel(RowEditEvent event) throws IOException {
+		restoreObj(event);
+	}
+
+	public void restoreObj(RowEditEvent event) throws IOException {
+    	NoteDto obj = (NoteDto) event.getObject();
+    	for (int i = notes.size() - 1; i >= 0; i--) {
+    		if (notes.get(i).getSeq() == obj.getSeq()) {
+    			notes.set(i, noteService.getById(obj.getSeq()));
+    			System.out.println("restored");
+    			break;
+    		}
+    	}
+    }
+
+	public void cancelNew() {
+		addMode = false;
+		conversationEnd();
+	}
+
+	public void cancelExisting() {
+		extMode = false;
+		conversationEnd();
+	}
+
+	public void validateNoteContent(FacesContext facesContext, UIComponent component, Object value) throws IOException {
+		String content = value.toString();
+		if (content.isEmpty()) {
+			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Note is required.", null));
+		}
+	}
+
+	public void validateClientName(FacesContext facesContext, UIComponent component, Object value) throws IOException {
+		String name = value.toString();
+		if (name.isEmpty()) {
+			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Name is required.", null));
 		}
 	}
 }

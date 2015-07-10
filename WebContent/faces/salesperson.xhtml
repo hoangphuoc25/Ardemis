@@ -27,18 +27,19 @@
 	        <div class="nav-collapse collapse navbar-responsive-collapse">
 	          <ul class="nav">
 	            <li class="active"><a href="#">Home</a></li>
+	            <li><a href="#{sessionController.dashboardLink()}">Dashboard</a></li>
 	            <li><h:commandLink action="#{listingController.toEmployeePage}" value="Employee Page" /></li>
 	            <li><a href="#">Reports</a></li>
 	            <li class="dropdown">
-	              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Customer<b class="caret"></b></a>
+	              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Products<b class="caret"></b></a>
 	              <ul class="dropdown-menu">
-	                <li><h:outputLink value="#{request.contextPath}/faces/employee.jsf">Employee Page</h:outputLink></li>
-	                <li><a href="#">Another action</a></li>
-	                <li><a href="#">Something else here</a></li>
+	                <li><h:outputLink value="#{request.contextPath}/faces/products.jsf">Products Overview</h:outputLink></li>
+	                <li><a href="../products/AutoCAD.jsf">AutoCAD</a></li>
+	                <li><a href="../products/quickdesk.jsf">Quickdesk</a></li>
 	                <li class="divider"></li>
 	                <li class="nav-header">Nav header</li>
-	                <li><a href="#">Separated link</a></li>
-	                <li><a href="#">One more separated link</a></li>
+	                <li><a href="../products/Revit.jsf">Revit</a></li>
+	                <li><a href="../products/Stormworks.jsf">Stormworks</a></li>
 	              </ul>
 	            </li>
 	          </ul>
@@ -47,6 +48,12 @@
 			</div>
 		</div>
 
+
+		<p:selectOneMenu value="#{sessionController.currency}">
+			<f:selectItem itemValue="0" itemLabel="Select " />
+			<f:selectItems value="#{sessionController.currencyList}" />
+			<p:ajax listener="#{salespersonController.reload}" update="form01"/>
+		</p:selectOneMenu>
 
 		<p:tabView id="tabview">
 			<p:tab title="Tab 1">
@@ -81,7 +88,8 @@
 
 			<p:column headerText="Link">
 				<a href="https://www.google.com.sg/?gws_rd=ssl#q=#{comp.name}" target="_blank" style="color: blue;">Google search</a>
-				<a href="history.jsf?seq=#{comp.seq}">Detail</a>
+				<h:outputLink value="#{salespersonController.link(comp.name)}" target="_blank" style="color: blue;">Google news</h:outputLink>
+				<a href="history.jsf?seq=#{comp.seq}" style="color: blue;">Detail</a>
 			</p:column>
 		</p:dataTable>
 
@@ -132,7 +140,7 @@
 
 			<p:commandButton value="Add" ajax="true" actionListener="#{salespersonController.addNewCompany}" update=":form01"
 				oncomplete="if (args &amp;&amp; !args.validationFailed) custDialog_w.hide()" />
-			<p:commandButton id="applyBtn" value="Apply" ajax="true" actionListener="#{salespersonController.addNewCompany}" update=":form01" />
+			<p:commandButton id="applyBtn" value="Apply" ajax="true" actionListener="#{salespersonController.addNewCompany2}" update="@all" />
 
 			</p:dialog>
 			</p:tab>
