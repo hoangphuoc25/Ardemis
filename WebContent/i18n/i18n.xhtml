@@ -5,7 +5,7 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
-	<f:loadBundle var="msg" basename="resources.welcome" />
+	<f:loadBundle var="msg" basename="resources.welcome_fr" />
 
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -16,9 +16,11 @@
 	<h1>JSF 2.2 Internationalization Example</h1>
 
 	<h:form>
-		<h:commandButton action="#{languageBean.changeLanguage('en')}" value="English" />
-		<h:outputText value=" " />
-		<h:commandButton action="#{languageBean.changeLanguage('gr')}" value="Greek" />
+		<h:commandButton action="#{languageBean.changeLanguage('en')}" value="English" update="@all"/>
+		<h:outputText value="HEYO" />
+		<h:commandButton action="#{languageBean.changeLanguage('gr')}" value="Greek" update="@all"/>
+		<h:outputText value="HEYO" />
+		<h:commandButton action="#{languageBean.changeLanguage('fr')}" value="French" update="@all"/>
 	</h:form>
 
 	<p>

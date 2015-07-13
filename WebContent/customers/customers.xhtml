@@ -30,7 +30,8 @@
 	</style>
 	<h:form id="form01" styleClass="main">
 		<p:menubar>
-			<p:submenu label="Products" style="color: green;">
+			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink()}" />
+			<p:submenu label="Products" >
 				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
 				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
 				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
@@ -38,6 +39,8 @@
 			</p:submenu>
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
 		</p:menubar>
+
+		<p:menubar model="#{sessionController.model}" />
 
 		<h:messages infoClass="message info" fatalClass="message error" errorClass="message error" />
 		<p:panelGrid columns="2" >
@@ -51,26 +54,25 @@
 			<h:outputText value="Feedback" />
 			<p:inputTextarea value="#{feedbackController.feedback}" />
 		</p:panelGrid>
-		<p:commandButton value="Submit" actionListener="#{feedbackController.submit}" update="form01" />
+		<p:commandButton value="Submit" actionListener="#{feedbackController.addFeedback}" update="form01" />
 
 		<p:dataTable id="noteTbl" rowIndexVar="row" value="#{feedbackController.notes}" var="note"
 			paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 			rows="15">
+			<p:column headerText="From ">
+				<h:outputText value="#{note.fromUser.name}" />
+			</p:column>
 
-		<p:column headerText="From ">
-			<h:outputText value="#{note.fromUser.name}" />
-		</p:column>
+			<p:column headerText="Date">
+				<h:outputText value="#{note.createdDate}">
+					<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
+			</p:column>
 
-		<p:column headerText="Date">
-			<h:outputText value="#{note.createdDate}">
-				<f:convertDateTime pattern="dd/MM/yyyy" />
-			</h:outputText>
-		</p:column>
-
-		<p:column headerText="Message">
-			<h:outputText value="#{note.note}" />
-		</p:column>
-	</p:dataTable>
+			<p:column headerText="Message">
+				<h:outputText value="#{note.note}" />
+			</p:column>
+		</p:dataTable>
 	</h:form>
 </h:body>
 </html>

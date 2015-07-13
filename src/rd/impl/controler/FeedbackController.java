@@ -16,9 +16,14 @@ import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import rd.dto.FeedbackDto;
 import rd.dto.NoteDto;
+import rd.dto.ProductDto;
+import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.FeedbackService;
 import rd.spec.service.NoteService;
+import rd.spec.service.ProductService;
 
 @Named
 @ConversationScoped
@@ -33,6 +38,8 @@ public class FeedbackController implements Serializable {
 	@Inject Conversation conversation;
 	@Inject SessionManager sessionManager;
 	@Inject NoteService noteService;
+	@Inject FeedbackService fbService;
+	@Inject ProductService prodService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -66,6 +73,16 @@ public class FeedbackController implements Serializable {
 		product = -1;
 		setFeedback("");
 		sessionManager.addGlobalMessageInfo("Thanks for your feedback", null);
+	}
+
+	public void addFeedback() throws IOException {
+		System.out.println("FeedbackController.addFeedback()");
+		int seq = fbService.getSeq();
+		ProductDto prod = prodService.getProductById(product);
+		UserDto user = sessionManager.getLoginUser();
+		FeedbackDto newFeedback = new FeedbackDto(seq, prod, rating, user, feedback);
+		fbService.addFeedback(newFeedback);
+		submit();
 	}
 
 	public void validateProduct(FacesContext context, UIComponent component, Object value) {
@@ -109,5 +126,4 @@ public class FeedbackController implements Serializable {
 	private String feedback;
 	private List<NoteDto> notes;
 }
-
 

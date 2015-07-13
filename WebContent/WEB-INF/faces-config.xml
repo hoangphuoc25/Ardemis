@@ -10,6 +10,11 @@
 		<locale-config>
 			<default-locale>en</default-locale>
 		</locale-config>
+
+		<resource-bundle>
+		<base-name>resources.welcome</base-name>
+		<var>message</var>
+	   </resource-bundle>
 	</application>
 
 </faces-config>

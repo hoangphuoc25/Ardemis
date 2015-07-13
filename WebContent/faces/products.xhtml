@@ -6,6 +6,9 @@
 	  xmlns:ui="http://java.sun.com/jsf/facelets"
 	  xmlns:p="http://primefaces.org/ui"
 	  >
+	  <f:metadata>
+	  	<f:viewParam name="seq" value="#{productController.seq}" />
+	  </f:metadata>
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
@@ -13,12 +16,25 @@
 <h:body>
 	<h:form id="form01">
 
+		<p:menubar>
+			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink()}" />
+			<p:submenu label="Products" >
+				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
+				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
+				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
+				<p:menuitem style="color: blue;" icon="ui-icon-document" value="Stormworks" url="../products/Stormworks.jsf" />
+			</p:submenu>
+			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
+		</p:menubar>
+
 		<p:selectOneMenu value="#{sessionController.currency}">
 			<f:selectItem itemValue="0" itemLabel="Select " />
 			<f:selectItems value="#{sessionController.currencyList}" />
 		</p:selectOneMenu>
 
 		<h:messages infoStyle="color: green;" fatalStyle="color: red;" errorStyle="color: red;" />
+
+		<p:outputPanel rendered="#{productController.seq == 0}" >
 
 		<p:dataTable id="tbl1" rowIndexVar="row" value="#{productController.products}" var="prod"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
@@ -36,6 +52,10 @@
 			<p:column headerText="Price">
 				<h:outputText value="#{prod.price}" />
 			</p:column>
+			<p:column headerText="Link">
+				<a href="../faces/productdetail.jsf?seq=#{prod.seq}">Detail</a>
+			</p:column>
+
 		</p:dataTable>
 
 		<h:outputText value="Search" />
@@ -65,10 +85,15 @@
 				<h:outputText value="#{productController.newProd.price}" rendered="#{productController.viewMode}" />
 			</p:panelGrid>
 
-			<p:commandButton value="Apply" actionListener="#{productController.apply}" update=":form01" ajax="true" />
-			<p:commandButton value="Edit" actionListener="#{productController.startEdit}" update=":form01:prodDialog" ajax="true" />
-			<p:commandButton value="Delete" actionListener="#{productController.delete}" update=":form01" ajax="true" />
+			<p:commandButton value="Apply" actionListener="#{productController.apply}" update=":form01" ajax="true" rendered="#{productController.editMode or productController.addMode}" />
+			<p:commandButton value="Edit" actionListener="#{productController.startEdit}" update=":form01:prodDialog" ajax="true" rendered="#{productController.viewMode}" />
+			<p:commandButton value="Delete" actionListener="#{productController.delete}" update=":form01" ajax="true" rendered="#{productController.viewMode}" />
+			<p:commandButton value="Cancel" actionListener="#{productController.cancel}" update=":form01" ajax="true" />
 		</p:dialog>
+		</p:outputPanel>
+
+
+
 	</h:form>
 </h:body>
 </html>

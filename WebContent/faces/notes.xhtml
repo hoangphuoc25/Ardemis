@@ -30,6 +30,22 @@
 </h:head>
 <h:body>
 	<h:form id="form01">
+
+		<p:menubar>
+			<p:menuitem value="Dashboard" url="#{requestContext}/faces/manager.jsf" />
+			<p:submenu label="Products">
+				<p:menuitem value="AutoCAD" url="#{requestContext}/products/AutoCAD.jsf" />
+				<p:menuitem value="Quickdesk" url="#{requestContext}/products/quickdesk.jsf" />
+				<p:menuitem value="Revit" url="#{requestContext}/products/Revit.jsf" />
+				<p:menuitem value="Stormworks" url="#{requestContext}/products/Stormworks.jsf" />
+			</p:submenu>
+			<p:submenu label="Reports">
+				<p:menuitem value="Expense" url="#{requestContext}/faces/expense.jsf" />
+				<p:menuitem value="Sale report" url="#{requestContext}/faces/report.jsf" />
+			</p:submenu>
+			<p:menuitem value="LOG OUT" action="#{noteController.logout}" immediate="true" />
+		</p:menubar>
+
 		<h:messages id="messages" infoClass="message info" fatalClass="message error" errorClass="message error"/>
 
 		<p:commandButton value="Add new user and note" actionListener="#{noteController.startAdd}" immediate="true"
@@ -41,6 +57,10 @@
 			<h:panelGrid columns="2">
 				<h:outputText value="New customer id" />
 				<p:inputText id="newid" value="#{noteController.newUser.id}" validator="#{noteController.userValidator}">
+				</p:inputText>
+
+				<h:outputText value="New customer name" />
+				<p:inputText value="#{noteController.newUser.name}" validator="#{noteController.userNameValidator}">
 				</p:inputText>
 
 				<h:outputText value="Note to customer" />

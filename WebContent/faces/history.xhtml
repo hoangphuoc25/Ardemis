@@ -16,6 +16,17 @@
 </h:head>
 <h:body>
 	<h:form id="form01">
+		<p:menubar>
+			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink()}" />
+			<p:submenu label="Products" >
+				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
+				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
+				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
+				<p:menuitem style="color: blue;" icon="ui-icon-document" value="Stormworks" url="../products/Stormworks.jsf" />
+			</p:submenu>
+			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
+		</p:menubar>
+
 		<p>Welcome</p>
 		<p:commandButton value="abc" actionListener="#{historyController.submit}" update=":form01"/>
 		<h:outputText value="#{historyController.seq}" />

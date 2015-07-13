@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+	  <f:metadata>
+	  	<f:viewParam name="seq" value="#{productDetailController.seq}" />
+	  </f:metadata>
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<h:form id="form01">
+		<p:menubar>
+			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink()}" />
+			<p:submenu label="Products" >
+				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
+				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
+				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
+				<p:menuitem style="color: blue;" icon="ui-icon-document" value="Stormworks" url="../products/Stormworks.jsf" />
+			</p:submenu>
+			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
+		</p:menubar>
+		<h3>Purchase history</h3>
+		<p:dataTable id="tbl1" rowIndexVar="row" value="#{productDetailController.purchases}" var="purchase"
+				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}" row="20">
+			<p:column headerText="Id">
+				<a href="#{request.contextPath}/faces/history.jsf?seq=#{purchase.seq}" style="color: blue;">#{purchase.seq}</a>
+			</p:column>
+			<p:column headerText="Date">
+				<h:outputText value="#{purchase.purchaseDate}">
+					<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Company" >
+				<h:outputText value="#{purchase.customer.name}" />
+			</p:column>
+			<p:column headerText="Purchase Date">
+				<h:outputText value="#{purchase.purchaseDate}">
+					<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Amount">
+				<h:outputText value="#{purchase.amount}" />
+			</p:column>
+		</p:dataTable>
+
+		<h3>Feedbacks</h3>
+		<p:dataTable id="tbl2" rowIndexVar="row" value="#{productDetailController.feedbacks}" var="fb"
+				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+				rows="15">
+			<p:column headerText="User id">
+				<h:outputText value="#{fb.customer.id}" />
+			</p:column>
+			<p:column headerText="Rating">
+				<p:rating value="#{fb.rating}" readonly="true" />
+			</p:column>
+			<p:column headerText="Feedback">
+				<h:outputText value="#{fb.feedback}" />
+			</p:column>
+		</p:dataTable>
+		<h:outputText style="font-family: Arial;" value="There seems to be nothing here" rendered="#{productDetailController.seq == 0}" />
+	</h:form>
+</h:body>
+</html>

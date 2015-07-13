@@ -14,4 +14,5 @@ public interface InvoiceService {
 	public void addInvoice(InvoiceDto invoice) throws IOException;
 	public List<InvoiceDto> getByCustomer(int seq) throws IOException;
 	public void updateInvoice(InvoiceDto invoice) throws IOException;
+	public List<InvoiceDto> findInvoicesByProduct(int seq) throws IOException;
 }

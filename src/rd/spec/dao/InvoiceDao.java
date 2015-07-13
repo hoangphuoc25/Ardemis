@@ -15,4 +15,5 @@ public interface InvoiceDao {
 	public void addInvoice(Transaction transaction, InvoiceDto invoice) throws IOException;
 	public List<InvoiceDto> getByCustomer(Transaction transaction, int seq) throws IOException;
 	public void updateInvoice(Transaction transaction, InvoiceDto invoice) throws IOException;
+	public List<InvoiceDto> findInvoicesByProduct(Transaction transaction, int seq) throws IOException;
 }

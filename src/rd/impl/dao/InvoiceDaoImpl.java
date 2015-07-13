@@ -271,7 +271,7 @@ public class InvoiceDaoImpl implements InvoiceDao, Serializable {
 	private static String UPDATE_INVOICE = "update customer_seq=?, purchase_date=?, amount=? where seq=?";
 	private static String DELETE_INVOICE = "delete from t_invoice where seq=?";
 	private static String GET_SEQ = "select max(seq)+1 from t_invoice";
-	private static String GET_ALL = "select seq, customer_seq, purchase_date, amount from t_invoice";
+	private static String GET_ALL = "select seq, customer_seq, purchase_date, amount from t_invoice order by seq";
 
 	public List<InvoiceDto> getByCustomer(Transaction transaction, int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -343,4 +343,46 @@ public class InvoiceDaoImpl implements InvoiceDao, Serializable {
 			}
 		}
 	}
+	public List<InvoiceDto> findInvoicesByProduct(Transaction transaction, int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(FIND_INVOICES_BY_PRODUCT);
+			prepareStatement.setInt(1, seq);
+			resultSet = prepareStatement.executeQuery();
+
+			List<Integer> temp = new ArrayList<Integer>();
+			while (resultSet.next()) {
+				temp.add(resultSet.getInt(1));
+			}
+
+			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
+			for (Integer sequence: temp) {
+				result.add(getById(transaction, sequence));
+			}
+
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String FIND_INVOICES_BY_PRODUCT = "select distinct ti.seq from t_invoice ti join t_product_purchase tpp on ti.seq=tpp.invoice_seq where tpp.product_seq=?";
 }

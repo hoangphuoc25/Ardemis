@@ -39,7 +39,7 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>User Form Auth1</web-resource-name>
-      <url-pattern>*.jsf</url-pattern>
+      <url-pattern>/faces/*</url-pattern>
     </web-resource-collection>
      <auth-constraint>
       <role-name>admin</role-name>
@@ -54,6 +54,17 @@
     </web-resource-collection>
      <auth-constraint>
       <role-name>admin</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>User Form Auth3</web-resource-name>
+      <url-pattern>/customers/*</url-pattern>
+    </web-resource-collection>
+     <auth-constraint>
+      <role-name>admin</role-name>
+      <role-name>user</role-name>
     </auth-constraint>
   </security-constraint>
 

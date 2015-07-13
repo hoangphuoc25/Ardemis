@@ -359,5 +359,5 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 			}
 		}
 	}
-	private static String GET_ALL = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark from t_clientcompany";
+	private static String GET_ALL = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark from t_clientcompany order by seq";
 }

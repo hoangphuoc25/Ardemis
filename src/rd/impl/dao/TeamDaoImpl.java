@@ -106,7 +106,7 @@ public class TeamDaoImpl implements TeamDao {
 	private static String UPDATE_TEAM = "update t_saleteam set name=?, remark=? where seq=?";
 	private static String GET_BY_ID = "select seq, name, remark from t_saleteam where seq=?";
 	private static String DELETE_TEAM = "delete from t_saleteam where seq=?";
-	private static String GET_ALL = "select seq, name, remark from t_saleteam";
+	private static String GET_ALL = "select seq, name, remark from t_saleteam order by seq";
 
 	public void updateTeam(Transaction transaction, TeamDto team) throws IOException {
 		PreparedStatement prepareStatement = null;

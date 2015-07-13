@@ -225,7 +225,7 @@ public class NoteController implements Serializable {
     	String id = value.toString();
 		logger.error("ID:" + id);
 		if (id == null || id.isEmpty()) {
-			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "ABCDEFGH", null));
+			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "User id is required.", null));
 		}
 		try {
 			if (userService == null) {
@@ -233,11 +233,18 @@ public class NoteController implements Serializable {
 			}
 			UserDto user = userService.findUserById(id);
 			if (user != null) {
-				throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "XYZ", null));
+				throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "User id existed", null));
 			}
 		} catch (IOException e) {
 			logger.error("ERROR");
 			e.printStackTrace();
+		}
+    }
+
+    public void userNameValidator(FacesContext context, UIComponent component, Object value) {
+    	String name = value.toString();
+		if (name == null || name.isEmpty()) {
+			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "User name is required.", null));
 		}
     }
 
@@ -301,6 +308,8 @@ public class NoteController implements Serializable {
 		noteService.addNote(newNote);
 
 		extMode = false;
+		newNote = new NoteDto();
+		clientName = "";
 	}
 
 	public String getClientName() {
@@ -365,5 +374,12 @@ public class NoteController implements Serializable {
 		if (name.isEmpty()) {
 			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Name is required.", null));
 		}
+	}
+
+	public String logout() {
+		System.out.println("NoteController.logout()");
+		conversationEnd();
+		sessionManager.logoff();
+		return "../portal.jsf?faces-redirect=true";
 	}
 }

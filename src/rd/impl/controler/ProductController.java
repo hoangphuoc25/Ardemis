@@ -198,4 +198,25 @@ public class ProductController implements Serializable {
 		RequestContext context = RequestContext.getCurrentInstance();
 		context.execute("prodDialog_w.hide();");
 	}
+
+	public void cancel() {
+		addMode = false;
+		editMode = false;
+		viewMode = false;
+		RequestContext context = RequestContext.getCurrentInstance();
+		context.execute("prodDialog_w.hide();");
+	}
+
+	public int getSeq() {
+		System.out.println("ProductController.getSeq()");
+		System.out.println(seq);
+		return seq;
+	}
+
+	public void setSeq(int seq) {
+		this.seq = seq;
+	}
+
+	private int seq;
+
 }

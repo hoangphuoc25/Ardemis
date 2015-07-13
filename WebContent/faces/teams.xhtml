@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<p:commandButton value="DIALOG" ajax="true"
+		actionListener="#{welcomeController.startAdd}" update=":form01"
+		oncomplete="custDialog_w.show()" />
+	<h:form id="form01">
+		<p:outputPanel id="p1">
+			<p:dialog id="custDialog" closable="false"
+					visible="#{welcomeController.addMode}" widgetVar="custDialog_w"
+					modal="true" resizable="false" draggable="true"
+					header="new team dialog">
+				<p:messages globalOnly="true" />
+				<p:panelGrid columns="3">
+					<h:outputText value="Name" />
+					<p:inputText id="abc" value="#{welcomeController.newTeam.name}" />
+				</p:panelGrid>
+				<p:commandButton ajax="true" value="Add"
+					actionListener="#{welcomeController.addNewTeam}" update=":form01" />
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:dataTable id="tbl1" value="#{welcomeController.teams}" var="team" >
+			<p:column headerText="Id">
+				<h:outputText value="#{team.seq}" />
+			</p:column>
+			<p:column headerText="Name">
+				<h:outputText value="#{team.name}" />
+			</p:column>
+
+		</p:dataTable>
+	</h:form>
+</h:body>
+</html>

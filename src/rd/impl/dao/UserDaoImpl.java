@@ -301,7 +301,7 @@ public class UserDaoImpl implements UserDao {
 
 	private static String SEARCH_BY_NAME = "select id, name, email, phone, team_seq from s_users where name like ?";
 	private static String GET_USER_BY_TEAM = "select id, name, email, phone, team_seq from s_users where team_seq=?";
-	private static String GET_ALL = "select id, name, email, phone, team_seq from s_users";
+	private static String GET_ALL = "select id, name, email, phone, team_seq from s_users order by id";
 	private static String GET_BY_ID = "select id, name, email, phone, team_seq from s_users where id=?";
 	private static String DELETE_USER = "delete from s_users where id=?";
 	private static String UPDATE_USER = "update s_users set name=?, email=?, phone=?, team_seq=? where id=?";

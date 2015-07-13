@@ -30,6 +30,18 @@
 		}
 	</style>
 	<h:form id="form01">
+
+		<p:menubar>
+			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink()}" />
+			<p:submenu label="Products" >
+				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
+				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
+				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
+				<p:menuitem style="color: blue;" icon="ui-icon-document" value="Stormworks" url="../products/Stormworks.jsf" />
+			</p:submenu>
+			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
+		</p:menubar>
+
 		<h:messages infoClass="message info" fatalClass="message error" errorClass="message error"/>
 		<p:panelGrid columns="2">
 			<h:outputText value="Date" />

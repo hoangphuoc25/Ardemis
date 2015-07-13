@@ -144,6 +144,7 @@ div.infrastructure {
 <h:body>
 
 	<p:menubar>
+		<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink()}" />
 		<p:submenu label="Products">
 			<p:menuitem value="AutoCAD" url="AutoCAD.jsf" />
 			<p:menuitem value="QuickDesk" url="quickdesk.jsf" />
@@ -256,7 +257,7 @@ div.infrastructure {
 				</p>
 			</div>
 			<div class="span4">
-				<h3>Document classification</h3>
+				<h3>Documents</h3>
 				<p>
 					Text classification is the task to assign a document to one or more
 					classes or categories. When the categories are positive or
@@ -271,7 +272,7 @@ div.infrastructure {
 				</p>
 			</div>
 			<div class="span4">
-				<h3>Semantic analysis</h3>
+				<h3>Design Concepts</h3>
 				<p>
 					Semantic analysis aims at finding the meaning of a sentence words,
 					is more complex and less understood than syntactic analysis. We
@@ -291,9 +292,9 @@ div.infrastructure {
 
 		<hr id="custom_made" />
 		<h2>Custom made</h2>
-		<div class="row-fluid" />
+		<div class="row-fluid">
 		<div class="span4">
-			<h3>Recommender systems</h3>
+			<h3>Strenths</h3>
 			<p>Recommender systems model the preferences of your clients to
 				provide them with useful purchase recommendations to enhance user
 				experience, increase spending and improve loyalty.</p>
@@ -303,7 +304,7 @@ div.infrastructure {
 			</p>
 		</div>
 		<div class="span4">
-			<h3>Behavior modelling</h3>
+			<h3>Weaknesses</h3>
 			<p>
 				Prevent customer defection, enhance marketing actions and reduce
 				employee turnover by using custom-made <em>predictive analytics</em>
@@ -315,7 +316,7 @@ div.infrastructure {
 			</p>
 		</div>
 		<div class="span4">
-			<h3>Much more</h3>
+			<h3>Rivals Targeted customers</h3>
 			<p>Data extraction, collection, analysis and modelling with
 				cost-effective, cloud-based, reliable and scalable solutions are our
 				specialty. We provide services, we do not sell software.</p>
@@ -325,13 +326,7 @@ div.infrastructure {
 			</p>
 		</div>
 	</div>
-
-
-	<address>
-		<p>Ghib.li © 2013 In Numero LLC, Switzerland</p>
-	</address>
-
-
+	</div>
 
 	<!-- Le javascript
     ================================================== -->

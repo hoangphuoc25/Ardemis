@@ -23,6 +23,15 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 	private static final long serialVersionUID = 1L;
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	private static String GET_ALL = "select seq, name, summary, target, price from t_product order by seq";
+	private static String GET_SEQ  = "select max(seq)+1 from t_product";
+	private static String ADD_PRODUCT = "insert into t_product (seq, name, summary, target, price) values (?, ?, ?, ?, ?)";
+	private static String GET_PRODUCT_BY_ID = "select seq, name, summary, target, price from t_product where seq=?";
+	private static String REMOVE_PRODUCT = "delete from t_product where seq=?";
+	private static String UPDATE_PRODUCT = "update t_product set name=?, summary=?, target=?, price=? where seq=?";
+	private static String SEARCH_BY_NAME = "select seq, name, summary, target, price from t_product where name like ?";
+	private static String GET_BY_NAME = "select seq, name, summary, target, price from t_product where name=?";
+
 	public void addProduct (Transaction transaction, ProductDto product) throws IOException {
 		// ATTENTION: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		PreparedStatement prepareStatement = null;
@@ -93,9 +102,6 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 		}
 	}
 
-	private static String GET_SEQ  = "select max(seq)+1 from t_product";
-	private static String ADD_PRODUCT = "insert into t_product (seq, name, summary, target, price) values (?, ?, ?, ?, ?)";
-
 	public void removeProduct(Transaction transaction, int seq) throws IOException {
 		// ATTENTION: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		PreparedStatement prepareStatement = null;
@@ -126,8 +132,6 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 			}
 		}
 	}
-
-	private static String REMOVE_PRODUCT = "delete from t_product where seq=?";
 
 	public ProductDto getProductById(Transaction transaction, int seq) throws IOException {
 		// ATTENTION: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -174,8 +178,6 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 		return new ProductDto(seq, name, summary, target, price);
 	}
 
-	private static String GET_PRODUCT_BY_ID = "select seq, name, summary, target, price from t_product where seq=?";
-
 	public void updateProduct (Transaction transaction, ProductDto product) throws IOException {
 		// ATTENTION: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		PreparedStatement prepareStatement = null;
@@ -211,8 +213,6 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 			}
 		}
 	}
-
-	private static String UPDATE_PRODUCT = "update t_product set name=?, summary=?, target=?, price=? where seq=?";
 
 	public List<ProductDto> searchByName(Transaction transaction, String name) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -250,8 +250,6 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 		}
 	}
 
-	private static String SEARCH_BY_NAME = "select seq, name, target, summary, price from t_product where name like ?";
-
 	public List<ProductDto> getAll(Transaction transaction) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		PreparedStatement prepareStatement = null;
@@ -286,7 +284,7 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 			}
 		}
 	}
-	private static String GET_ALL = "select seq, name, target, summary, price from t_product";
+
 	public ProductDto getByName(Transaction transaction, String name) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		PreparedStatement prepareStatement = null;
@@ -322,5 +320,4 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 			}
 		}
 	}
-	private static String GET_BY_NAME = "select seq, name, target, summary, price from t_product where name=?";
 }

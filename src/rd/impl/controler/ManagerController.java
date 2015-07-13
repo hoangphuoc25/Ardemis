@@ -71,8 +71,14 @@ public class ManagerController implements Serializable {
 	private int team;
 
 	public String logout() {
+		System.out.println("ManagerController.logout()");
 		conversationEnd();
 		sessionManager.logoff();
-		return "/faces/manager.jsf?faces-redirect=true";
+		return "../portal.jsf?faces-redirect=true";
+	}
+
+	public String link(UserDto sale) {
+		conversationEnd();
+		return "../faces/employee.jsf?id="+sale.getId()+"&faces-redirect=true";
 	}
 }

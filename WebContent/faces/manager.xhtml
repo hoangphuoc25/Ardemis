@@ -13,7 +13,7 @@
 
 	<h:form id="form01">
 
-		<p:menubar>
+		<p:menubar id="menu">
 			<p:menuitem value="Dashboard" url="#{requestContext}/faces/manager.jsf" />
 			<p:submenu label="Products">
 				<p:menuitem value="AutoCAD" url="#{requestContext}/products/AutoCAD.jsf" />
@@ -25,7 +25,7 @@
 				<p:menuitem value="Expense" url="#{requestContext}/faces/expense.jsf" />
 				<p:menuitem value="Sale report" url="#{requestContext}/faces/report.jsf" />
 			</p:submenu>
-			<p:menuitem value="LOG OUT" style="float: right" action="#{managerController.logout}" />
+			<p:menuitem value="LOG OUT" style="float: right" action="#{managerController.logout}" immediate="true" update="form01" />
 		</p:menubar>
 		<p:panelGrid columns="3">
 			<p:panelGrid columns="2">
@@ -52,6 +52,9 @@
 			</p:column>
 			<p:column headerText="Phone">
 				<h:outputText value="#{sale.phone}" />
+			</p:column>
+			<p:column table="Link">
+				<a href="#{request.contextPath}/faces/employee.jsf?id=#{sale.id}" style="color: blue; underline: none;">Detail</a>
 			</p:column>
 		</p:dataTable>
 
