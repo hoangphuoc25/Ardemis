@@ -10,15 +10,20 @@ import java.util.Map;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
+import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
+import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import rd.dto.CompanyDto;
 import rd.dto.InvoiceDto;
 import rd.dto.ProductDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.CompanyService;
 import rd.spec.service.InvoiceService;
+import rd.spec.service.ProductService;
 
 @Named
 @ConversationScoped
@@ -28,6 +33,8 @@ public class HistoryController implements Serializable {
 	@Inject Conversation conversation;
 	@Inject SessionManager sessionManager;
 	@Inject InvoiceService invoiceService;
+	@Inject ProductService prodService;
+	@Inject CompanyService compService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -97,11 +104,15 @@ public class HistoryController implements Serializable {
 
 	private InvoiceDto newInvoice;
 
-	public List<String> suggest(String partial) {
+	public List<String> suggest(String partial) throws IOException {
+		List<ProductDto> temp = prodService.searchByName(partial);
 		List<String> result = new ArrayList<String>();
-		for (int i = 0; i < 10; i++) {
-			result.add(partial + i);
+		for (ProductDto dto: temp) {
+			result.add(dto.getName() + "("+dto.getSeq()+")");
 		}
+//		for (int i = 0; i < 10; i++) {
+//			result.add(partial + i);
+//		}
 		return result;
 	}
 
@@ -123,12 +134,16 @@ public class HistoryController implements Serializable {
 
 	private String search;
 	private List<ProductDto> selectedProducts;
+	private String compSearch;
 
 	public void select() throws IOException {
 		if (selectedProducts == null) {
 			selectedProducts = new ArrayList<ProductDto>();
 		}
-		selectedProducts.add(new ProductDto(100, search, "abc", "abc", 100.0));
+		// selectedProducts.add(new ProductDto(100, search, "abc", "abc", 100.0));
+		int seq = Integer.parseInt(search.split("[()]")[1]);
+		ProductDto prod = prodService.getProductById(seq);
+		selectedProducts.add(prod);
 	}
 
 	public void deleteSelected() {
@@ -146,6 +161,43 @@ public class HistoryController implements Serializable {
 
 	public void validateDate(FacesContext facesContext, UIComponent component, Object value) {
 		Date d = (Date) value;
+		if (d.getTime() > (new Date()).getTime())
+			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Invalid date", null));
+	}
 
+	public void addNewInvoice() throws IOException {
+		newInvoice.setSeq(invoiceService.getSeq());
+		int customerSeq = Integer.parseInt(compSearch.split("[()]")[1]);
+		CompanyDto customer = compService.getById(customerSeq);
+		newInvoice.setCustomer(customer);
+		double amount = 0;
+		for (ProductDto dto: selectedProducts) {
+			amount += dto.getPrice();
+		}
+		newInvoice.setProducts(selectedProducts);
+		newInvoice.setAmount(amount);
+		invoiceService.addInvoice(newInvoice);
+
+		sessionManager.addGlobalMessageInfo("New invoice added", null);
+		compSearch = "";
+		search = "";
+		selectedProducts = new ArrayList<ProductDto>();
+	}
+
+	public String getCompSearch() {
+		return compSearch;
+	}
+
+	public void setCompSearch(String compSearch) {
+		this.compSearch = compSearch;
+	}
+
+	public List<String> compSuggest(String partial) throws IOException {
+		List<CompanyDto> temp = compService.searchCompanyByName(partial);
+		List<String> result = new ArrayList<String>();
+		for (CompanyDto dto: temp) {
+			result.add(dto.getName() + "("+dto.getSeq()+")");
+		}
+		return result;
 	}
 }

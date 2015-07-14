@@ -53,4 +53,12 @@ public class InvoiceDto {
 	public void setPurchaseDate(Date purchaseDate) {
 		this.purchaseDate = purchaseDate;
 	}
+
+	public List<ProductDto> getProducts() {
+		return products;
+	}
+
+	public void setProducts(List<ProductDto> products) {
+		this.products = products;
+	}
 }

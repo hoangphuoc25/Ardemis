@@ -71,7 +71,6 @@ public class ManagerController implements Serializable {
 	private int team;
 
 	public String logout() {
-		System.out.println("ManagerController.logout()");
 		conversationEnd();
 		sessionManager.logoff();
 		return "../portal.jsf?faces-redirect=true";

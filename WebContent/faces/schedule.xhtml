@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<h:form id="form01">
+		<p:menubar>
+			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink()}" />
+			<p:submenu label="Products" >
+				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
+				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
+				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
+				<p:menuitem style="color: blue;" icon="ui-icon-document" value="Stormworks" url="../products/Stormworks.jsf" />
+			</p:submenu>
+			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
+		</p:menubar>
+
+		<p:schedule value="#{employeeController.model}" draggable="false" resizable="false" />
+
+		<h:panelGrid columns="2">
+			<h:outputText value="from" />
+			<p:calendar value="#{employeeController.from}" pattern="MM/dd/yyyy HH:mm" />
+			<h:outputText value="to" />
+			<p:calendar value="#{employeeController.to}" pattern="MM/dd/yyyy HH:mm" />
+			<h:outputText value="title" />
+			<p:inputText value="#{employeeController.title}" />
+		</h:panelGrid>
+		<p:commandButton value="Add" actionListener="#{employeeController.addNewEvent}" update="form01" />
+	</h:form>
+</h:body>
+</html>

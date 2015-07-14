@@ -97,7 +97,7 @@ public class ProductController implements Serializable {
 	}
 
 	public void validateName(FacesContext context, UIComponent component, Object value) throws IOException {
-		String name = value.toString();
+		String name = value.toString().trim();
 		if (name.isEmpty()) {
 			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Please enter a name", null));
 		}
@@ -112,6 +112,7 @@ public class ProductController implements Serializable {
 
 	public void addProduct() throws IOException {
 		int seq = productService.getSeq();
+		newProd.setName(newProd.getName().trim());
 		newProd.setSeq(seq);
 		productService.addProduct(newProd);
 		products.add(newProd);
@@ -219,4 +220,10 @@ public class ProductController implements Serializable {
 
 	private int seq;
 
+	@Inject SessionController sessionController;
+	public double deducePrice(ProductDto prod) {
+		if (sessionController.getCurrency() == 0)
+			return prod.getPrice();
+		return prod.getPrice()*sessionController.getRates().get(sessionController.getCurrency());
+	}
 }

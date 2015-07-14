@@ -104,7 +104,7 @@
 		<p:dialog id="custDialog" closable="false" widgetVar="custDialog_w" rendered="#{salespersonController.addMode}" visible="#{salespersonController.addMode}"
 				modal="true" resizable="false" draggable="true" header="Customer detail">
 			<p:panelGrid columns="3">
-				<h:outputText value="Name" />
+				<h:outputText value="Name*" />
 				<p:inputText id="comName" value="#{salespersonController.newCust.name}" required="true" requiredMessage="Name is required" />
 				<p:message for="comName" />
 
@@ -112,7 +112,7 @@
 				<p:inputText id="comSize" value="#{salespersonController.newCust.size}" />
 				<p:message for="comSize" />
 
-				<h:outputText value="Industry" />
+				<h:outputText value="Industry*" />
 				<p:inputText id="comInd" value="#{salespersonController.newCust.industry}" required="true" requiredMessage="Industry is required"/>
 				<p:message for="comInd" />
 
@@ -124,11 +124,11 @@
 				<p:inputText id="comYear" value="#{salespersonController.newCust.yearFounded}" />
 				<p:message for="comYear" />
 
-				<h:outputText value="Location" />
+				<h:outputText value="Location*" />
 				<p:inputText id="comLocation" value="#{salespersonController.newCust.location}" required="true" requiredMessage="Location is required" />
 				<p:message for="comLocation" />
 
-				<h:outputText value="Phone" />
+				<h:outputText value="Phone*" />
 				<p:inputText id="comPhone" value="#{salespersonController.newCust.phone}" required="true" requiredMessage="Phone is required">
 					<f:validator validatorId="phoneValidator" />
 				</p:inputText>
@@ -137,11 +137,16 @@
 				<h:outputText value="Remark" />
 				<p:inputText id="comRemark" value="#{salespersonController.newCust.remark}" />
 				<p:message for="comRemark" />
+
+				<h:outputText value="* = required fields" />
+				<h:outputText value="" />
+				<h:outputText value="" />
 			</p:panelGrid>
 
 			<p:commandButton value="Add" ajax="true" actionListener="#{salespersonController.addNewCompany}" update=":form01"
 				oncomplete="if (args &amp;&amp; !args.validationFailed) custDialog_w.hide()" />
 			<p:commandButton id="applyBtn" value="Apply" ajax="true" actionListener="#{salespersonController.addNewCompany2}" update="@all" />
+			<p:commandButton id="cancelBtn" value="Cancel" ajax="true" actionListener="#{salespersonController.cancel}" update="@all" immediate="true" />
 
 			</p:dialog>
 			</p:tab>

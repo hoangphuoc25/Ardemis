@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<h:form id="form01">
+		<p:menubar id="menu">
+			<p:menuitem value="Dashboard" url="#{requestContext}/faces/manager.jsf" />
+			<p:submenu label="Products">
+				<p:menuitem value="AutoCAD" url="#{requestContext}/products/AutoCAD.jsf" />
+				<p:menuitem value="Quickdesk" url="#{requestContext}/products/quickdesk.jsf" />
+				<p:menuitem value="Revit" url="#{requestContext}/products/Revit.jsf" />
+				<p:menuitem value="Stormworks" url="#{requestContext}/products/Stormworks.jsf" />
+			</p:submenu>
+			<p:submenu label="Reports">
+				<p:menuitem value="Expense" url="#{requestContext}/faces/expense.jsf" />
+				<p:menuitem value="Sale report" url="#{requestContext}/faces/report.jsf" />
+			</p:submenu>
+			<p:menuitem value="LOG OUT" style="float: right" action="#{managerController.logout}" immediate="true" update="form01" />
+		</p:menubar>
+
+		<h:panelGrid style="float: right" columns="2">
+			<h:outputText value="Currency" />
+			<p:selectOneMenu value="#{sessionController.currency}">
+				<f:selectItem itemValue="0" itemLabel="Select " />
+				<f:selectItems value="#{sessionController.currencyList}" />
+				<p:ajax listener="#{reportController.reload}" update="form01" />
+			</p:selectOneMenu>
+		</h:panelGrid>
+
+		<p:dataTable id="tbl1" rowIndexVar="row" value="#{reportController.invoices}" var="invoice"
+				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+				rows="15">
+			<p:column headerText="Company">
+				<h:outputText value="#{invoice.customer.name}" />
+			</p:column>
+			<p:column headerText="Purchase date">
+				<h:outputText value="#{invoice.purchaseDate}">
+					<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Amount">
+				<h:outputText value="#{reportController.deduceAmount(invoice)}" />
+			</p:column>
+		</p:dataTable>
+
+		<h:panelGrid columns="2">
+			<h:outputText value="From date" />
+			<p:calendar value="#{reportController.fromDate}" />
+
+			<h:outputText value="To date" />
+			<p:calendar value="#{reportController.toDate}" />
+
+			<p:commandButton value="Search" actionListener="#{reportController.search}" update=":form01"/>
+		</h:panelGrid>
+	</h:form>
+</h:body>
+</html>

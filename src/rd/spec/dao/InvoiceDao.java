@@ -1,6 +1,7 @@
 package rd.spec.dao;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import rd.dto.InvoiceDto;
@@ -16,4 +17,8 @@ public interface InvoiceDao {
 	public List<InvoiceDto> getByCustomer(Transaction transaction, int seq) throws IOException;
 	public void updateInvoice(Transaction transaction, InvoiceDto invoice) throws IOException;
 	public List<InvoiceDto> findInvoicesByProduct(Transaction transaction, int seq) throws IOException;
+	public int getSeq(Transaction transaction) throws IOException;
+	public List<InvoiceDto> searchInvoiceBeforeDate(Transaction transaction, Date date) throws IOException;
+	public List<InvoiceDto> searchInvoiceAfterDate(Transaction transaction, Date date) throws IOException;
+	public List<InvoiceDto> searchInvoiceBeforeAfter(Transaction transaction, Date after, Date before) throws IOException;
 }

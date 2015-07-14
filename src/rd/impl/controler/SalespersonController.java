@@ -96,12 +96,10 @@ public class SalespersonController implements Serializable {
 	}
 
 	public void addNewCompany() throws IOException {
-		logger.error("ADDNEWCOMPANY ENTRY");
 		newCust.setSeq(comService.getSeq());
 		comService.insertCompany(newCust);
 		customerList.add(newCust);
 		newCust = new CompanyDto();
-		logger.error("ADDNEWCOMPANY EXIT");
 		addMode = false;
 		conversationEnd();
 	}
@@ -173,6 +171,13 @@ public class SalespersonController implements Serializable {
 
 	public String link(String name) {
 		return "https://www.google.com.sg/?gws_rd=ssl#q="+name+"&tbm=nws";
+	}
+
+	public void cancel() {
+		addMode = false;
+		editMode = false;
+		RequestContext context = RequestContext.getCurrentInstance();
+		context.execute("custDialog_w.hide();");
 	}
 }
 

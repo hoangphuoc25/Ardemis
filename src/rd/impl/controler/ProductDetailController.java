@@ -11,6 +11,7 @@ import javax.inject.Named;
 
 import rd.dto.FeedbackDto;
 import rd.dto.InvoiceDto;
+import rd.dto.ProductDto;
 import rd.spec.service.FeedbackService;
 import rd.spec.service.InvoiceService;
 import rd.spec.service.ProductService;
@@ -75,4 +76,10 @@ public class ProductDetailController implements Serializable {
 	private List<FeedbackDto> feedbacks;
 	private int seq;
 
+	@Inject SessionController sessionController;
+	public double deduceAmount(InvoiceDto invoice) {
+		if (sessionController.getCurrency() == 0)
+			return invoice.getAmount();
+		return invoice.getAmount()*sessionController.getRates().get(sessionController.getCurrency());
+	}
 }

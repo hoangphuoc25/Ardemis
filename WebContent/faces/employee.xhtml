@@ -25,6 +25,14 @@
 			</p:submenu>
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
 		</p:menubar>
+		<h:panelGrid columns="2">
+			<h:outputText value="Currency" />
+			<p:selectOneMenu value="#{sessionController.currency}">
+				<f:selectItem itemValue="0" itemLabel="Select " />
+				<f:selectItems value="#{sessionController.currencyList}" />
+				<p:ajax listener="#{productDetailController.reload}" update="form01" />
+			</p:selectOneMenu>
+		</h:panelGrid>
 		<p:dataTable id="timetable" rowIndexVar="row"
 			value="#{employeeController.expList}" var="exp" paginator="true"
 			paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
@@ -41,13 +49,14 @@
 				<h:outputText value="#{exp.receiptNo}" />
 			</p:column>
 			<p:column headerText="Amount">
-				<h:outputText value="#{exp.amount}" />
+				<h:outputText value="#{employeeController.deduceCost(exp)}" />
 			</p:column>
 		</p:dataTable>
 
 		<h:commandButton value="Download">
 			<p:fileDownload value="#{employeeController.file}" />
 		</h:commandButton>
+
 	</h:form>
 </h:body>
 </html>

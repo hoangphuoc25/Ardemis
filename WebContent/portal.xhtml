@@ -3,20 +3,150 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
 <title>Welcome</title>
+<link rel="stylesheet"
+	href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css" />
+<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script
+	src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script>
 </head>
+<style>
+body {
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+/* Everything but the jumbotron gets side spacing for mobile first views */
+.header,.marketing,.footer {
+	padding-right: 15px;
+	padding-left: 15px;
+}
+
+/* Custom page header */
+.header {
+	padding-bottom: 20px;
+	border-bottom: 1px solid #e5e5e5;
+}
+/* Make the masthead heading the same height as the navigation */
+.header h3 {
+	margin-top: 0;
+	margin-bottom: 0;
+	line-height: 40px;
+}
+
+/* Custom page footer */
+.footer {
+	padding-top: 19px;
+	color: #777;
+	border-top: 1px solid #e5e5e5;
+}
+
+/* Customize container */
+@media ( min-width : 768px) {
+	.container {
+		max-width: 730px;
+	}
+}
+
+.container-narrow>hr {
+	margin: 30px 0;
+}
+
+/* Main marketing message and sign up button */
+.jumbotron {
+	text-align: center;
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.jumbotron .btn {
+	padding: 14px 24px;
+	font-size: 21px;
+}
+
+/* Supporting marketing content */
+.marketing {
+	margin: 40px 0;
+}
+
+.marketing p+h4 {
+	margin-top: 28px;
+}
+
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 768px) {
+	/* Remove the padding we set earlier */
+	.header,.marketing,.footer {
+		padding-right: 0;
+		padding-left: 0;
+	}
+	/* Space out the masthead */
+	.header {
+		margin-bottom: 30px;
+	}
+	/* Remove the bottom border on the jumbotron for visual effect */
+	.jumbotron {
+		border-bottom: 0;
+	}
+}
+</style>
 <body>
-	<h3 style="margin: auto; padding: 10px;">Ardemis</h3>
-	<p>
-	<a href="faces/manager.jsf">Manager dashboard</a>
-	</p>
-	<p>
-	<a href="customers/customers.jsf">Customer dashboard</a>
-	</p>
-	<p>
-	<a href="faces/salesperson.jsf">Salesperson dashboard</a>
-	</p>
-	<p>
-	<a href="faces/support.jsf">Support dashboard</a>
-	</p>
+	<div class="container">
+		<div class="modal fade" id="myModal" tabindex="-1" role="dialog"
+			aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<h4 class="modal-title" id="myModalLabel">Author</h4>
+					</div>
+					<div class="modal-body">Robert</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="header clearfix">
+			<nav>
+			<ul class="nav nav-pills pull-right">
+				<li><a href="#myModal" data-toggle="modal" data-target="#myModal">About</a></li>
+			</ul>
+			</nav>
+			<h3 class="text-muted">Ardemis</h3>
+		</div>
+
+		<div class="jumbotron">
+			<h3>Welcome to Ardemis</h3>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="col-md-3">
+			<p>
+				<a href="faces/manager.jsf"><h4>Manager dashboard</h4></a>
+			</p>
+			<p>For sale managers</p>
+		</div>
+		<div class="col-md-3">
+			<p>
+				<a href="customers/customers.jsf"><h4>Customer dashboard</h4></a>
+			</p>
+			<p>For customers</p>
+		</div>
+		<div class="col-md-3">
+			<p>
+				<a href="faces/salesperson.jsf"><h4>Salesperson dashboard</h4></a>
+			</p>
+			<p>For salepersons</p>
+		</div>
+		<div class="col-md-3">
+			<p>
+				<a href="faces/support.jsf"><h4>Support dashboard</h4></a>
+			</p>
+			<p>For sale supports</p>
+		</div>
+	</div>
 </body>
 </html>

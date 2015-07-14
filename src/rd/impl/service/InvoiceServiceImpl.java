@@ -2,6 +2,7 @@ package rd.impl.service;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -114,6 +115,54 @@ public class InvoiceServiceImpl implements InvoiceService, Serializable {
 		try{
 			transaction.begin();
 			List<InvoiceDto> result = invoiceDao.findInvoicesByProduct(transaction, seq);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public int getSeq() throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			int seq = invoiceDao.getSeq(transaction);
+			transaction.commit();
+			return seq;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<InvoiceDto> searchInvoiceBeforeDate(Date date) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<InvoiceDto> result = invoiceDao.searchInvoiceBeforeDate(transaction, date);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<InvoiceDto> searchInvoiceAfterDate(Date date) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<InvoiceDto> result = invoiceDao.searchInvoiceAfterDate(transaction, date);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<InvoiceDto> searchInvoiceBeforeAfter(Date after, Date before) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<InvoiceDto> result = invoiceDao.searchInvoiceBeforeAfter(transaction, after, before);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {

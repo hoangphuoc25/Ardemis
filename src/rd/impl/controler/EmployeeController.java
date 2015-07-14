@@ -25,7 +25,10 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.primefaces.model.DefaultScheduleEvent;
+import org.primefaces.model.DefaultScheduleModel;
 import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.ScheduleModel;
 import org.primefaces.model.StreamedContent;
 
 import rd.dto.SaleExpenseDto;
@@ -81,16 +84,29 @@ public class EmployeeController implements Serializable {
 		this.expList = expList;
 	}
 
-	public StreamedContent getFile() {
+	public StreamedContent getFile() throws ParseException {
 		HSSFWorkbook workbook = new HSSFWorkbook();
 		HSSFSheet sheet = workbook.createSheet("Sample sheet");
+		Row rr = sheet.createRow(0);
+		Cell cc = rr.createCell(0);
+		cc.setCellValue("Name");
+		cc = rr.createCell(1);
+		cc.setCellValue("Receipt Date");
+		cc = rr.createCell(2);
+		cc.setCellValue("Purpose");
+		cc = rr.createCell(3);
+		cc.setCellValue("Receipt No");
+		cc = rr.createCell(4);
+		cc.setCellValue("Amount");
+
 		for (int i = 0; i < expList.size(); i++) {
 			Row row = sheet.createRow(i+1);
 			Cell cell = row.createCell(0);
 			cell.setCellValue(expList.get(i).getSalesperson().getName());
 			cell = row.createCell(1);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
-			cell.setCellValue(expList.get(i).getReceiptDate());
+			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			cell.setCellValue(sdf.format(expList.get(i).getReceiptDate()));
 			cell = row.createCell(2);
 			cell.setCellValue(expList.get(i).getPurpose());
 			cell = row.createCell(3);
@@ -140,7 +156,7 @@ public class EmployeeController implements Serializable {
 			cell = row.createCell(3);
 			cell.setCellValue(expList.get(i).getReceiptNo());
 			cell = row.createCell(4);
-			cell.setCellValue(expList.get(i).getAmount());
+			cell.setCellValue(deduceCost(expList.get(i)));
 		}
 		try {
 	        String path = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/");
@@ -160,5 +176,60 @@ public class EmployeeController implements Serializable {
 		    e.printStackTrace();
 		}
 		return "employee.jsf?id="+id+"&faces-redirect=true";
+	}
+
+	@Inject SessionController sessionController;
+	public double deduceCost(SaleExpenseDto se) {
+		if (sessionController.getCurrency() == 0)
+			return se.getAmount();
+		return se.getAmount()*sessionController.getRates().get(sessionController.getCurrency());
+	}
+
+	public ScheduleModel getModel() {
+		if (model == null) {
+			model = new DefaultScheduleModel();
+			model.addEvent(new DefaultScheduleEvent("title", new Date(), new Date()));
+		}
+		return model;
+	}
+
+	public void setModel(ScheduleModel model) {
+		this.model = model;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public Date getTo() {
+		return to;
+	}
+
+	public void setTo(Date to) {
+		this.to = to;
+	}
+
+	public Date getFrom() {
+		return from;
+	}
+
+	public void setFrom(Date from) {
+		this.from = from;
+	}
+
+	private ScheduleModel model = new DefaultScheduleModel();
+
+	private Date from;
+	private Date to;
+	private String title;
+
+	public void addNewEvent() {
+		reload();
+		System.out.println("EmployeeController.addNewEvent()");
+		model.addEvent(new DefaultScheduleEvent(title, from, to));
 	}
 }

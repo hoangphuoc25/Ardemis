@@ -1,6 +1,7 @@
 package rd.spec.service;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import rd.dto.InvoiceDto;
@@ -15,4 +16,8 @@ public interface InvoiceService {
 	public List<InvoiceDto> getByCustomer(int seq) throws IOException;
 	public void updateInvoice(InvoiceDto invoice) throws IOException;
 	public List<InvoiceDto> findInvoicesByProduct(int seq) throws IOException;
+	public int getSeq() throws IOException;
+	public List<InvoiceDto> searchInvoiceBeforeDate(Date date) throws IOException;
+	public List<InvoiceDto> searchInvoiceAfterDate(Date date) throws IOException;
+	public List<InvoiceDto> searchInvoiceBeforeAfter(Date after, Date before) throws IOException;
 }

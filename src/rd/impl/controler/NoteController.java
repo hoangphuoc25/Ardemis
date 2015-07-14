@@ -377,7 +377,6 @@ public class NoteController implements Serializable {
 	}
 
 	public String logout() {
-		System.out.println("NoteController.logout()");
 		conversationEnd();
 		sessionManager.logoff();
 		return "../portal.jsf?faces-redirect=true";

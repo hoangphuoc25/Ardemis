@@ -25,6 +25,15 @@
 			</p:submenu>
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
 		</p:menubar>
+		<h:panelGrid style="float: right" columns="2">
+			<h:outputText value="Currency" />
+			<p:selectOneMenu value="#{sessionController.currency}">
+				<f:selectItem itemValue="0" itemLabel="Select " />
+				<f:selectItems value="#{sessionController.currencyList}" />
+				<p:ajax listener="#{productDetailController.reload}" update="form01" />
+			</p:selectOneMenu>
+		</h:panelGrid>
+
 		<h3>Purchase history</h3>
 		<p:dataTable id="tbl1" rowIndexVar="row" value="#{productDetailController.purchases}" var="purchase"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}" row="20">
@@ -45,7 +54,7 @@
 				</h:outputText>
 			</p:column>
 			<p:column headerText="Amount">
-				<h:outputText value="#{purchase.amount}" />
+				<h:outputText value="#{productDetailController.deduceAmount(purchase)}" />
 			</p:column>
 		</p:dataTable>
 

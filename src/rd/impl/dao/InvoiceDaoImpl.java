@@ -51,7 +51,7 @@ public class InvoiceDaoImpl implements InvoiceDao, Serializable {
 			resultSet = prepareStatement.executeQuery();
 
 			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
-			if (resultSet.next()) {
+			while (resultSet.next()) {
 				result.add(makeInvoiceDto(transaction, resultSet));
 			}
 			return result;
@@ -195,7 +195,7 @@ public class InvoiceDaoImpl implements InvoiceDao, Serializable {
 		}
 	}
 
-	private int getSeq(Transaction transaction) throws IOException {
+	public int getSeq(Transaction transaction) throws IOException {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -244,6 +244,12 @@ public class InvoiceDaoImpl implements InvoiceDao, Serializable {
 			prepareStatement.setDouble(4, invoice.getAmount());
 			resultSet = prepareStatement.executeQuery();
 
+			for (ProductDto dto: invoice.getProducts()) {
+				prepareStatement = connection.prepareStatement(ADD_PRODUCT_PURCHASE);
+				prepareStatement.setInt(1, invoice.getSeq());
+				prepareStatement.setInt(2, dto.getSeq());
+				resultSet = prepareStatement.executeQuery();
+			}
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {
@@ -271,7 +277,8 @@ public class InvoiceDaoImpl implements InvoiceDao, Serializable {
 	private static String UPDATE_INVOICE = "update customer_seq=?, purchase_date=?, amount=? where seq=?";
 	private static String DELETE_INVOICE = "delete from t_invoice where seq=?";
 	private static String GET_SEQ = "select max(seq)+1 from t_invoice";
-	private static String GET_ALL = "select seq, customer_seq, purchase_date, amount from t_invoice order by seq";
+	private static String GET_ALL = "select seq, customer_seq, purchase_date, amount from t_invoice order by purchase_date desc";
+	private static String ADD_PRODUCT_PURCHASE = "insert into t_product_purchase (invoice_seq, product_seq) values (?, ?)";
 
 	public List<InvoiceDto> getByCustomer(Transaction transaction, int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -385,4 +392,113 @@ public class InvoiceDaoImpl implements InvoiceDao, Serializable {
 		}
 	}
 	private static String FIND_INVOICES_BY_PRODUCT = "select distinct ti.seq from t_invoice ti join t_product_purchase tpp on ti.seq=tpp.invoice_seq where tpp.product_seq=?";
+	public List<InvoiceDto> searchInvoiceBeforeDate(Transaction transaction, Date date) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_INVOICE_BEFORE_DATE);
+			prepareStatement.setDate(1, new java.sql.Date(date.getTime()));
+			resultSet = prepareStatement.executeQuery();
+
+			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
+			while (resultSet.next()) {
+				result.add(makeInvoiceDto(transaction, resultSet));
+			}
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String SEARCH_INVOICE_BEFORE_DATE = "select seq, customer_seq, purchase_date, amount from t_invoice where purchase_date <= ? ";
+	public List<InvoiceDto> searchInvoiceAfterDate(Transaction transaction, Date date) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_INVOICE_AFTER_DATE);
+			prepareStatement.setDate(1, new java.sql.Date(date.getTime()));
+			resultSet = prepareStatement.executeQuery();
+
+			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
+			while (resultSet.next()) {
+				result.add(makeInvoiceDto(transaction, resultSet));
+			}
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String SEARCH_INVOICE_AFTER_DATE = "select seq, customer_seq, purchase_date, amount from t_invoice where purchase_date >= ?";
+	public List<InvoiceDto> searchInvoiceBeforeAfter(Transaction transaction, Date after, Date before) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_INVOICE_BEFORE_AFTER);
+			prepareStatement.setDate(1, new java.sql.Date(after.getTime()));
+			prepareStatement.setDate(2, new java.sql.Date(before.getTime()));
+			resultSet = prepareStatement.executeQuery();
+
+			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
+			while (resultSet.next()) {
+				result.add(makeInvoiceDto(transaction, resultSet));
+			}
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String SEARCH_INVOICE_BEFORE_AFTER = "select seq, customer_seq, purchase_date, amount from t_invoice where purchase_date >= ? and purchase_date <= ?";
 }

@@ -27,10 +27,6 @@
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
 		</p:menubar>
 
-		<p>Welcome</p>
-		<p:commandButton value="abc" actionListener="#{historyController.submit}" update=":form01"/>
-		<h:outputText value="#{historyController.seq}" />
-
 		<h:messages />
 		<p:dataTable id="historyTbl" rowIndexVar="row" value="#{historyController.purchases}" var="invoice"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
@@ -52,7 +48,9 @@
 
 		<p:panelGrid columns="2">
 			<h:outputText value="Company Name"/>
-			<p:inputText value="#{historyController.newInvoice.customer.name}" validator="#{historyController.validateCompany}" />
+
+			<p:autoComplete minQueryLength="3" maxResults="10" value="#{historyController.compSearch}" completeMethod="#{historyController.compSuggest}" >
+			</p:autoComplete>
 
 			<h:outputText value="Purchase date" />
 			<p:calendar value="#{historyController.newInvoice.purchaseDate}" validator="#{historyController.validateDate}" />

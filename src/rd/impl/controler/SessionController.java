@@ -2,7 +2,9 @@ package rd.impl.controler;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
@@ -24,6 +26,7 @@ public class SessionController implements Serializable {
 	private List<SelectItem> currencyList;
 	private List<SelectItem> links;
 	private MenuModel model;
+	private Map<Integer, Double> rates;
 
 	public List<SelectItem> getCurrencyList() {
 		if (currencyList == null) {
@@ -115,5 +118,19 @@ public class SessionController implements Serializable {
 
 		menu1.getChildren().add(item);
 		System.out.println("addmenuitem called");
+	}
+
+	public Map<Integer, Double> getRates() {
+		if (rates == null) {
+			rates = new HashMap<Integer, Double>();
+			rates.put(1, 1.0);
+			rates.put(2, 0.47);
+			rates.put(3, 0.74);
+		}
+		return rates;
+	}
+
+	public void setRates(Map<Integer, Double> rates) {
+		this.rates = rates;
 	}
 }

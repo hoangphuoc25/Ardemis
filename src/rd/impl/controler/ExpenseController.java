@@ -83,6 +83,7 @@ public class ExpenseController implements Serializable {
 		newExp.setSalesperson(sessionManager.getLoginUser());
 		expService.addSaleExpense(newExp);
 		myExp.add(newExp);
+		sessionManager.addGlobalMessageInfo("Info added successfully", null);
 		newExp = new SaleExpenseDto();
 	}
 
@@ -264,4 +265,11 @@ public class ExpenseController implements Serializable {
     		}
     	}
     }
+
+    @Inject SessionController sessionController;
+	public double deduceCost(SaleExpenseDto se) {
+		if (sessionController.getCurrency() == 0)
+			return se.getAmount();
+		return se.getAmount()*sessionController.getRates().get(sessionController.getCurrency());
+	}
 }

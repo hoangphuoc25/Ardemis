@@ -43,7 +43,9 @@
     </web-resource-collection>
      <auth-constraint>
       <role-name>admin</role-name>
-      <role-name>user</role-name>
+      <role-name>sale</role-name>
+      <role-name>support</role-name>
+      <role-name>manager</role-name>
     </auth-constraint>
   </security-constraint>
 
@@ -54,6 +56,7 @@
     </web-resource-collection>
      <auth-constraint>
       <role-name>admin</role-name>
+      <role-name>manager</role-name>
     </auth-constraint>
   </security-constraint>
 
@@ -64,7 +67,21 @@
     </web-resource-collection>
      <auth-constraint>
       <role-name>admin</role-name>
-      <role-name>user</role-name>
+      <role-name>sale</role-name>
+      <role-name>customer</role-name>
+      <role-name>support</role-name>
+      <role-name>manager</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>User Form Auth3</web-resource-name>
+      <url-pattern>/faces/manager.jsf</url-pattern>
+    </web-resource-collection>
+     <auth-constraint>
+      <role-name>admin</role-name>
+      <role-name>manager</role-name>
     </auth-constraint>
   </security-constraint>
 
@@ -81,16 +98,16 @@
     <role-name>admin</role-name>
   </security-role>
   <security-role>
-    <role-name>user</role-name>
+    <role-name>customer</role-name>
   </security-role>
   <security-role>
-    <role-name>add</role-name>
+    <role-name>sale</role-name>
   </security-role>
   <security-role>
-    <role-name>update</role-name>
+    <role-name>manager</role-name>
   </security-role>
   <security-role>
-    <role-name>delete</role-name>
+    <role-name>support</role-name>
   </security-role>
 
 	<context-param>

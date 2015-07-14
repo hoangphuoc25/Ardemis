@@ -8,7 +8,14 @@
 	  >
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title></title>
+	<title>Expense</title>
+	<style>
+		.container {
+		  padding: 10px 30px 0px 30px;
+		  margin-right: auto;
+		  margin-left: auto;
+		}
+	</style>
 </h:head>
 <h:body>
 	<style>
@@ -29,6 +36,7 @@
 			padding: 20px;
 		}
 	</style>
+	<div class="container">
 	<h:form id="form01">
 
 		<p:menubar>
@@ -41,6 +49,14 @@
 			</p:submenu>
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
 		</p:menubar>
+		<h:panelGrid columns="2">
+			<h:outputText value="Currency" />
+			<p:selectOneMenu value="#{sessionController.currency}">
+				<f:selectItem itemValue="0" itemLabel="Select " />
+				<f:selectItems value="#{sessionController.currencyList}" />
+				<p:ajax listener="#{productDetailController.reload}" update="form01" />
+			</p:selectOneMenu>
+		</h:panelGrid>
 
 		<h:messages infoClass="message info" fatalClass="message error" errorClass="message error"/>
 		<p:panelGrid columns="2">
@@ -73,16 +89,17 @@
 				<h:outputText value="#{expense.receiptNo}" />
 			</p:column>
 			<p:column headerText="Amount">
-				<h:outputText value="#{expense.amount}" />
+				<h:outputText value="#{expenseController.deduceCost(expense)}" />
 			</p:column>
 
 			<p:column headerText="Action">
-				<h:commandButton value="Remove" actionListener="#{expenseController.remove(expense)}" update="expTbl"/>
+				<p:commandButton value="Remove" actionListener="#{expenseController.remove(expense)}" update="expTbl"/>
 			</p:column>
 		</p:dataTable>
 
 		<p:fileUpload fileUploadListener="#{expenseController.handleFileUpload}" mode="advanced" dragDropSupport="false"
 					sizeLimit="1000000" fileLimit="1" allowTypes="/(\.|\/)(xls)$/" update=":form01" />
 	</h:form>
+	</div>
 </h:body>
 </html>

@@ -12,6 +12,11 @@
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
+	<style>
+		.floatright td {
+			text-align: right
+		}
+	</style>
 </h:head>
 <h:body>
 	<h:form id="form01">
@@ -27,10 +32,14 @@
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
 		</p:menubar>
 
-		<p:selectOneMenu value="#{sessionController.currency}">
-			<f:selectItem itemValue="0" itemLabel="Select " />
-			<f:selectItems value="#{sessionController.currencyList}" />
-		</p:selectOneMenu>
+		<h:panelGrid style="float: right" columns="2">
+			<h:outputText value="Currency" />
+			<p:selectOneMenu value="#{sessionController.currency}">
+				<f:selectItem itemValue="0" itemLabel="Select " />
+				<f:selectItems value="#{sessionController.currencyList}" />
+				<p:ajax update="form01" />
+			</p:selectOneMenu>
+		</h:panelGrid>
 
 		<h:messages infoStyle="color: green;" fatalStyle="color: red;" errorStyle="color: red;" />
 
@@ -50,7 +59,7 @@
 				<h:outputText value="#{prod.target}" />
 			</p:column>
 			<p:column headerText="Price">
-				<h:outputText value="#{prod.price}" />
+				<h:outputText value="#{productController.deducePrice(prod)}" />
 			</p:column>
 			<p:column headerText="Link">
 				<a href="../faces/productdetail.jsf?seq=#{prod.seq}">Detail</a>
@@ -73,11 +82,11 @@
 				<h:outputText value="#{productController.newProd.name}" rendered="#{productController.viewMode}" />
 
 				<h:outputText value="Summary" />
-				<p:inputText value="#{productController.newProd.summary}" rendered="#{productController.addMode or productController.editMode}" />
+				<p:inputTextarea value="#{productController.newProd.summary}" rendered="#{productController.addMode or productController.editMode}" />
 				<h:outputText value="#{productController.newProd.name}" rendered="#{productController.viewMode}" />
 
 				<h:outputText value="Target" />
-				<p:inputText value="#{productController.newProd.target}" rendered="#{productController.addMode or productController.editMode}"/>
+				<p:inputTextarea value="#{productController.newProd.target}" rendered="#{productController.addMode or productController.editMode}"/>
 				<h:outputText value="#{productController.newProd.target}" rendered="#{productController.viewMode}" />
 
 				<h:outputText value="Price" />
@@ -88,7 +97,7 @@
 			<p:commandButton value="Apply" actionListener="#{productController.apply}" update=":form01" ajax="true" rendered="#{productController.editMode or productController.addMode}" />
 			<p:commandButton value="Edit" actionListener="#{productController.startEdit}" update=":form01:prodDialog" ajax="true" rendered="#{productController.viewMode}" />
 			<p:commandButton value="Delete" actionListener="#{productController.delete}" update=":form01" ajax="true" rendered="#{productController.viewMode}" />
-			<p:commandButton value="Cancel" actionListener="#{productController.cancel}" update=":form01" ajax="true" />
+			<p:commandButton value="Cancel" actionListener="#{productController.cancel}" update=":form01" ajax="true" immediate="true" />
 		</p:dialog>
 		</p:outputPanel>
 
