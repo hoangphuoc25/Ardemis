@@ -138,6 +138,13 @@ public class UserDaoImpl implements UserDao {
 			prepareStatement.setInt(6, userDto.getTeam().getSeq());
 			resultSet = prepareStatement.executeQuery();
 
+			for (RoleDto dto: userDto.getRoles()) {
+				prepareStatement = connection.prepareStatement(INSERT_USER_ROLE);
+				prepareStatement.setString(1, userDto.getId());
+				prepareStatement.setString(2, dto.getRole());
+				resultSet = prepareStatement.executeQuery();
+			}
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {
@@ -270,7 +277,7 @@ public class UserDaoImpl implements UserDao {
 		try {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(SEARCH_BY_NAME);
-			prepareStatement.setString(1, "%" + name + "%");
+			prepareStatement.setString(1, "%" + name.toUpperCase() + "%");
 			resultSet = prepareStatement.executeQuery();
 			List<UserDto> items = new ArrayList<UserDto>();
 			while (resultSet.next()) {
@@ -299,7 +306,7 @@ public class UserDaoImpl implements UserDao {
 		}
 	}
 
-	private static String SEARCH_BY_NAME = "select id, name, email, phone, team_seq from s_users where name like ?";
+	private static String SEARCH_BY_NAME = "select id, name, email, phone, team_seq from s_users where upper(name) like ?";
 	private static String GET_USER_BY_TEAM = "select id, name, email, phone, team_seq from s_users where team_seq=?";
 	private static String GET_ALL = "select id, name, email, phone, team_seq from s_users order by id";
 	private static String GET_BY_ID = "select id, name, email, phone, team_seq from s_users where id=?";
@@ -307,6 +314,7 @@ public class UserDaoImpl implements UserDao {
 	private static String UPDATE_USER = "update s_users set name=?, email=?, phone=?, team_seq=? where id=?";
 	private static String INSERT_USER = "insert into s_users (id, password, name, email, phone, team_seq) values (?, ?, ?, ?, ?, ?)";
 	private static String UPDATE_PASSWORD = "update s_users set password=? where id=?";
+	private static String INSERT_USER_ROLE = "insert into s_userrole (id, rolename) values (?, ?)";
 
 	public void updatePassword(Transaction transaction, String user, String password) throws IOException {
 		PreparedStatement prepareStatement = null;

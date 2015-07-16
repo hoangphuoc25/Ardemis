@@ -281,7 +281,7 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 		try {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(SEARCH_COMPANY_BY_NAME);
-			prepareStatement.setString(1, "%" + name + "%");
+			prepareStatement.setString(1, "%" + name.toUpperCase() + "%");
 			resultSet = prepareStatement.executeQuery();
 
 			List<CompanyDto> result = new ArrayList<CompanyDto>();
@@ -322,7 +322,7 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 		return new CompanyDto(seq, name, size, industry, type, year, location, phone, remark);
 	}
 
-	private static String SEARCH_COMPANY_BY_NAME = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark from t_clientcompany where name like ?";
+	private static String SEARCH_COMPANY_BY_NAME = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark from t_clientcompany where upper(name) like ?";
 	public List<CompanyDto> getAll(Transaction transaction) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		PreparedStatement prepareStatement = null;

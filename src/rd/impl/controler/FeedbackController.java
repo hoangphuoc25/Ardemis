@@ -2,6 +2,7 @@ package rd.impl.controler;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.Conversation;
@@ -113,6 +114,7 @@ public class FeedbackController implements Serializable {
 
 	public List<NoteDto> getNotes() throws IOException {
 		if (notes == null || notes.size() == 0) {
+			notes = new ArrayList<NoteDto>();
 			notes = noteService.getByReceiver(sessionManager.getLoginUser().getId());
 		}
 		return notes;
@@ -125,5 +127,11 @@ public class FeedbackController implements Serializable {
 	private int rating;
 	private String feedback;
 	private List<NoteDto> notes;
+
+	public String logout() {
+		conversationEnd();
+		sessionManager.logoff();
+		return "../portal.jsf?faces-redirect=true";
+	}
 }
 

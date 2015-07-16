@@ -6,27 +6,60 @@
 	  xmlns:ui="http://java.sun.com/jsf/facelets"
 	  xmlns:p="http://primefaces.org/ui"
 	  >
+	  <f:metadata>
+	  	<f:event type="preRenderView" listener="#{reportController.reload}" />
+	  </f:metadata>
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
+	<style>
+		.alert {
+			display: block;
+			font-family: Arial;
+			padding: 15px;
+			margin-bottom: 20px;
+			border: 1px solid transparent;
+			border-radius: 4px;
+		}
+		.alert-warning {
+			color: #8a6d3b;
+			background-color: #fcf8e3;
+			border-color: #faebcc;
+		}
+		.alert-info {
+			 color: #3c763d;
+			 background-color: #dff0d8;
+			 border-color: #d6e9c6;
+		}
+		.alert-danger {
+			 color: #a94442;
+			 background-color: #f2dede;
+			 border-color: #ebccd1;
+		}
+	</style>
 </h:head>
 <h:body>
 	<h:form id="form01">
 		<p:menubar id="menu">
 			<p:menuitem value="Dashboard" url="#{requestContext}/faces/manager.jsf" />
-			<p:submenu label="Products">
+			<p:submenu label="Products Catalog">
 				<p:menuitem value="AutoCAD" url="#{requestContext}/products/AutoCAD.jsf" />
 				<p:menuitem value="Quickdesk" url="#{requestContext}/products/quickdesk.jsf" />
 				<p:menuitem value="Revit" url="#{requestContext}/products/Revit.jsf" />
 				<p:menuitem value="Stormworks" url="#{requestContext}/products/Stormworks.jsf" />
 			</p:submenu>
 			<p:submenu label="Reports">
-				<p:menuitem value="Expense" url="#{requestContext}/faces/expense.jsf" />
-				<p:menuitem value="Sale report" url="#{requestContext}/faces/report.jsf" />
+				<p:menuitem value="Expense" url="../faces/expense.jsf" />
+				<p:menuitem value="Sale report" url="../faces/report.jsf" />
+				<p:menuitem value="Add new purchase" url="../faces/report.jsf" />
 			</p:submenu>
+			<p:menuitem value="Products" url="../faces/products.jsf" />
+			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Notes" url="../faces/notes.jsf" />
 			<p:menuitem value="LOG OUT" style="float: right" action="#{managerController.logout}" immediate="true" update="form01" />
 		</p:menubar>
 
+		<h:messages infoClass="alert alert-info" fatalClass="alert alert-danger" errorClass="alert alert-danger" warnClass="alert alert-warning"/>
 		<h:panelGrid style="float: right" columns="2">
 			<h:outputText value="Currency" />
 			<p:selectOneMenu value="#{sessionController.currency}">
@@ -36,11 +69,12 @@
 			</p:selectOneMenu>
 		</h:panelGrid>
 
+		<h3 style="font-family: Helvetica;">All purchases made</h3>
 		<p:dataTable id="tbl1" rowIndexVar="row" value="#{reportController.invoices}" var="invoice"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 				rows="15">
 			<p:column headerText="Company">
-				<h:outputText value="#{invoice.customer.name}" />
+				<a href="#{request.contextPath}/faces/history.jsf?seq=#{invoice.customer.seq}" style="color: blue;">#{invoice.customer.name}</a>
 			</p:column>
 			<p:column headerText="Purchase date">
 				<h:outputText value="#{invoice.purchaseDate}">
@@ -50,17 +84,52 @@
 			<p:column headerText="Amount">
 				<h:outputText value="#{reportController.deduceAmount(invoice)}" />
 			</p:column>
+			<p:column headerText="Products">
+				<h:outputText value="#{reportController.productPurchased(invoice)}" escape="false" />
+			</p:column>
+
+			<p:column headerText="Action" rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager')}">
+				<p:commandButton value="Delete" actionListener="#{reportController.remove(invoice)}" update=":form01" />
+				<a href="editInvoice.jsf?seq=#{invoice.seq}" style="color: blue;">Edit</a>
+			</p:column>
 		</p:dataTable>
 
-		<h:panelGrid columns="2">
+		<h:panelGrid columns="6">
 			<h:outputText value="From date" />
 			<p:calendar value="#{reportController.fromDate}" />
 
 			<h:outputText value="To date" />
 			<p:calendar value="#{reportController.toDate}" />
-
 			<p:commandButton value="Search" actionListener="#{reportController.search}" update=":form01"/>
+			<p:commandButton value="Clear" actionListener="#{reportController.clear}" update=":form01"/>
 		</h:panelGrid>
+
+		<h3 style="font-family: Helvetica;">Add new purchase</h3>
+		<p:panelGrid columns="2">
+			<h:outputText value="Company Name"/>
+			<p:autoComplete minQueryLength="3" maxResults="10" value="#{reportController.compSearch}" completeMethod="#{reportController.compSuggest}" validator="#{reportController.validateCompany}">
+			</p:autoComplete>
+			<h:outputText value="Purchase date" />
+			<p:calendar value="#{reportController.newInvoice.purchaseDate}" validator="#{reportController.validateDate}" />
+			<h:outputText value="Product" />
+			<p:outputPanel id="p1">
+				<p:autoComplete id="srch" minQueryLength="3" maxResults="10" value="#{reportController.search}" completeMethod="#{reportController.suggest}" >
+					<p:ajax listener="#{reportController.select}" event="itemSelect" update="p1" />
+				</p:autoComplete>
+				<p:dataTable id="tb1" rowIndexVar="row" value="#{reportController.selectedProducts}" var="prod">
+					<p:column headerText="Select">
+						<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{prod.selected}" />
+					</p:column>
+					<p:column headerText="Name">
+						<h:outputText value="#{prod.name}" />
+					</p:column>
+				</p:dataTable>
+				<p:commandButton value="Delete" actionListener="#{reportController.deleteSelected}" update="p1" />
+			</p:outputPanel>
+		</p:panelGrid>
+		<a href="../faces/companyList.jsf" style="font-family: Arial; color: blue; text-decoration: none">Add new customer</a>
+		<br/>
+		<p:commandButton value="Add new order" actionListener="#{reportController.addNewInvoice}" update="form01" />
 	</h:form>
 </h:body>
 </html>

@@ -181,7 +181,9 @@ public class HistoryController implements Serializable {
 		sessionManager.addGlobalMessageInfo("New invoice added", null);
 		compSearch = "";
 		search = "";
+
 		selectedProducts = new ArrayList<ProductDto>();
+		newInvoice = new InvoiceDto();
 	}
 
 	public String getCompSearch() {
@@ -200,4 +202,28 @@ public class HistoryController implements Serializable {
 		}
 		return result;
 	}
+
+	public String productPurchased(InvoiceDto invoice) throws IOException {
+		List<ProductDto> prods = invoiceService.getProductByInvoiceId(invoice.getSeq());
+		String result = "";
+		for (ProductDto dto: prods) {
+			result += dto.getName() + ", ";
+		}
+		if (result.length() > 2)
+			result = result.substring(0, result.length() - 2);
+		return result;
+	}
+
+	public CompanyDto getCompany() throws IOException {
+		if (seq != 0) {
+			company = compService.getById(seq);
+		}
+		return company;
+	}
+
+	public void setCompany(CompanyDto company) {
+		this.company = company;
+	}
+
+	private CompanyDto company;
 }

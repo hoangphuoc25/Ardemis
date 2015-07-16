@@ -6,11 +6,15 @@
 	  xmlns:ui="http://java.sun.com/jsf/facelets"
 	  xmlns:p="http://primefaces.org/ui"
 	  >
+	  <f:metadata>
+		<f:viewParam name="id" value="#{employeeController.id}" />
+	  </f:metadata>
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
 </h:head>
 <h:body>
+	<h:messages />
 	<h:form id="form01">
 		<p:menubar>
 			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink()}" />
@@ -18,22 +22,21 @@
 				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
 				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
 				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
-				<p:menuitem style="color: blue;" icon="ui-icon-document" value="Stormworks" url="../products/Stormworks.jsf" />
+				<p:menuitem style="color: blue;" value="Stormworks" url="../products/Stormworks.jsf" />
 			</p:submenu>
+			<p:submenu label="Reports">
+				<p:menuitem value="Expense" url="../faces/expense.jsf" />
+				<p:menuitem value="Sale report" url="../faces/report.jsf" />
+				<p:menuitem value="Add new purchase" url="../faces/report.jsf" />
+			</p:submenu>
+
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
+			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Notes" url="../faces/notes.jsf" />
+			<p:menuitem value="LOG OUT" style="float: right" action="#{feedbackController.logout}" immediate="true" update="form01" />
 		</p:menubar>
-
-		<p:schedule value="#{employeeController.model}" draggable="false" resizable="false" />
-
-		<h:panelGrid columns="2">
-			<h:outputText value="from" />
-			<p:calendar value="#{employeeController.from}" pattern="MM/dd/yyyy HH:mm" />
-			<h:outputText value="to" />
-			<p:calendar value="#{employeeController.to}" pattern="MM/dd/yyyy HH:mm" />
-			<h:outputText value="title" />
-			<p:inputText value="#{employeeController.title}" />
-		</h:panelGrid>
-		<p:commandButton value="Add" actionListener="#{employeeController.addNewEvent}" update="form01" />
+		<h3 style="font-family: Arial;">Employee schedule - #{employeeController.user.name}</h3>
+		<p:schedule value="#{employeeController.model}" draggable="false" resizable="false" style="max-width: 800px; margin-left:auto; margin-right: auto;"/>
 	</h:form>
 </h:body>
 </html>

@@ -31,18 +31,19 @@
 	<h:form id="form01" styleClass="main">
 		<p:menubar>
 			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink()}" />
-			<p:submenu label="Products" >
+			<p:submenu label="Products Catalog" >
 				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
 				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
 				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
-				<p:menuitem style="color: blue;" icon="ui-icon-document" value="Stormworks" url="../products/Stormworks.jsf" />
+				<p:menuitem style="color: blue;" value="Stormworks" url="../products/Stormworks.jsf" />
 			</p:submenu>
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
+			<p:menuitem value="LOG OUT" style="float: right" action="#{feedbackController.logout}" immediate="true" update="form01" />
 		</p:menubar>
 
-		<p:menubar model="#{sessionController.model}" />
-
 		<h:messages infoClass="message info" fatalClass="message error" errorClass="message error" />
+
+		<h3 style="font-family: Helvetica;">New feedback</h3>
 		<p:panelGrid columns="2" >
 			<h:outputText value="Product" />
 			<p:selectOneMenu value="#{feedbackController.product}" validator="#{feedbackController.validateProduct}" >

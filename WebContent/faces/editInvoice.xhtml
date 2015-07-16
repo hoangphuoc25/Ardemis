@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+	  <f:metadata>
+	  	<f:viewParam name="seq" value="#{editInvoiceController.seq}"></f:viewParam>
+	  	<f:event listener="#{editInvoiceController.reload}" type="preRenderView"></f:event>
+	  </f:metadata>
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<h:form id="form01">
+
+		<p:menubar>
+			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink()}" />
+			<p:submenu label="Products Catalog" >
+				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
+				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
+				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
+				<p:menuitem style="color: blue;" value="Stormworks" url="../products/Stormworks.jsf" />
+			</p:submenu>
+			<p:submenu label="Reports">
+				<p:menuitem value="Expense" url="../faces/expense.jsf" />
+				<p:menuitem value="Sale report" url="../faces/report.jsf" />
+				<p:menuitem value="Add new purchase" url="../faces/report.jsf" />
+			</p:submenu>
+			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
+			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Notes" url="../faces/notes.jsf" />
+			<p:menuitem value="LOG OUT" style="float: right" action="#{feedbackController.logout}" immediate="true" update="form01" />
+		</p:menubar>
+
+		<h3 style="color: blue;">Edit invoice</h3>
+		<h:messages />
+		<p:panelGrid columns="2">
+			<h:outputText value="Company Name"/>
+			<p:autoComplete minQueryLength="3" maxResults="10" value="#{editInvoiceController.compSearch}" completeMethod="#{editInvoiceController.compSuggest}" validator="#{editInvoiceController.validateCompany}">
+			</p:autoComplete>
+
+			<h:outputText value="Purchase date" />
+			<p:calendar value="#{editInvoiceController.newInvoice.purchaseDate}" validator="#{editInvoiceController.validateDate}" />
+
+			<h:outputText value="Product" />
+			<p:outputPanel id="p1">
+				<p:autoComplete id="srch" minQueryLength="3" maxResults="10" value="#{editInvoiceController.search}" completeMethod="#{editInvoiceController.suggest}" >
+					<p:ajax listener="#{editInvoiceController.select}" event="itemSelect" update="p1" />
+				</p:autoComplete>
+				<p:dataTable id="tb1" rowIndexVar="row" value="#{editInvoiceController.selectedProducts}" var="prod">
+					<p:column headerText="Select">
+						<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{prod.selected}" />
+					</p:column>
+					<p:column headerText="Name">
+						<h:outputText value="#{prod.name}" />
+					</p:column>
+				</p:dataTable>
+				<p:commandButton value="Delete" actionListener="#{editInvoiceController.deleteSelected}" update="p1" />
+			</p:outputPanel>
+		</p:panelGrid>
+		<p:commandButton value="Confirm" action="#{editInvoiceController.submit}" update=":form01"/>
+		<p:commandButton value="Cancel" action="#{editInvoiceController.cancel}" update=":form01"/>
+	</h:form>
+</h:body>
+</html>

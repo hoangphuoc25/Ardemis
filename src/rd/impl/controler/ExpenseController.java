@@ -101,6 +101,13 @@ public class ExpenseController implements Serializable {
 			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Invalid date.", null));
     }
 
+	public void validatePurpose(FacesContext context, UIComponent component, Object value) throws IOException {
+		String purpose = value.toString();
+		if (purpose.isEmpty()) {
+			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Purpose is required", null));
+		}
+	}
+
 	public void validateAmount(FacesContext context, UIComponent component, Object value) throws IOException {
 		double d = (Double) value;
 		if (d < 0)
@@ -141,7 +148,7 @@ public class ExpenseController implements Serializable {
 
 	        String errorMsg = readEmpListFromExcel(path + name);
 	        if (errorMsg.isEmpty())
-	        	sessionManager.addGlobalMessageInfo("Recorded added successfully", null);
+	        	sessionManager.addGlobalMessageInfo("Records added successfully", null);
 	        else
 	        	sessionManager.addGlobalMessageInfo(errorMsg, null);
     	} catch (Exception e) {
@@ -229,6 +236,12 @@ public class ExpenseController implements Serializable {
 
     	if (obj.getReceiptNo().isEmpty()) {
     		sessionManager.addGlobalMessageFatal("Invalid No.", null);
+    		restoreObj(event);
+    		return;
+    	}
+
+    	if (obj.getReceiptDate() == null || obj.getReceiptDate().toString().isEmpty()) {
+    		sessionManager.addGlobalMessageFatal("Invalid Date", null);
     		restoreObj(event);
     		return;
     	}

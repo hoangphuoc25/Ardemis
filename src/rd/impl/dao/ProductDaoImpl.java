@@ -29,7 +29,7 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 	private static String GET_PRODUCT_BY_ID = "select seq, name, summary, target, price from t_product where seq=?";
 	private static String REMOVE_PRODUCT = "delete from t_product where seq=?";
 	private static String UPDATE_PRODUCT = "update t_product set name=?, summary=?, target=?, price=? where seq=?";
-	private static String SEARCH_BY_NAME = "select seq, name, summary, target, price from t_product where name like ?";
+	private static String SEARCH_BY_NAME = "select seq, name, summary, target, price from t_product where upper(name) like ?";
 	private static String GET_BY_NAME = "select seq, name, summary, target, price from t_product where name=?";
 
 	public void addProduct (Transaction transaction, ProductDto product) throws IOException {
@@ -222,7 +222,7 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 		try {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(SEARCH_BY_NAME);
-			prepareStatement.setString(1, "%" + name + "%");
+			prepareStatement.setString(1, "%" + name.toUpperCase() + "%");
 			resultSet = prepareStatement.executeQuery();
 
 			List<ProductDto> result = new ArrayList<ProductDto>();

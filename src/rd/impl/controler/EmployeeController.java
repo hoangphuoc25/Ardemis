@@ -31,9 +31,13 @@ import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.ScheduleModel;
 import org.primefaces.model.StreamedContent;
 
+import rd.dto.MeetingDto;
 import rd.dto.SaleExpenseDto;
+import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.MeetingService;
 import rd.spec.service.SaleExpenseService;
+import rd.spec.service.UserService;
 
 @Named
 @ConversationScoped
@@ -43,6 +47,8 @@ public class EmployeeController implements Serializable {
 	@Inject Conversation conversation;
 	@Inject SessionManager sessionManager;
 	@Inject SaleExpenseService expService;
+	@Inject MeetingService meetingService;
+	@Inject UserService userService;
 
 	private StreamedContent file;
 
@@ -185,10 +191,14 @@ public class EmployeeController implements Serializable {
 		return se.getAmount()*sessionController.getRates().get(sessionController.getCurrency());
 	}
 
-	public ScheduleModel getModel() {
+	public ScheduleModel getModel() throws IOException {
 		if (model == null) {
 			model = new DefaultScheduleModel();
-			model.addEvent(new DefaultScheduleEvent("title", new Date(), new Date()));
+			List<MeetingDto> temp = meetingService.getMeetingByUser(id);
+			System.out.println(temp.size());
+			for (MeetingDto dto: temp) {
+				model.addEvent(new DefaultScheduleEvent(dto.getDetail(), dto.getFrom(), dto.getTo()));
+			}
 		}
 		return model;
 	}
@@ -221,7 +231,7 @@ public class EmployeeController implements Serializable {
 		this.from = from;
 	}
 
-	private ScheduleModel model = new DefaultScheduleModel();
+	private ScheduleModel model;
 
 	private Date from;
 	private Date to;
@@ -232,4 +242,17 @@ public class EmployeeController implements Serializable {
 		System.out.println("EmployeeController.addNewEvent()");
 		model.addEvent(new DefaultScheduleEvent(title, from, to));
 	}
+
+	public UserDto getUser() throws IOException {
+		if (!id.isEmpty()) {
+			user = userService.findUserById(id);
+		}
+		return user;
+	}
+
+	public void setUser(UserDto user) {
+		this.user = user;
+	}
+
+	private UserDto user;
 }

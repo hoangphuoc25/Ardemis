@@ -6,7 +6,10 @@ import java.util.List;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
+import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -15,10 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import rd.dto.CompanyDto;
-import rd.dto.NoteDto;
+import rd.dto.InvoiceDto;
 import rd.dto.TeamDto;
-import rd.dto.UserDto;
+import rd.spec.manager.SessionManager;
 import rd.spec.service.CompanyService;
+import rd.spec.service.InvoiceService;
 import rd.spec.service.TeamService;
 import rd.utils.DatabaseUtil;
 
@@ -34,6 +38,8 @@ public class SalespersonController implements Serializable {
 	@Inject TeamService teamService;
 	@Inject Conversation conversation;
 	@Inject CompanyService comService;
+	@Inject SessionManager sessionManager;
+	@Inject InvoiceService invoiceService;
 
 	private List<TeamDto> teams;
 	private List<CompanyDto> customerList;
@@ -101,6 +107,8 @@ public class SalespersonController implements Serializable {
 		customerList.add(newCust);
 		newCust = new CompanyDto();
 		addMode = false;
+
+		sessionManager.addGlobalMessageFatal("New company added", null);
 		conversationEnd();
 	}
 
@@ -178,6 +186,35 @@ public class SalespersonController implements Serializable {
 		editMode = false;
 		RequestContext context = RequestContext.getCurrentInstance();
 		context.execute("custDialog_w.hide();");
+	}
+
+	public void validateCompName(FacesContext facesContext, UIComponent component, Object value) throws IOException {
+		String name = value.toString().trim();
+		List<CompanyDto> comp = comService.searchCompanyByName(name);
+		if (comp != null && comp.size() > 0) {
+			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "A company with this name already exists.", null));
+		}
+	}
+
+	public void remove(CompanyDto comp) throws IOException {
+		List<InvoiceDto> temp = invoiceService.getByCustomer(comp.getSeq());
+		if (temp != null && temp.size() > 0) {
+			sessionManager.addGlobalMessageFatal("Can't delete customer.", null);
+			return;
+		}
+		comService.deleteCompany(comp.getSeq());
+		for (int i = customerList.size() -1; i >= 0; i--) {
+			if (customerList.get(i).getSeq() == comp.getSeq()) {
+				customerList.remove(i);
+				return;
+			}
+		}
+	}
+
+	public String logout() {
+		conversationEnd();
+		sessionManager.logoff();
+		return "../portal.jsf?faces-redirect=true";
 	}
 }
 

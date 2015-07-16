@@ -35,8 +35,9 @@ service_impl_file_tag 		= 'ServiceImpl.java'
 ser_impl_method = '\t\t// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE\n\
 \t\ttry{{\n\
 \t\t\ttransaction.begin();\n\
-\t\t\t{0}.{1}(transaction);\n\
+\t\t\t{2} {0}.{1}({3});\n\
 \t\t\ttransaction.commit();\n\
+\t\t\t{4}\
 \t\t}} catch (IOException e) {{\n\
 \t\t\ttransaction.rollback();\n\
 \t\t\tthrow e;\n\
@@ -337,7 +338,15 @@ def serv_impl_new_method(temp):
 		args = p.search(method_sign).group(0)
 		method_name = method_sign.replace(args, "")
 		result += "\tpublic {0} {1} throws IOException {{\n".format(return_type, method_sign)
-		result += ser_impl_method.format(class_name[0].lower() + class_name[1:] + 'Dao', method_name)
+
+		arg_element = [t.strip() for t in args[1:-1].split(',')]
+		arg_name = ['transaction'] + [t.split(' ')[1] for t in arg_element]
+		return_stmt = ''
+		return_obj = ''
+		if return_type != 'void':
+			return_stmt = 'return result;\n'
+			return_obj = return_type + ' result ='
+		result += ser_impl_method.format(class_name[0].lower() + class_name[1:] + 'Dao', method_name, return_obj, ', '.join(arg_name), return_stmt) 
 		result += "\t}\n"
 	return result
 

@@ -21,8 +21,15 @@
 				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
 				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
 				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
-				<p:menuitem style="color: blue;" icon="ui-icon-document" value="Stormworks" url="../products/Stormworks.jsf" />
+				<p:menuitem style="color: blue;" value="Stormworks" url="../products/Stormworks.jsf" />
 			</p:submenu>
+			<p:submenu label="Reports">
+				<p:menuitem value="Expense" url="../faces/expense.jsf" />
+				<p:menuitem value="Sale report" url="../faces/report.jsf" />
+				<p:menuitem value="Add new purchase" url="../faces/report.jsf" />
+			</p:submenu>
+			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Notes" url="../faces/notes.jsf" />
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
 		</p:menubar>
 		<h:panelGrid style="float: right" columns="2">
@@ -38,7 +45,7 @@
 		<p:dataTable id="tbl1" rowIndexVar="row" value="#{productDetailController.purchases}" var="purchase"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}" row="20">
 			<p:column headerText="Id">
-				<a href="#{request.contextPath}/faces/history.jsf?seq=#{purchase.seq}" style="color: blue;">#{purchase.seq}</a>
+				<h:outputText value="#{purchase.seq}" />
 			</p:column>
 			<p:column headerText="Date">
 				<h:outputText value="#{purchase.purchaseDate}">
@@ -46,7 +53,7 @@
 				</h:outputText>
 			</p:column>
 			<p:column headerText="Company" >
-				<h:outputText value="#{purchase.customer.name}" />
+				<a href="#{request.contextPath}/faces/history.jsf?seq=#{purchase.customer.seq}" style="color: blue;">#{purchase.customer.name}</a>
 			</p:column>
 			<p:column headerText="Purchase Date">
 				<h:outputText value="#{purchase.purchaseDate}">

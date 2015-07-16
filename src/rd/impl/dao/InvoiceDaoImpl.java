@@ -135,6 +135,10 @@ public class InvoiceDaoImpl implements InvoiceDao, Serializable {
 			prepareStatement.setInt(1, seq);
 			resultSet = prepareStatement.executeQuery();
 
+			prepareStatement = connection.prepareStatement(DELETE_PRODUCT_PURCHASE);
+			prepareStatement.setInt(1, seq);
+			resultSet = prepareStatement.executeQuery();
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {
@@ -274,11 +278,12 @@ public class InvoiceDaoImpl implements InvoiceDao, Serializable {
 	private static String GET_PRODUCT_BY_INVOICE_ID = "select product_seq from t_product_purchase where invoice_seq=?";
 	private static String GET_BY_ID = "select seq, customer_seq, purchase_date, amount from t_invoice where seq=?";
 	private static String GET_BY_CUSTOMER = "select seq, customer_seq, purchase_date, amount from t_invoice where customer_seq=?";
-	private static String UPDATE_INVOICE = "update customer_seq=?, purchase_date=?, amount=? where seq=?";
+	private static String UPDATE_INVOICE = "update t_invoice set customer_seq=?, purchase_date=?, amount=? where seq=?";
 	private static String DELETE_INVOICE = "delete from t_invoice where seq=?";
 	private static String GET_SEQ = "select max(seq)+1 from t_invoice";
-	private static String GET_ALL = "select seq, customer_seq, purchase_date, amount from t_invoice order by purchase_date desc";
+	private static String GET_ALL = "select seq, customer_seq, purchase_date, amount from t_invoice order by seq";
 	private static String ADD_PRODUCT_PURCHASE = "insert into t_product_purchase (invoice_seq, product_seq) values (?, ?)";
+	private static String DELETE_PRODUCT_PURCHASE = "delete from t_product_purchase where invoice_seq=?";
 
 	public List<InvoiceDto> getByCustomer(Transaction transaction, int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -328,8 +333,18 @@ public class InvoiceDaoImpl implements InvoiceDao, Serializable {
 			prepareStatement.setDate(2, new java.sql.Date(invoice.getPurchaseDate().getTime()));
 			prepareStatement.setDouble(3, invoice.getAmount());
 			prepareStatement.setInt(4, invoice.getSeq());
-
 			resultSet = prepareStatement.executeQuery();
+
+			prepareStatement = connection.prepareStatement(DELETE_PRODUCT_PURCHASE);
+			prepareStatement.setInt(1, invoice.getSeq());
+			resultSet = prepareStatement.executeQuery();
+
+			for (ProductDto dto: invoice.getProducts()) {
+				prepareStatement = connection.prepareStatement(ADD_PRODUCT_PURCHASE);
+				prepareStatement.setInt(1, invoice.getSeq());
+				prepareStatement.setInt(2, dto.getSeq());
+				resultSet = prepareStatement.executeQuery();
+			}
 
 		} catch (SQLException e) {
 			throw new IOException(e);

@@ -178,6 +178,12 @@ public class ProductController implements Serializable {
 			viewMode = false;
 			sessionManager.addGlobalMessageInfo("Info updated successfully", null);
 			productService.updateProduct(newProd);
+			for (int i = 0; i < products.size(); i++) {
+				if (products.get(i).getSeq() == newProd.getSeq()) {
+					products.set(i, newProd);
+					break;
+				}
+			}
 			RequestContext context = RequestContext.getCurrentInstance();
 			context.execute("prodDialog_w.hide();");
 		}
@@ -225,5 +231,11 @@ public class ProductController implements Serializable {
 		if (sessionController.getCurrency() == 0)
 			return prod.getPrice();
 		return prod.getPrice()*sessionController.getRates().get(sessionController.getCurrency());
+	}
+
+	public String logout() {
+		conversationEnd();
+		sessionManager.logoff();
+		return "../portal.jsf?faces-redirect=true";
 	}
 }

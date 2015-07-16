@@ -21,9 +21,18 @@
 				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
 				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
 				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
-				<p:menuitem style="color: blue;" icon="ui-icon-document" value="Stormworks" url="../products/Stormworks.jsf" />
+				<p:menuitem style="color: blue;" value="Stormworks" url="../products/Stormworks.jsf" />
 			</p:submenu>
+			<p:submenu label="Reports">
+				<p:menuitem value="Expense" url="../faces/expense.jsf" />
+				<p:menuitem value="Sale report" url="../faces/report.jsf" />
+				<p:menuitem value="Add new purchase" url="../faces/report.jsf" />
+			</p:submenu>
+
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
+			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Notes" url="../faces/notes.jsf" />
+			<p:menuitem value="LOG OUT" style="float: right" action="#{feedbackController.logout}" immediate="true" update="form01" />
 		</p:menubar>
 		<h:panelGrid columns="2">
 			<h:outputText value="Currency" />
@@ -53,7 +62,7 @@
 			</p:column>
 		</p:dataTable>
 
-		<h:commandButton value="Download">
+		<h:commandButton value="Download as Excel">
 			<p:fileDownload value="#{employeeController.file}" />
 		</h:commandButton>
 

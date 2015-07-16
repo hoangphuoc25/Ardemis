@@ -27,9 +27,17 @@
 				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
 				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
 				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
-				<p:menuitem style="color: blue;" icon="ui-icon-document" value="Stormworks" url="../products/Stormworks.jsf" />
+				<p:menuitem style="color: blue;" value="Stormworks" url="../products/Stormworks.jsf" />
+			</p:submenu>
+			<p:submenu label="Reports">
+				<p:menuitem value="Expense" url="../faces/expense.jsf" />
+				<p:menuitem value="Sale report" url="../faces/report.jsf" />
+				<p:menuitem value="Add new purchase" url="../faces/report.jsf" />
 			</p:submenu>
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
+			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Notes" url="../faces/notes.jsf" />
+			<p:menuitem value="LOG OUT" style="float: right" action="#{productController.logout}" immediate="true" update="form01" />
 		</p:menubar>
 
 		<h:panelGrid style="float: right" columns="2">
@@ -44,7 +52,7 @@
 		<h:messages infoStyle="color: green;" fatalStyle="color: red;" errorStyle="color: red;" />
 
 		<p:outputPanel rendered="#{productController.seq == 0}" >
-
+		<h3 style="font-family: Helvetica">All products</h3>
 		<p:dataTable id="tbl1" rowIndexVar="row" value="#{productController.products}" var="prod"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 				rows="15" selection="#{productController.selectedProd}" selectionMode="single" rowKey="#{prod.seq}">
@@ -62,7 +70,7 @@
 				<h:outputText value="#{productController.deducePrice(prod)}" />
 			</p:column>
 			<p:column headerText="Link">
-				<a href="../faces/productdetail.jsf?seq=#{prod.seq}">Detail</a>
+				<a href="../faces/productdetail.jsf?seq=#{prod.seq}" style="color: blue; text-decoration: none;">Detail</a>
 			</p:column>
 
 		</p:dataTable>
@@ -71,10 +79,11 @@
 		<p:inputText value="#{productController.searchStr}" />
 		<p:commandButton value="Search" actionListener="#{productController.search}" update=":form01" />
 
-		<p:commandButton value="Add new Product" actionListener="#{productController.startAdd}" oncomplete="prodDialog_w.show()" update="form01"/>
+		<p:commandButton value="Add new Product" actionListener="#{productController.startAdd}" oncomplete="prodDialog_w.show()" update="form01"
+			rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager') or facesContext.externalContext.isUserInRole('support') }"/>
 
 		<p:dialog id="prodDialog" closable="false" rendered="#{productController.addMode or productController.viewMode or productController.editMode}" visible="true"
-				widgetVar="prodDialog_w" modal="true" resizable="false" draggable="true" header="Product Detail">
+				widgetVar="prodDialog_w" modal="true" resizable="false" draggable="true" header="Product Detail" style="max-width: 500px;">
 			<h:messages infoStyle="color: green;" fatalStyle="color: red;" errorStyle="color: red;" />
 			<p:panelGrid columns="2">
 				<h:outputText value="Name" />
@@ -83,7 +92,7 @@
 
 				<h:outputText value="Summary" />
 				<p:inputTextarea value="#{productController.newProd.summary}" rendered="#{productController.addMode or productController.editMode}" />
-				<h:outputText value="#{productController.newProd.name}" rendered="#{productController.viewMode}" />
+				<h:outputText value="#{productController.newProd.summary}" rendered="#{productController.viewMode}" />
 
 				<h:outputText value="Target" />
 				<p:inputTextarea value="#{productController.newProd.target}" rendered="#{productController.addMode or productController.editMode}"/>
@@ -95,8 +104,10 @@
 			</p:panelGrid>
 
 			<p:commandButton value="Apply" actionListener="#{productController.apply}" update=":form01" ajax="true" rendered="#{productController.editMode or productController.addMode}" />
-			<p:commandButton value="Edit" actionListener="#{productController.startEdit}" update=":form01:prodDialog" ajax="true" rendered="#{productController.viewMode}" />
-			<p:commandButton value="Delete" actionListener="#{productController.delete}" update=":form01" ajax="true" rendered="#{productController.viewMode}" />
+			<p:commandButton value="Edit" actionListener="#{productController.startEdit}" update=":form01:prodDialog" ajax="true" rendered="#{productController.viewMode and
+				(facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager') or facesContext.externalContext.isUserInRole('support'))}" />
+			<p:commandButton value="Delete" actionListener="#{productController.delete}" update=":form01" ajax="true" rendered="#{productController.viewMode and
+				(facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager') or facesContext.externalContext.isUserInRole('support'))}"/>
 			<p:commandButton value="Cancel" actionListener="#{productController.cancel}" update=":form01" ajax="true" immediate="true" />
 		</p:dialog>
 		</p:outputPanel>

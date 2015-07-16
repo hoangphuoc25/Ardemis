@@ -42,7 +42,10 @@
 			<p:submenu label="Reports">
 				<p:menuitem value="Expense" url="#{requestContext}/faces/expense.jsf" />
 				<p:menuitem value="Sale report" url="#{requestContext}/faces/report.jsf" />
+				<p:menuitem value="Add new purchase" url="../faces/report.jsf" />
 			</p:submenu>
+			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Notes" url="../faces/notes.jsf" />
 			<p:menuitem value="LOG OUT" action="#{noteController.logout}" immediate="true" />
 		</p:menubar>
 
@@ -113,7 +116,7 @@
 			</p:column>
 			<p:column headerText="Action">
 				<p:rowEditor />
-				<h:commandButton value="Delete" action="#{noteController.remove(note)}" update=":form01" />
+				<h:commandButton value="Delete" action="#{noteController.remove(note)}" update=":form01" immediate="true" />
 			</p:column>
 		</p:dataTable>
 

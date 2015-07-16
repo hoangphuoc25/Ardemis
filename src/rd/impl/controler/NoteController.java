@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import rd.dto.CompanyDto;
 import rd.dto.NoteDto;
+import rd.dto.RoleDto;
 import rd.dto.SaleExpenseDto;
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
@@ -104,6 +105,11 @@ public class NoteController implements Serializable {
 	}
 
 	public void addUserAndNote() throws IOException {
+		newUser.setPassword(newUser.getId());
+		List<RoleDto> temp = new ArrayList<RoleDto>();
+		temp.add(new RoleDto("customer"));
+		newUser.setRoles(temp);
+
 		userService.addUser(newUser);
 		logger.error("new user added");
 
@@ -121,8 +127,8 @@ public class NoteController implements Serializable {
 		addMode = false;
 
 		sessionManager.addGlobalMessageInfo("USER CREATED", null);
-		RequestContext context = RequestContext.getCurrentInstance();
-		context.execute("noteDialog_w.hide();");
+//		RequestContext context = RequestContext.getCurrentInstance();
+//		context.execute("noteDialog_w.hide();");
 	}
 
 	public List<NoteDto> getNotes() {
@@ -150,6 +156,7 @@ public class NoteController implements Serializable {
 		notes.add(newNote);
 		logger.error("newnote added");
 
+		sessionManager.addGlobalMessageInfo("New note created", null);
 		newUser = new UserDto();
 		newNote = new NoteDto();
 		addMode = false;
@@ -307,6 +314,9 @@ public class NoteController implements Serializable {
 		newNote.setCreatedDate(new Date());
 		noteService.addNote(newNote);
 
+		notes.add(newNote);
+		sessionManager.addGlobalMessageInfo("New note created", null);
+
 		extMode = false;
 		newNote = new NoteDto();
 		clientName = "";
@@ -327,6 +337,8 @@ public class NoteController implements Serializable {
 			restoreObj(event);
 			return;
 		}
+
+		noteService.updateNote(note);
 
 		for (int i = notes.size() - 1; i >= 0; i--) {
     		if (notes.get(i).getSeq() == note.getSeq()) {

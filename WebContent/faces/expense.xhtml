@@ -45,9 +45,18 @@
 				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
 				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
 				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
-				<p:menuitem style="color: blue;" icon="ui-icon-document" value="Stormworks" url="../products/Stormworks.jsf" />
+				<p:menuitem style="color: blue;" value="Stormworks" url="../products/Stormworks.jsf" />
 			</p:submenu>
+			<p:submenu label="Reports">
+				<p:menuitem value="Expense" url="../faces/expense.jsf" />
+				<p:menuitem value="Sale report" url="../faces/report.jsf" />
+				<p:menuitem value="Add new purchase" url="../faces/report.jsf" />
+			</p:submenu>
+
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
+			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Notes" url="../faces/notes.jsf" />
+			<p:menuitem value="LOG OUT" style="float: right" action="#{feedbackController.logout}" immediate="true" update="form01" />
 		</p:menubar>
 		<h:panelGrid columns="2">
 			<h:outputText value="Currency" />
@@ -58,7 +67,8 @@
 			</p:selectOneMenu>
 		</h:panelGrid>
 
-		<h:messages infoClass="message info" fatalClass="message error" errorClass="message error"/>
+		<h3 style="font-family: Helvetica;">New expense</h3>
+		<h:messages id="messages" infoClass="message info" fatalClass="message error" errorClass="message error"/>
 		<p:panelGrid columns="2">
 			<h:outputText value="Date" />
 			<p:calendar value="#{expenseController.newExp.receiptDate}" validator="#{expenseController.validateReceiptDate}" pattern="dd-MM-yyyy" />
@@ -67,36 +77,69 @@
 			<p:inputText value="#{expenseController.newExp.receiptNo}" />
 
 			<h:outputText value="Purpose" />
-			<p:inputText value="#{expenseController.newExp.purpose}" />
+			<p:inputText value="#{expenseController.newExp.purpose}" validator="#{expenseController.validatePurpose}" />
 
 			<h:outputText value="Amount" />
 			<p:inputText value="#{expenseController.newExp.amount}" validator="#{expenseController.validateAmount}" />
 		</p:panelGrid>
 		<p:commandButton value="Submit" actionListener="#{expenseController.addNewExp}" update="form01" />
 
+		<h3 style="font-family: Helvetica;">Your Expense</h3>
 		<p:dataTable id="expTbl" rowIndexVar="row" value="#{expenseController.myExp}" var="expense"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-				rows="15" >
+				rows="15" editable="true" rowKey="#{expense.seq}" >
+			<p:ajax event="rowEdit" listener="#{expenseController.onRowEdit}" update="expTbl, :form01:messages" />
+			<p:ajax event="rowEditCancel" listener="#{expenseController.onRowEditCancel}" update="expTbl, :form01:messages" />
 			<p:column headerText="Receiptdate">
-				<h:outputText value="#{expense.receiptDate}">
-					<f:convertDateTime pattern="dd/MM/yyyy" />
-				</h:outputText>
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{expense.receiptDate}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+					</f:facet>
+					<f:facet name="input">
+						<p:calendar value="#{expense.receiptDate}" pattern="dd/MM/yyyy" />
+					</f:facet>
+				</p:cellEditor>
 			</p:column>
 			<p:column headerText="Purpose">
-				<h:outputText value="#{expense.purpose}" />
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{expense.purpose}" />
+					</f:facet>
+					<f:facet name="input">
+						<p:inputText value="#{expense.purpose}" />
+					</f:facet>
+				</p:cellEditor>
+
 			</p:column>
 			<p:column headerText="Receiptno">
-				<h:outputText value="#{expense.receiptNo}" />
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{expense.receiptNo}" />
+					</f:facet>
+					<f:facet name="input">
+						<p:inputText value="#{expense.receiptNo}" />
+					</f:facet>
+				</p:cellEditor>
 			</p:column>
 			<p:column headerText="Amount">
-				<h:outputText value="#{expenseController.deduceCost(expense)}" />
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{expenseController.deduceCost(expense)}" />
+					</f:facet>
+					<f:facet name="input">
+						<p:inputText value="#{expense.amount}" />
+					</f:facet>
+				</p:cellEditor>
 			</p:column>
-
 			<p:column headerText="Action">
-				<p:commandButton value="Remove" actionListener="#{expenseController.remove(expense)}" update="expTbl"/>
+				<h:commandButton value="Remove" actionListener="#{expenseController.remove(expense)}" update="form01" immediate="true" />
+				<p:rowEditor />
 			</p:column>
 		</p:dataTable>
 
+		<h3 style="font-family: Helvetica;">Upload</h3>
 		<p:fileUpload fileUploadListener="#{expenseController.handleFileUpload}" mode="advanced" dragDropSupport="false"
 					sizeLimit="1000000" fileLimit="1" allowTypes="/(\.|\/)(xls)$/" update=":form01" />
 	</h:form>

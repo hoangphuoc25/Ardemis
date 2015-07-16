@@ -10,18 +10,23 @@ import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.primefaces.component.menuitem.MenuItem;
-import org.primefaces.component.slidemenu.SlideMenu;
 import org.primefaces.component.submenu.Submenu;
 import org.primefaces.model.DefaultMenuModel;
 import org.primefaces.model.MenuModel;
+
+import rd.spec.manager.SessionManager;
 
 @Named
 @SessionScoped
 public class SessionController implements Serializable {
 	private static final long serialVersionUID = 1L;
+
+
+	@Inject SessionManager sessionManager;
 
 	private List<SelectItem> currencyList;
 	private List<SelectItem> links;
@@ -59,9 +64,11 @@ public class SessionController implements Serializable {
 		} else if (FacesContext.getCurrentInstance().getExternalContext().isUserInRole("sale")) {
 			return "../faces/salesperson.jsf";
 		} else if (FacesContext.getCurrentInstance().getExternalContext().isUserInRole("support")) {
-			return "../faces/support.jsf";
+			return "../faces/products.jsf";
 		} else if (FacesContext.getCurrentInstance().getExternalContext().isUserInRole("customer")) {
 			return "../customers/customers.jsf";
+		} else if (FacesContext.getCurrentInstance().getExternalContext().isUserInRole("manager")) {
+			return "../faces/manager.jsf";
 		}
 		return "";
 	}
@@ -132,5 +139,10 @@ public class SessionController implements Serializable {
 
 	public void setRates(Map<Integer, Double> rates) {
 		this.rates = rates;
+	}
+
+	public String logout() {
+		sessionManager.logoff();
+		return "../portal.jsf?faces-redirect=true";
 	}
 }
