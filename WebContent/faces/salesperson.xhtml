@@ -115,6 +115,7 @@
 				</p:column>
 				<p:column headerText="Action">
 					<p:commandButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01" />
+					<a href="editEvent.jsf?seq=#{event.seq}">Edit</a>
 				</p:column>
 			</p:dataTable>
 	        <f:facet name="options">

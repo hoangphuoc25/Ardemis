@@ -12,6 +12,31 @@
 
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+	<style>
+		.alert {
+			display: block;
+			font-family: Arial;
+			padding: 15px;
+			margin-bottom: 20px;
+			border: 1px solid transparent;
+			border-radius: 4px;
+		}
+		.alert-warning {
+			color: #8a6d3b;
+			background-color: #fcf8e3;
+			border-color: #faebcc;
+		}
+		.alert-info {
+			 color: #3c763d;
+			 background-color: #dff0d8;
+			 border-color: #d6e9c6;
+		}
+		.alert-danger {
+			 color: #a94442;
+			 background-color: #f2dede;
+			 border-color: #ebccd1;
+		}
+	</style>
 </h:head>
 <h:body>
 	<h:form id="form01">
@@ -65,7 +90,8 @@
 			<p:ajax listener="#{salespersonController.reload}" update="form01"/>
 		</p:selectOneMenu>
 
-		<h:messages />
+		<h:messages infoClass="alert alert-success" errorClass="alert alert-error" fatalClass="alert alert-block" />
+
 		<p:dataTable id="table1" rowIndexVar="row" value="#{salespersonController.customerList}" var="comp"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 				rows="15" rowKey="#{comp.seq}">
@@ -100,7 +126,10 @@
 				<p:spacer width="20" />
 				<a href="history.jsf?seq=#{comp.seq}" style="color: blue;">Detail</a>
 				<p:spacer width="20" />
-				<h:commandButton value="Delete" actionListener="#{salespersonController.remove(comp)}" update="form01" />
+				<h:commandButton value="Delete" actionListener="#{salespersonController.remove(comp)}" update="form01"
+					rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager') or facesContext.externalContext.isUserInRole('support')}"/>
+				<p:spacer width="20" />
+				<a href="editCompany.jsf?seq=#{comp.seq}" style="color: blue;">Edit</a>
 			</p:column>
 		</p:dataTable>
 

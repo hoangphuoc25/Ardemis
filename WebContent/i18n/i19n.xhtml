@@ -2,32 +2,30 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      >
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+	  <f:loadBundle var="msg" basename="resources.welcome" />
+	  <h:head></h:head>
+<h:body>
+	<h1>JSF 2 internationalization example</h1>
+	<h:form>
+		<h:outputText value="#{message['welcome']}" />
+		<h:panelGrid columns="2">
+			Language :
+			<h:selectOneMenu value="#{languageBean.localeCode}"
+					onchange="submit()"
+					valueChangeListener="#{languageBean.countryLocaleCodeChanged}">
+				<f:selectItems value="#{languageBean.countriesInMap}" />
+			</h:selectOneMenu>
+		</h:panelGrid>
 
-    <h:body>
-
-    	<h1>JSF 2 internationalization example</h1>
-
-     <h:form>
-
-	<h2>
-		<h:outputText value="#{msg['welcome.jsf']}" />
-	</h2>
-
-	<h:panelGrid columns="2">
-
-		Language :
-		<h:selectOneMenu value="#{languageBean.localeCode}" onchange="submit()"
-			valueChangeListener="#{languageBean.countryLocaleCodeChanged}">
-   			<f:selectItems value="#{languageBean.countriesInMap}" />
-   		</h:selectOneMenu>
-
-	</h:panelGrid>
-
-      </h:form>
-
-    </h:body>
+		<p:selectOneMenu value="#{languageBean.localeCode}">
+			<f:selectItems value="#{languageBean.countriesInMap}" />
+			<p:ajax event="change" listener="#{languageBean.countryLocaleCodeChanged}" update="@form" />
+		</p:selectOneMenu>
+	</h:form>
+</h:body>
 </html>

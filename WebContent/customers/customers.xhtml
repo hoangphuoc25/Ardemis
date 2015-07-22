@@ -41,22 +41,18 @@
 			<p:menuitem value="LOG OUT" style="float: right" action="#{feedbackController.logout}" immediate="true" update="form01" />
 		</p:menubar>
 
+		<h3 style="font-family: Helvetica;">Welcome</h3>
+		<p>Our company offers a wide range of products for design and architectures. Please see take time to read the details about our products.</p>
+		<ul>
+			<li><a href="../products/AutoCAD.jsf" style="color: blue">AutoCAD</a></li>
+			<li><a href="../products/quickdesk.jsf" style="color: blue">Quickdesk</a></li>
+			<li><a href="../products/Revit.jsf" style="color: blue">Revit</a></li>
+			<li><a href="../products/Stormworks.jsf" style="color: blue">Stormworks</a></li>
+		</ul>
+
 		<h:messages infoClass="message info" fatalClass="message error" errorClass="message error" />
 
-		<h3 style="font-family: Helvetica;">New feedback</h3>
-		<p:panelGrid columns="2" >
-			<h:outputText value="Product" />
-			<p:selectOneMenu value="#{feedbackController.product}" validator="#{feedbackController.validateProduct}" >
-				<f:selectItem itemLabel="Select Item" itemValue="-1" />
-				<f:selectItems value="#{databaseUtil.prods}" />
-			</p:selectOneMenu>
-			<h:outputText value="Rating" />
-			<p:rating value="#{feedbackController.rating}" />
-			<h:outputText value="Feedback" />
-			<p:inputTextarea value="#{feedbackController.feedback}" />
-		</p:panelGrid>
-		<p:commandButton value="Submit" actionListener="#{feedbackController.addFeedback}" update="form01" />
-
+		<h3 style="font-family: Helvetica;">Your messages</h3>
 		<p:dataTable id="noteTbl" rowIndexVar="row" value="#{feedbackController.notes}" var="note"
 			paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 			rows="15">
@@ -74,6 +70,24 @@
 				<h:outputText value="#{note.note}" />
 			</p:column>
 		</p:dataTable>
+
+		<p:panel id="toggleable" header="Add feedback" toggleable="true" toggleSpeed="200" closeSpeed="200" widgetVar="panel" style="margin-bottom:20px" collapsed="true">
+
+			<h3 style="font-family: Helvetica;">New feedback</h3>
+			<p:panelGrid columns="2" >
+				<h:outputText value="Product" />
+				<p:selectOneMenu value="#{feedbackController.product}" validator="#{feedbackController.validateProduct}" >
+					<f:selectItem itemLabel="Select Item" itemValue="-1" />
+					<f:selectItems value="#{databaseUtil.prods}" />
+				</p:selectOneMenu>
+				<h:outputText value="Rating" />
+				<p:rating value="#{feedbackController.rating}" />
+				<h:outputText value="Feedback" />
+				<p:inputTextarea value="#{feedbackController.feedback}" />
+			</p:panelGrid>
+			<br/>
+			<p:commandButton value="Submit" actionListener="#{feedbackController.addFeedback}" update="form01" />
+		</p:panel>
 	</h:form>
 </h:body>
 </html>

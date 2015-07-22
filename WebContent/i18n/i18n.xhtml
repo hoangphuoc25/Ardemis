@@ -2,10 +2,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:ui="http://java.sun.com/jsf/facelets">
-	<f:loadBundle var="msg" basename="resources.welcome_fr" />
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui">
+	<f:loadBundle var="msg" basename="resources.welcome" />
 
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -13,18 +14,18 @@
 </h:head>
 
 <h:body>
+	<f:view locale="en" >
+		<h:outputText value="#{message.motivation}" />
+	</f:view>
+
 	<h1>JSF 2.2 Internationalization Example</h1>
 
-	<h:form>
-		<h:commandButton action="#{languageBean.changeLanguage('en')}" value="English" update="@all"/>
-		<h:outputText value="HEYO" />
-		<h:commandButton action="#{languageBean.changeLanguage('gr')}" value="Greek" update="@all"/>
-		<h:outputText value="HEYO" />
-		<h:commandButton action="#{languageBean.changeLanguage('fr')}" value="French" update="@all"/>
+	<h:form id="form01">
+		<p:commandButton actionListener="#{languageBean.changeLanguage('en')}" value="English" update="form01" />
+		<p:commandButton actionListener="#{languageBean.changeLanguage('gr')}" value="Greek" update="form01" />
+		<p:commandButton actionListener="#{languageBean.changeLanguage('fr')}" value="French" update="form01" />
+		<h:outputText value="#{message.motivation}" />
+		<h:outputText value="#{msg.motivation}" />
 	</h:form>
-
-	<p>
-		<h:outputText value="#{msg['motivation']}" />
-	</p>
 </h:body>
 </html>

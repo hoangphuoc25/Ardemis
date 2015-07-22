@@ -15,8 +15,10 @@ import javax.inject.Named;
 
 import org.primefaces.context.RequestContext;
 
+import rd.dto.InvoiceDto;
 import rd.dto.ProductDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.InvoiceService;
 import rd.spec.service.ProductService;
 
 @Named
@@ -31,6 +33,7 @@ public class ProductController implements Serializable {
 	@Inject Conversation conversation;
 	@Inject ProductService productService;
 	@Inject SessionManager sessionManager;
+	@Inject InvoiceService invoiceService;
 
 	private ProductDto newProd = new ProductDto();
 	private List<ProductDto> products;
@@ -190,6 +193,12 @@ public class ProductController implements Serializable {
 	}
 
 	public void delete() throws IOException {
+		List<InvoiceDto> invoices = invoiceService.findInvoicesByProduct(seq);
+		if (invoices != null && invoices.size() > 0) {
+			sessionManager.addGlobalMessageFatal("Can't delete product", null);
+			return;
+		}
+
 		productService.removeProduct(newProd.getSeq());
 		for (ProductDto p: products) {
 			if (p.getSeq() == newProd.getSeq()) {

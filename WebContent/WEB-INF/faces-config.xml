@@ -9,12 +9,14 @@
 		<message-bundle>resources.application</message-bundle>
 		<locale-config>
 			<default-locale>en</default-locale>
+			<supported-locale>fr</supported-locale>
+			<supported-locale>gr</supported-locale>
 		</locale-config>
 
 		<resource-bundle>
-		<base-name>resources.welcome</base-name>
-		<var>message</var>
-	   </resource-bundle>
+            <base-name>resources.welcome</base-name>
+            <var>message</var>
+        </resource-bundle>
 	</application>
 
 </faces-config>

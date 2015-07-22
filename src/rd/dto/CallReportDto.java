@@ -3,13 +3,47 @@ package rd.dto;
 import java.util.Date;
 
 public class CallReportDto {
-
 	private int seq;
-	private String phone;
-	private Date callDate;
-	private String note;
-	private String rate;
-	private ContactDto contact;
+	private CompanyDto customer;
+
+	public CompanyDto getCustomer() {
+		return this.customer;
+	}
+
+	public void setCustomer(CompanyDto customer) {
+		this.customer = customer;
+	}
+
+	private Date callTime;
+
+	public Date getCallTime() {
+		return this.callTime;
+	}
+
+	public void setCallTime(Date callTime) {
+		this.callTime = callTime;
+	}
+
+	private String detail;
+
+	public String getDetail() {
+		return this.detail;
+	}
+
+	public void setDetail(String detail) {
+		this.detail = detail;
+	}
+
+	public CallReportDto(int seq, CompanyDto customer, Date callTime, String detail, String rating, UserDto user) {
+		this.seq = seq;
+		this.customer = customer;
+		this.callTime = callTime;
+		this.detail = detail;
+		this.rating = rating;
+		this.salesperson = user;
+	}
+
+	public CallReportDto() {}
 
 	public int getSeq() {
 		return seq;
@@ -18,56 +52,21 @@ public class CallReportDto {
 	public void setSeq(int seq) {
 		this.seq = seq;
 	}
-
-	public String getPhone() {
-		return phone;
+	private String rating;
+	public String getRating() {
+		return this.rating;
+	}
+	public void setRating(String rating) {
+		this.rating = rating;
 	}
 
-	public void setPhone(String phone) {
-		this.phone = phone;
+	public UserDto getSalesperson() {
+		return salesperson;
 	}
 
-	public Date getCallDate() {
-		return callDate;
+	public void setSalesperson(UserDto salesperson) {
+		this.salesperson = salesperson;
 	}
 
-	public void setCallDate(Date callDate) {
-		this.callDate = callDate;
-	}
-
-	public String getNote() {
-		return note;
-	}
-
-	public void setNote(String note) {
-		this.note = note;
-	}
-
-	public String getRate() {
-		return rate;
-	}
-
-	public void setRate(String rate) {
-		this.rate = rate;
-	}
-
-	public CallReportDto(int seq, ContactDto contact, String phone, Date callDate,
-			String note, String rate) {
-		this.seq = seq;
-		this.phone = phone;
-		this.callDate = callDate;
-		this.note = note;
-		this.rate = rate;
-		this.contact = contact;
-	}
-
-	public CallReportDto() {}
-
-	public ContactDto getContact() {
-		return contact;
-	}
-
-	public void setContact(ContactDto contact) {
-		this.contact = contact;
-	}
+	private UserDto salesperson;
 }

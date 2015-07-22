@@ -6,6 +6,9 @@
 	  xmlns:ui="http://java.sun.com/jsf/facelets"
 	  xmlns:p="http://primefaces.org/ui"
 	  >
+	  <f:metadata>
+	  	<f:event listener="#{noteController.reload}" type="preRenderView"></f:event>
+	  </f:metadata>
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
@@ -32,62 +35,71 @@
 	<h:form id="form01">
 
 		<p:menubar>
-			<p:menuitem value="Dashboard" url="#{requestContext}/faces/manager.jsf" />
-			<p:submenu label="Products">
+			<p:menuitem value="#{message.dashboard}" url="#{requestContext}/faces/manager.jsf" />
+			<p:submenu label="#{message.products}">
 				<p:menuitem value="AutoCAD" url="#{requestContext}/products/AutoCAD.jsf" />
 				<p:menuitem value="Quickdesk" url="#{requestContext}/products/quickdesk.jsf" />
 				<p:menuitem value="Revit" url="#{requestContext}/products/Revit.jsf" />
 				<p:menuitem value="Stormworks" url="#{requestContext}/products/Stormworks.jsf" />
 			</p:submenu>
-			<p:submenu label="Reports">
-				<p:menuitem value="Expense" url="#{requestContext}/faces/expense.jsf" />
-				<p:menuitem value="Sale report" url="#{requestContext}/faces/report.jsf" />
-				<p:menuitem value="Add new purchase" url="../faces/report.jsf" />
+			<p:submenu label="#{message.reports}">
+				<p:menuitem value="#{message.expense}" url="#{requestContext}/faces/expense.jsf" />
+				<p:menuitem value="#{message.salereport}" url="#{requestContext}/faces/report.jsf" />
+				<p:menuitem value="#{message.addnewrecord}" url="../faces/report.jsf" />
 			</p:submenu>
-			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
-			<p:menuitem value="Notes" url="../faces/notes.jsf" />
-			<p:menuitem value="LOG OUT" action="#{noteController.logout}" immediate="true" />
+			<p:menuitem value="#{message.customers}" url="../faces/companyList.jsf" />
+			<p:menuitem value="#{message.notes}" url="../faces/notes.jsf" />
+			<p:menuitem value="#{message.logout}" action="#{noteController.logout}" immediate="true" />
 		</p:menubar>
 
 		<h:messages id="messages" infoClass="message info" fatalClass="message error" errorClass="message error"/>
+		<br/>
+		<p:selectOneMenu value="#{languageBean.localeCode}">
+			<f:selectItems value="#{languageBean.countriesInMap}" />
+			<p:ajax event="change" listener="#{languageBean.countryLocaleCodeChanged}" update="@form" />
+		</p:selectOneMenu>
+		<br/>
 
-		<p:commandButton value="Add new user and note" actionListener="#{noteController.startAdd}" immediate="true"
+		<p:commandButton value="#{message.createUserAndNote}" actionListener="#{noteController.startAdd}" immediate="true"
 			update=":form01" oncomplete="noteDialog_w.show()" />
 
 		<p:dialog id="noteDialog" closable="false" visible="#{noteController.addMode}"
 				widgetVar="noteDialog_w" modal="true" resizable="false" draggable="true" header="New Note">
 			<p:messages />
 			<h:panelGrid columns="2">
-				<h:outputText value="New customer id" />
+				<h:outputText value="#{message.newUserID}" />
 				<p:inputText id="newid" value="#{noteController.newUser.id}" validator="#{noteController.userValidator}">
 				</p:inputText>
 
-				<h:outputText value="New customer name" />
+				<h:outputText value="#{message.newUserName}" />
 				<p:inputText value="#{noteController.newUser.name}" validator="#{noteController.userNameValidator}">
 				</p:inputText>
 
-				<h:outputText value="Note to customer" />
+				<h:outputText value="#{message.note}" />
 				<p:inputTextarea id="noteContent" value="#{noteController.newNote.note}" />
+
+				<h:outputText value="Email" />
+				<p:inputText value="#{noteController.email}" />
 			</h:panelGrid>
-			<p:commandButton value="Submit" action="#{noteController.addUserAndNote}" update="@all" ajax="true" process=":form01:noteDialog" />
-			<p:commandButton value="Cancel" actionListener="#{noteController.cancelNew}" update="@all" ajax="true" process=":form01:noteDialog" immediate="true" />
+			<p:commandButton value="#{message.submit}" action="#{noteController.addUserAndNote}" update="@all" ajax="true" process=":form01:noteDialog" />
+			<p:commandButton value="#{message.cancel}" actionListener="#{noteController.cancelNew}" update="@all" ajax="true" process=":form01:noteDialog" immediate="true" />
 		</p:dialog>
 
-		<p:commandButton value="Send note to existing user" actionListener="#{noteController.startAddExisting}" oncomplete="extDialog_w.show()"
+		<p:commandButton value="#{message.sendNoteExistingUser}" actionListener="#{noteController.startAddExisting}" oncomplete="extDialog_w.show()"
 			update=":form01" immediate="true" />
 
 		<p:dialog id="extDialog" closable="false" visible="#{noteController.extMode}"
 				widgetVar="extDialog_w" modal="true" resizable="false" draggable="true" header="Create note">
 			<p:messages />
 			<p:panelGrid columns="2">
-				<h:outputText value="User name" />
+				<h:outputText value="#{message.userName}" />
 				<p:autoComplete value="#{noteController.clientName}" completeMethod="#{noteController.suggestClient}"
 					minQueryLength="3" validator="#{noteController.validateClientName}"/>
-				<h:outputText value="Note" />
+				<h:outputText value="#{message.note}" />
 				<p:inputTextarea value="#{noteController.newNote.note}" validator="#{noteController.validateNoteContent}"/>
 			</p:panelGrid>
-			<p:commandButton value="Submit" action="#{noteController.addNewNote}" update="@all" ajax="true" process=":form01:extDialog"/>
-			<p:commandButton value="Cancel" actionListener="#{noteController.cancelExisting}" update="@all" ajax="true" immediate="true" process=":form01:extDialog" />
+			<p:commandButton value="#{message.submit}" action="#{noteController.addNewNote}" update="@all" ajax="true" process=":form01:extDialog"/>
+			<p:commandButton value="#{message.cancel}" actionListener="#{noteController.cancelExisting}" update="@all" ajax="true" immediate="true" process=":form01:extDialog" />
 		</p:dialog>
 
 		<p:dataTable id="tbl1" rowIndexVar="row" value="#{noteController.notes}" var="note"

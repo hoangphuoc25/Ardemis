@@ -5,6 +5,10 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui">
+
+	<f:metadata>
+		<f:event type="preRenderView" listener="#{managerController.reload}"></f:event>
+	</f:metadata>
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
@@ -37,6 +41,33 @@
 			<p:menuitem value="Notes" url="../faces/notes.jsf" />
 			<p:menuitem value="LOG OUT" style="float: right" action="#{managerController.logout}" immediate="true" update="form01" />
 		</p:menubar>
+
+		<h3 style="font-family: Helvetica">Employees' schedule today</h3>
+		<p:dataTable id="tbl2" rowIndexVar="row" value="#{managerController.eventList}" var="event"
+				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+				rows="15">
+			<p:column headerText="From">
+				<h:outputText value="#{event.from}">
+					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="To">
+				<h:outputText value="#{event.to}">
+					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Detail">
+				<h:outputText value="#{event.detail}" />
+			</p:column>
+			<p:column headerText="Customer">
+				<h:outputText value="#{event.customer.name}" />
+			</p:column>
+			<p:column headerText="Salesperson">
+				<h:outputText value="#{event.salesperson.name}" />
+			</p:column>
+		</p:dataTable>
+
+		<h3 style="font-family: Helvetica">Employee search</h3>
 		<p:panelGrid columns="3">
 			<p:panelGrid columns="2">
 				<p:outputLabel for="teamCombo" value="Select Team" />
@@ -64,11 +95,17 @@
 				<h:outputText value="#{sale.phone}" />
 			</p:column>
 			<p:column table="Link">
-				<a href="#{request.contextPath}/faces/employee.jsf?id=#{sale.id}" style="color: blue; underline: none;">Detail</a>
+				<a href="#{request.contextPath}/faces/employee.jsf?id=#{sale.id}" style="color: blue; underline: none;">Expense Detail</a>
 				<h:outputText value="    " />
+				<p:commandButton value="View Schedule" actionListener="#{managerController.updateEmpId(sale)}" update=":form01:schedule"/>
 				<a href="#{request.contextPath}/faces/employeeSchedule.jsf?id=#{sale.id}" style="color: blue; underline: none;">Schedule</a>
 			</p:column>
 		</p:dataTable>
+
+
+		<h3 style="font-family: Helvetica">Employee schedule</h3>
+		<p:schedule id="schedule" value="#{managerController.model}" draggable="false" resizable="false" style="max-width: 800px; margin-left:auto; margin-right: auto;"
+			rendered="#{managerController.team > 0}"/>
 
 		<p:ajaxStatus style="text-align: center;">
 			<f:facet name="start">

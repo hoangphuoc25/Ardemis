@@ -96,4 +96,17 @@ public class MeetingServiceImpl implements MeetingService, Serializable {
 			throw e;
 		}
 	}
+
+	@Override
+	public List<MeetingDto> getMeetingToday() throws IOException {
+		try {
+			transaction.begin();
+			List<MeetingDto> result = meetingDao.getMeetingToday(transaction);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

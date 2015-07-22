@@ -5,6 +5,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
@@ -126,7 +128,7 @@ public class NoteController implements Serializable {
 
 		addMode = false;
 
-		sessionManager.addGlobalMessageInfo("USER CREATED", null);
+		sessionManager.addGlobalMessageInfo(getBundle().getString("newUserCreated"), null);
 //		RequestContext context = RequestContext.getCurrentInstance();
 //		context.execute("noteDialog_w.hide();");
 	}
@@ -156,7 +158,7 @@ public class NoteController implements Serializable {
 		notes.add(newNote);
 		logger.error("newnote added");
 
-		sessionManager.addGlobalMessageInfo("New note created", null);
+		sessionManager.addGlobalMessageInfo(getBundle().getString("newNoteCreated"), null);
 		newUser = new UserDto();
 		newNote = new NoteDto();
 		addMode = false;
@@ -232,7 +234,7 @@ public class NoteController implements Serializable {
     	String id = value.toString();
 		logger.error("ID:" + id);
 		if (id == null || id.isEmpty()) {
-			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "User id is required.", null));
+			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, getBundle().getString("userIDRequired"), null));
 		}
 		try {
 			if (userService == null) {
@@ -240,7 +242,7 @@ public class NoteController implements Serializable {
 			}
 			UserDto user = userService.findUserById(id);
 			if (user != null) {
-				throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "User id existed", null));
+				throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, getBundle().getString("userIDExisted"), null));
 			}
 		} catch (IOException e) {
 			logger.error("ERROR");
@@ -251,7 +253,7 @@ public class NoteController implements Serializable {
     public void userNameValidator(FacesContext context, UIComponent component, Object value) {
     	String name = value.toString();
 		if (name == null || name.isEmpty()) {
-			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "User name is required.", null));
+			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, getBundle().getString("userNameRequired"), null));
 		}
     }
 
@@ -300,11 +302,11 @@ public class NoteController implements Serializable {
 
 	public void addNewNote() throws IOException {
 		if (clientName == null || clientName.isEmpty()) {
-			sessionManager.addGlobalMessageFatal("User name is required.", null);
+			sessionManager.addGlobalMessageFatal(getBundle().getString("userNameRequired"), null);
 			return;
 		}
 		if (newNote.getNote().isEmpty()) {
-			sessionManager.addGlobalMessageFatal("Note content required.", null);
+			sessionManager.addGlobalMessageFatal(getBundle().getString("noteContentRequired"), null);
 			return;
 		}
 		String id = getClientName().split("[()]")[1];
@@ -315,7 +317,7 @@ public class NoteController implements Serializable {
 		noteService.addNote(newNote);
 
 		notes.add(newNote);
-		sessionManager.addGlobalMessageInfo("New note created", null);
+		sessionManager.addGlobalMessageInfo(getBundle().getString("newNoteCreated"), null);
 
 		extMode = false;
 		newNote = new NoteDto();
@@ -333,7 +335,7 @@ public class NoteController implements Serializable {
 	public void onRowEdit(RowEditEvent event) throws IOException {
 		NoteDto note = (NoteDto) event.getObject();
 		if (note.getNote().isEmpty()) {
-			sessionManager.addGlobalMessageFatal("Note content is required", null);
+			sessionManager.addGlobalMessageFatal(getBundle().getString("noteContentRequired"), null);
 			restoreObj(event);
 			return;
 		}
@@ -343,7 +345,7 @@ public class NoteController implements Serializable {
 		for (int i = notes.size() - 1; i >= 0; i--) {
     		if (notes.get(i).getSeq() == note.getSeq()) {
     			notes.set(i, note);
-    			sessionManager.addGlobalMessageInfo("Info updated successully", null);
+    			sessionManager.addGlobalMessageInfo(getBundle().getString("succeed"), null);
     			break;
     		}
     	}
@@ -377,14 +379,14 @@ public class NoteController implements Serializable {
 	public void validateNoteContent(FacesContext facesContext, UIComponent component, Object value) throws IOException {
 		String content = value.toString();
 		if (content.isEmpty()) {
-			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Note is required.", null));
+			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, getBundle().getString("noteContentRequired"), null));
 		}
 	}
 
 	public void validateClientName(FacesContext facesContext, UIComponent component, Object value) throws IOException {
 		String name = value.toString();
 		if (name.isEmpty()) {
-			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Name is required.", null));
+			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, getBundle().getString("userNameRequired"), null));
 		}
 	}
 
@@ -393,4 +395,29 @@ public class NoteController implements Serializable {
 		sessionManager.logoff();
 		return "../portal.jsf?faces-redirect=true";
 	}
+
+	public ResourceBundle getBundle() {
+		if (bundle == null) {
+			FacesContext facesContext = FacesContext.getCurrentInstance();
+			String messageBundleName = "resources.welcome";
+			Locale locale = facesContext.getViewRoot().getLocale();
+			bundle = ResourceBundle.getBundle(messageBundleName, locale);
+		}
+		return bundle;
+	}
+
+	public void setBundle(ResourceBundle bundle) {
+		this.bundle = bundle;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	private ResourceBundle bundle;
+	private String email;
 }

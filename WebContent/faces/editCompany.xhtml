@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+	  <f:metadata>
+	  	<f:viewParam name="seq" value="#{editCompanyController.seq}"></f:viewParam>
+	  	<f:event type="preRenderView" listener="#{editCompanyController.reload}" />
+	  </f:metadata>
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+	<style>
+		.alert {
+			display: block;
+			font-family: Arial;
+			padding: 15px;
+			margin-bottom: 20px;
+			border: 1px solid transparent;
+			border-radius: 4px;
+		}
+		.alert-warning {
+			color: #8a6d3b;
+			background-color: #fcf8e3;
+			border-color: #faebcc;
+		}
+		.alert-info {
+			 color: #3c763d;
+			 background-color: #dff0d8;
+			 border-color: #d6e9c6;
+		}
+		.alert-danger {
+			 color: #a94442;
+			 background-color: #f2dede;
+			 border-color: #ebccd1;
+		}
+	</style>
+</h:head>
+<h:body>
+	<h:form id="form01">
+		<h:messages infoClass="alert alert-info" fatalClass="alert alert-danger" errorClass="alert alert-danger" warnClass="alert alert-warning"/>
+		<h3 style="font-family: Helvetica;">Edit Company</h3>
+		<p:panelGrid columns="3">
+			<h:outputText value="Name*" />
+			<p:inputText id="comName" value="#{editCompanyController.cust.name}" required="true"
+				requiredMessage="Name is required" />
+			<p:message for="comName" />
+
+			<h:outputText value="Company size" />
+			<p:inputText id="comSize" value="#{editCompanyController.cust.size}" />
+			<p:message for="comSize" />
+
+			<h:outputText value="Industry*" />
+			<p:inputText id="comInd" value="#{editCompanyController.cust.industry}" required="true" requiredMessage="Industry is required"/>
+			<p:message for="comInd" />
+
+			<h:outputText value="Type" />
+			<p:inputText id="comType" value="#{editCompanyController.cust.type}" />
+			<p:message for="comType" />
+
+			<h:outputText value="Year founded" />
+			<p:inputText id="comYear" value="#{editCompanyController.cust.yearFounded}" />
+			<p:message for="comYear" />
+
+			<h:outputText value="Location*" />
+			<p:inputText id="comLocation" value="#{editCompanyController.cust.location}" required="true" requiredMessage="Location is required" />
+			<p:message for="comLocation" />
+
+			<h:outputText value="Phone*" />
+			<p:inputText id="comPhone" value="#{editCompanyController.cust.phone}" required="true" requiredMessage="Phone is required">
+				<f:validator validatorId="phoneValidator" />
+			</p:inputText>
+			<p:message for="comPhone" />
+
+			<h:outputText value="Remark" />
+			<p:inputTextarea id="comRemark" value="#{editCompanyController.cust.remark}" />
+			<p:message for="comRemark" />
+
+			<h:outputText value="* = required fields" />
+			<h:outputText value="" />
+			<h:outputText value="" />
+		</p:panelGrid>
+		<h:commandButton value="Submit" actionListener="#{editCompanyController.edit}" update="form01" />
+		<h:commandButton value="Cancel" actionListener="#{editCompanyController.cancel}" update="form01" />
+	</h:form>
+</h:body>
+</html>

@@ -2,6 +2,7 @@ package rd.impl.service;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -65,6 +66,44 @@ public class CallReportServiceImpl implements CallReportService, Serializable {
 			transaction.begin();
 			callReportDao.deleteCallReport(transaction, cr);
 			transaction.commit();
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+
+	@Override
+	public int getSeq() throws IOException {
+		try {
+			transaction.begin();
+			int seq = callReportDao.getSeq(transaction);
+			transaction.commit();
+			return seq;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+
+	@Override
+	public List<CallReportDto> getAll() throws IOException {
+		try {
+			transaction.begin();
+			List<CallReportDto> all = callReportDao.getAll(transaction);
+			transaction.commit();
+			return all;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<CallReportDto> getByCompanyId(int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<CallReportDto> result = callReportDao.getByCompanyId(transaction, seq);
+			transaction.commit();
+			return result;
 		} catch (IOException e) {
 			transaction.rollback();
 			throw e;

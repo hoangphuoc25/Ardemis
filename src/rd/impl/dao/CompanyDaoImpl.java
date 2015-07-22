@@ -86,6 +86,8 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 		try {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(UPDATE_COMPANY);
+			System.out.println("CompanyDaoImpl.updateCompany()");
+			System.out.println(com.getName());
 			prepareStatement.setString(1, com.getName());
 			prepareStatement.setString(2, com.getSize());
 			prepareStatement.setString(3, com.getIndustry());
@@ -94,6 +96,7 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 			prepareStatement.setString(6, com.getLocation());
 			prepareStatement.setString(7, com.getPhone());
 			prepareStatement.setString(8, com.getRemark());
+			prepareStatement.setInt(9, com.getSeq());
 			resultSet = prepareStatement.executeQuery();
 
 			comCache.put(com);

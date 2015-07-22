@@ -104,11 +104,11 @@ public class SalespersonController implements Serializable {
 	public void addNewCompany() throws IOException {
 		newCust.setSeq(comService.getSeq());
 		comService.insertCompany(newCust);
-		customerList.add(newCust);
+		getCustomerList().add(newCust);
 		newCust = new CompanyDto();
 		addMode = false;
 
-		sessionManager.addGlobalMessageFatal("New company added", null);
+		sessionManager.addGlobalMessageInfo("New company added", null);
 		conversationEnd();
 	}
 

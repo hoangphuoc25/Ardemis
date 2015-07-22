@@ -157,9 +157,6 @@ public class ScheduleController implements Serializable {
 			}
 		});
 		int count = 0;
-		for (Pair<Date, Integer> p: time) {
-			System.out.println(p.getFirst() + " " + p.getSecond());
-		}
 		for (int i = 0; i < time.size(); i++) {
 			Pair<Date, Integer> p = time.get(i);
 			if (p.getSecond() == 1) {

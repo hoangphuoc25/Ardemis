@@ -6,40 +6,50 @@
 	  xmlns:ui="http://java.sun.com/jsf/facelets"
 	  xmlns:p="http://primefaces.org/ui"
 	  >
-	  <f:metadata>
-		<f:viewParam name="id" value="#{employeeController.id}" />
-		<f:event type="preRenderView" listener="#{employeeController.reload}"></f:event>
-	  </f:metadata>
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
 </h:head>
 <h:body>
-	<h:messages />
 	<h:form id="form01">
+
 		<p:menubar>
 			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink()}" />
-			<p:submenu label="Products" >
+			<p:submenu label="Products Catalog" >
 				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
 				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
 				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
 				<p:menuitem style="color: blue;" value="Stormworks" url="../products/Stormworks.jsf" />
 			</p:submenu>
-			<p:submenu label="Reports">
-				<p:menuitem value="Expense" url="../faces/expense.jsf" />
-				<p:menuitem value="Sale report" url="../faces/report.jsf" />
-				<p:menuitem value="Add new purchase" url="../faces/report.jsf" />
-				<p:menuitem value="All call reports" url="../faces/calls.jsf" />
-				<p:menuitem value="Add call report" url="../faces/callReport.jsf" />
-			</p:submenu>
-
+			<p:menuitem value="Products" url="../faces/products.jsf" />
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
 			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
 			<p:menuitem value="Notes" url="../faces/notes.jsf" />
-			<p:menuitem value="LOG OUT" style="float: right" action="#{feedbackController.logout}" immediate="true" update="form01" />
+			<p:menuitem style="position: absolute; right: 4px;" value="Logout" action="#{scheduleController.logout}" immediate="true" update="form01" />
 		</p:menubar>
-		<h3 style="font-family: Arial;">Employee schedule - #{employeeController.user.name}</h3>
-		<p:schedule value="#{employeeController.model}" draggable="false" resizable="false" style="max-width: 800px; margin-left:auto; margin-right: auto;"/>
+
+		<h:messages />
+		<p:dataTable id="tbl1" rowIndexVar="row" value="#{callReportController.allCalls}" var="call"
+				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+				rows="15" >
+			<p:column headerText="Company">
+				<a href="history.jsf?seq=#{call.customer.seq}" style="color: blue">#{call.customer.name}</a>
+			</p:column>
+			<p:column headerText="Call time">
+				<h:outputText value="#{call.callTime}">
+					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Detail">
+				<h:outputText value="#{call.detail}" />
+			</p:column>
+			<p:column headerText="Rating">
+				<h:outputText value="#{call.rating}" />
+			</p:column>
+			<p:column headerText="Salesperson">
+				<h:outputText value="#{call.salesperson.name}" />
+			</p:column>
+		</p:dataTable>
 	</h:form>
 </h:body>
 </html>

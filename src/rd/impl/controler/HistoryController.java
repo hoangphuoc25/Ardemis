@@ -17,10 +17,12 @@ import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import rd.dto.CallReportDto;
 import rd.dto.CompanyDto;
 import rd.dto.InvoiceDto;
 import rd.dto.ProductDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.CallReportService;
 import rd.spec.service.CompanyService;
 import rd.spec.service.InvoiceService;
 import rd.spec.service.ProductService;
@@ -35,6 +37,7 @@ public class HistoryController implements Serializable {
 	@Inject InvoiceService invoiceService;
 	@Inject ProductService prodService;
 	@Inject CompanyService compService;
+	@Inject CallReportService crService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -225,5 +228,18 @@ public class HistoryController implements Serializable {
 		this.company = company;
 	}
 
+	public List<CallReportDto> getCallResults() throws IOException {
+		if (callResults == null) {
+			callResults = crService.getByCompanyId(seq);
+		}
+		return callResults;
+	}
+
+	public void setCallResults(List<CallReportDto> callResults) {
+		this.callResults = callResults;
+	}
+
 	private CompanyDto company;
+	private List<CallReportDto> callResults;
+
 }

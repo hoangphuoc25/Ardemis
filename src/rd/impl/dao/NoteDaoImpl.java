@@ -79,7 +79,6 @@ public class NoteDaoImpl implements NoteDao {
 
 	public void addNote(Transaction transaction, NoteDto note) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		logger.error("ADDING NOTE");
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -93,7 +92,6 @@ public class NoteDaoImpl implements NoteDao {
 			prepareStatement.setDate(5, new java.sql.Date(note.getCreatedDate().getTime()));
 
 			resultSet = prepareStatement.executeQuery();
-			logger.error("QUERY EXECUTED");
 
 		} catch (SQLException e) {
 			throw new IOException(e);
