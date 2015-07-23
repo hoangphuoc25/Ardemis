@@ -340,6 +340,7 @@ def serv_impl_new_method(temp):
 		result += "\tpublic {0} {1} throws IOException {{\n".format(return_type, method_sign)
 
 		arg_element = [t.strip() for t in args[1:-1].split(',')]
+		print(arg_element)
 		arg_name = ['transaction'] + ([t.split(' ')[1] for t in arg_element] if len(arg_element) > 0 else [])
 		return_stmt = ''
 		return_obj = ''

@@ -1,11 +1,14 @@
 package rd.impl.controler;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -19,6 +22,7 @@ import org.primefaces.model.DefaultMenuModel;
 import org.primefaces.model.MenuModel;
 
 import rd.spec.manager.SessionManager;
+import rd.spec.service.UserService;
 
 @Named
 @SessionScoped
@@ -27,6 +31,7 @@ public class SessionController implements Serializable {
 
 
 	@Inject SessionManager sessionManager;
+	@Inject UserService userService;
 
 	private List<SelectItem> currencyList;
 	private List<SelectItem> links;
@@ -145,4 +150,34 @@ public class SessionController implements Serializable {
 		sessionManager.logoff();
 		return "../portal.jsf?faces-redirect=true";
 	}
+
+	// @PostConstruct -- only works with pages with no conversation started at the beginning (in preRenderView)
+	public void init() throws IOException {
+		System.out.println("SessionController.init()");
+		System.out.println("initing");
+		userService.updateLoginTime(sessionManager.getLoginUser().getId(), new Date());
+	}
+
+	public String getDashboardLink() throws IOException {
+		if (dashboardLink == null || dashboardLink.isEmpty()) {
+			userService.updateLoginTime(sessionManager.getLoginUser().getId(), new Date());
+			dashboardLink = dashboardLink();
+		}
+		return dashboardLink;
+	}
+
+	public void setDashboardLink(String dashboardLink) {
+		this.dashboardLink = dashboardLink;
+	}
+
+	public Date getLastLoginTime() {
+		return lastLoginTime;
+	}
+
+	public void setLastLoginTime(Date lastLoginTime) {
+		this.lastLoginTime = lastLoginTime;
+	}
+
+	private String dashboardLink;
+	private Date lastLoginTime;
 }

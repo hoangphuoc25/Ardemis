@@ -71,7 +71,7 @@ public class CallReportController implements Serializable {
 		this.companyName = companyName;
 	}
 
-	private Date callTime;
+	private Date callTime = new Date();
 	private String callDetail;
 	private String companyName;
 	private String rating;

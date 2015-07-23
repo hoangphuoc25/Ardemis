@@ -1,6 +1,7 @@
 package rd.spec.service;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import rd.dto.UserDto;
@@ -16,4 +17,5 @@ public interface UserService {
 	public List<UserDto> getUserByRole(String role) throws IOException;
 	public UserDto searchByEmail(String email) throws IOException;
 	public List<UserDto> getUserByTeamLazy(int seq) throws IOException;
+	public void updateLoginTime(String userId, Date loginTime) throws IOException;
 }

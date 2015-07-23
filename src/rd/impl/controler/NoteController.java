@@ -176,7 +176,7 @@ public class NoteController implements Serializable {
 	private boolean addMode = false;;
 
 	public void startAdd() {
-		reload();
+		// reload();
 		System.out.println("NoteController.startAdd()");
 		addMode = true;
 		newUser = new UserDto();

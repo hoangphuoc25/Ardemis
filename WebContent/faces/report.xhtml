@@ -41,7 +41,7 @@
 <h:body>
 	<h:form id="form01">
 		<p:menubar id="menu">
-			<p:menuitem value="Dashboard" url="#{requestContext}/faces/manager.jsf" />
+			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink}" />
 			<p:submenu label="Products Catalog">
 				<p:menuitem value="AutoCAD" url="#{requestContext}/products/AutoCAD.jsf" />
 				<p:menuitem value="Quickdesk" url="#{requestContext}/products/quickdesk.jsf" />

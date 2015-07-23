@@ -30,7 +30,7 @@
 	</style>
 	<h:form id="form01" styleClass="main">
 		<p:menubar>
-			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink()}" />
+			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink}" />
 			<p:submenu label="Products Catalog" >
 				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
 				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
@@ -42,7 +42,7 @@
 		</p:menubar>
 
 		<h3 style="font-family: Helvetica;">Welcome</h3>
-		<p>Our company offers a wide range of products for design and architectures. Please see take time to read the details about our products.</p>
+		<p>Our company offers a wide range of products for design and architecture industry. Please see take some time to read more detail about our products.</p>
 		<ul>
 			<li><a href="../products/AutoCAD.jsf" style="color: blue">AutoCAD</a></li>
 			<li><a href="../products/quickdesk.jsf" style="color: blue">Quickdesk</a></li>

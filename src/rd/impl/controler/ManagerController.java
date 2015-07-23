@@ -2,10 +2,12 @@ package rd.impl.controler;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
+import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -14,10 +16,14 @@ import javax.inject.Named;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultScheduleModel;
 import org.primefaces.model.ScheduleModel;
+import org.primefaces.push.PushContext;
+import org.primefaces.push.PushContextFactory;
 
+import rd.dto.CompanyDto;
 import rd.dto.MeetingDto;
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.CompanyService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.UserService;
 
@@ -31,6 +37,7 @@ public class ManagerController implements Serializable {
 	@Inject UserService userService;
 	@Inject SessionManager sessionManager;
 	@Inject MeetingService meetingService;
+	@Inject CompanyService compService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -141,5 +148,61 @@ public class ManagerController implements Serializable {
 	public void updateEmpId(UserDto sale) {
 		this.empId = sale.getId();
 		System.out.println(empId);
+	}
+
+	public boolean isAssignMode() {
+		return assignMode;
+	}
+
+	public void setAssignMode(boolean assignMode) {
+		this.assignMode = assignMode;
+	}
+
+	private boolean assignMode = false;
+	private String assignComName;
+	private UserDto assignee;
+
+	public void startAssign(UserDto assignee) {
+		assignMode = true;
+		this.setAssignee(assignee);
+	}
+
+	public String getAssignComName() {
+		return assignComName;
+	}
+
+	public void setAssignComName(String assignComName) {
+		this.assignComName = assignComName;
+	}
+
+	public UserDto getAssignee() {
+		return assignee;
+	}
+
+	public void setAssignee(UserDto assignee) {
+		this.assignee = assignee;
+	}
+
+	public void assignSale() {
+		System.out.println(assignee.getId());
+		System.out.println(assignComName);
+		assignMode = false;
+	}
+
+	public List<String> suggestCompany(String partial) throws IOException {
+		List<String> result = new ArrayList<String>();
+		List<CompanyDto> temp = compService.searchCompanyByName(partial);
+		for (CompanyDto dto: temp) {
+			result.add(dto.getName() + "("+dto.getSeq()+")");
+		}
+		return result;
+	}
+
+	public void cancel() {
+		assignMode = false;
+	}
+
+	public void abc() {
+        PushContext pushContext = PushContextFactory.getDefault().getPushContext();
 	}
 }

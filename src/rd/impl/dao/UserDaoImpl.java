@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -464,4 +465,41 @@ public class UserDaoImpl implements UserDao {
 	}
 
 	private static String GET_USER_BY_TEAM_LAZY = "select id, name, email, phone, team_seq from s_users where team_seq=?";
+	public void updateLoginTime(Transaction transaction, String userId, Date loginTime) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(DELETE_LOGIN_TIME);
+			prepareStatement.setString(1, userId);
+			resultSet = prepareStatement.executeQuery();
+
+			prepareStatement = connection.prepareStatement(ADD_LOGIN_TIME);
+			prepareStatement.setString(1, userId);
+			prepareStatement.setTimestamp(2, new java.sql.Timestamp(loginTime.getTime()));
+			resultSet = prepareStatement.executeQuery();
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String DELETE_LOGIN_TIME = "delete from t_login_record where user_id=?";
+	private static String ADD_LOGIN_TIME = "insert into t_login_record (user_id, last_login) values (?, ?)";
 }

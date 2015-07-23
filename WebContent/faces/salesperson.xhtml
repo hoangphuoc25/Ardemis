@@ -61,7 +61,7 @@
 <h:body>
 	<h:form id="form01">
 		<p:menubar>
-			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink()}" />
+			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink}" />
 			<p:submenu label="Products Catalog" >
 				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
 				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
@@ -71,6 +71,10 @@
 			<p:menuitem value="Products" url="../faces/products.jsf" />
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
 			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:submenu label="Reports">
+				<p:menuitem value="Call Report" url="../faces/calls.jsf" />
+				<p:menuitem value="Add call report" url="../faces/callReport.jsf" />
+			</p:submenu>
 			<p:menuitem value="Notes" url="../faces/notes.jsf" />
 			<p:menuitem value="LOG OUT" style="float: right" action="#{scheduleController.logout}" immediate="true" update="form01" />
 		</p:menubar>

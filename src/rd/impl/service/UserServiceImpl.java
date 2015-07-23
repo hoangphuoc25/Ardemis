@@ -2,6 +2,7 @@ package rd.impl.service;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
@@ -148,5 +149,22 @@ public class UserServiceImpl implements UserService, Serializable {
 			transaction.rollback();
 			throw e;
 		}
+	}
+
+	@Override
+	public void updateLoginTime(String userId, Date loginTime)
+			throws IOException {
+		try{
+			transaction.begin();
+			userDao.updateLoginTime(transaction, userId, loginTime);
+			transaction.commit();
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+
+	public Date getLastLoginTime() throws IOException {
+		return null;
 	}
 }
