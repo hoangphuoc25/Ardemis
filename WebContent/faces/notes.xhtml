@@ -94,7 +94,7 @@
 			<p:panelGrid columns="2">
 				<h:outputText value="#{message.userName}" />
 				<p:autoComplete value="#{noteController.clientName}" completeMethod="#{noteController.suggestClient}"
-					minQueryLength="3" validator="#{noteController.validateClientName}"/>
+					minQueryLength="3" validator="#{noteController.validateClientName}" forceSelection="true" />
 				<h:outputText value="#{message.note}" />
 				<p:inputTextarea value="#{noteController.newNote.note}" validator="#{noteController.validateNoteContent}"/>
 			</p:panelGrid>

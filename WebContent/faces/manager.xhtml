@@ -42,6 +42,7 @@
 			<p:menuitem value="LOG OUT" style="float: right" action="#{managerController.logout}" immediate="true" update="form01" />
 		</p:menubar>
 
+		<h:messages />
 		<h3 style="font-family: Helvetica">Employees' schedule today</h3>
 		<p:dataTable id="tbl2" rowIndexVar="row" value="#{managerController.eventList}" var="event"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"

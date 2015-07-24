@@ -34,13 +34,14 @@ public class CallReportDto {
 		this.detail = detail;
 	}
 
-	public CallReportDto(int seq, CompanyDto customer, Date callTime, String detail, String rating, UserDto user) {
+	public CallReportDto(int seq, CompanyDto customer, Date callTime, String detail, String rating, UserDto user, ProductDto product) {
 		this.seq = seq;
 		this.customer = customer;
 		this.callTime = callTime;
 		this.detail = detail;
 		this.rating = rating;
 		this.salesperson = user;
+		this.product = product;
 	}
 
 	public CallReportDto() {}
@@ -68,5 +69,14 @@ public class CallReportDto {
 		this.salesperson = salesperson;
 	}
 
+	public ProductDto getProduct() {
+		return product;
+	}
+
+	public void setProduct(ProductDto product) {
+		this.product = product;
+	}
+
 	private UserDto salesperson;
+	private ProductDto product;
 }

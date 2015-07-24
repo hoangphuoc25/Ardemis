@@ -13,4 +13,6 @@ public interface NoteDao {
 	public List<NoteDto> getBySender(Transaction transaction, String id) throws IOException;
 	public List<NoteDto> getByReceiver(Transaction transaction, String id) throws IOException;
 	public int getSeq(Transaction transaction) throws IOException;
+	public List<NoteDto> getNoteByStatus(Transaction transaction, String userId, String status) throws IOException;
+	public List<NoteDto> getRecentNote(Transaction transaction, String userId) throws IOException;
 }

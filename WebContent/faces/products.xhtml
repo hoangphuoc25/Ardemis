@@ -8,6 +8,7 @@
 	  >
 	  <f:metadata>
 	  	<f:viewParam name="seq" value="#{productController.seq}" />
+	  	<f:event listener="#{productController.reload}" type="preRenderView"></f:event>
 	  </f:metadata>
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -19,7 +20,7 @@
 	</style>
 </h:head>
 <h:body>
-	<h:form id="form01">
+	<h:form id="form01" target="_blank">
 
 		<p:menubar>
 			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink}" />
@@ -56,11 +57,10 @@
 		<p:dataTable id="tbl1" rowIndexVar="row" value="#{productController.products}" var="prod"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 				rows="15" selection="#{productController.selectedProd}" selectionMode="single" rowKey="#{prod.seq}">
-			<p:ajax event="rowSelect" oncomplete="prodDialog_w.show();" listener="#{productController.showDialog}" update=":form01"/>
 			<p:column headerText="Name">
 				<h:outputText value="#{prod.name}" />
 			</p:column>
-			<p:column headerText="Summary">
+			<p:column headerText="Summary" style="max-width: 650px;">
 				<h:outputText value="#{prod.summary}" />
 			</p:column>
 			<p:column headerText="Target">
@@ -71,6 +71,12 @@
 			</p:column>
 			<p:column headerText="Link">
 				<a href="../faces/productdetail.jsf?seq=#{prod.seq}" style="color: blue; text-decoration: none;">Detail</a>
+				<p:spacer width="10px" />
+				<p:commandLink value="Edit" style="color: blue" actionListener="#{productController.showDialog(prod)}" update=":form01" />
+				<p:spacer width="10px" />
+				<p:commandLink value="Detail" style="color: blue" actionListener="#{productController.startShowDetail(prod)}" update=":form01" />
+				<p:spacer width="10px" />
+				<a href="#{productController.catalogLink(prod)}" target="_blank" style="color: blue;">Catalog</a>
 			</p:column>
 
 		</p:dataTable>
@@ -112,7 +118,69 @@
 		</p:dialog>
 		</p:outputPanel>
 
+		<p:ajaxStatus style="text-align: center;">
+			<f:facet name="start">
+				<h:outputText value="Loading"/><br/>
+				<p:graphicImage value="/images/loading.gif" />
+			</f:facet>
+			<f:facet name="complete">
+				<h:outputText value=""/>
+			</f:facet>
+		</p:ajaxStatus>
 
+		<p:dialog id="detailDialog" closable="false" visible="#{productController.viewDetailMode}" style="height: 750px;"
+				widgetVar="detailDialog_w" modal="true" resizable="false" draggable="true" header="Product Detail">
+			<p:scrollPanel mode="native" style="max-height: 650px; max-width:500px;">
+				<h3>Purchase history</h3>
+				<p:dataTable id="tbl2" rowIndexVar="row" value="#{productController.purchases}" var="purchase"
+						paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}" row="20">
+					<p:column headerText="Id">
+						<h:outputText value="#{purchase.seq}" />
+					</p:column>
+					<p:column headerText="Date">
+						<h:outputText value="#{purchase.purchaseDate}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="Company" >
+						<a href="#{request.contextPath}/faces/history.jsf?seq=#{purchase.customer.seq}" style="color: blue;">#{purchase.customer.name}</a>
+					</p:column>
+					<p:column headerText="Purchase Date">
+						<h:outputText value="#{purchase.purchaseDate}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="Amount">
+						<h:outputText value="#{productController.deduceAmount(purchase)}" />
+					</p:column>
+				</p:dataTable>
+
+				<h3>Feedbacks</h3>
+				<p:dataTable id="tbl3" rowIndexVar="row" value="#{productController.feedbacks}" var="fb"
+						paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+						rows="15">
+					<p:column headerText="User id">
+						<h:outputText value="#{fb.customer.id}" />
+					</p:column>
+					<p:column headerText="Rating">
+						<p:rating value="#{fb.rating}" readonly="true" />
+					</p:column>
+					<p:column headerText="Feedback">
+						<h:outputText value="#{fb.feedback}" />
+					</p:column>
+				</p:dataTable>
+
+				<p:commandButton value="Cancel" actionListener="#{productController.detailCancel}" oncomplete="detailDialog_w.hide()" update=":form01" />
+			</p:scrollPanel>
+		</p:dialog>
+
+		<p:dialog id="catalog" closable="false" visible="false"
+				widgetVar="catalog_w" modal="true" resizable="false" draggable="true" header="Product Catalog">
+			<p:commandButton value="Close" onclick="catalog_w.hide()" update=":form01" />
+			<p:scrollPanel mode="native" style="max-height: 650px;">
+	    		<ui:include src="#{productController.detailPath}" />
+	    	</p:scrollPanel>
+		</p:dialog>
 
 	</h:form>
 </h:body>

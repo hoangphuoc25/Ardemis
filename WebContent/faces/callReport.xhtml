@@ -39,7 +39,7 @@
 		<h3 style="font-family: Helvetica">Add new call report</h3>
 		<p:panelGrid columns="2">
 			<h:outputText value="Company Name" />
-			<p:autoComplete minQueryLength="3" maxResults="10" completeMethod="#{callReportController.suggestCompany}" value="#{callReportController.companyName}">
+			<p:autoComplete minQueryLength="3" maxResults="10" completeMethod="#{callReportController.suggestCompany}" value="#{callReportController.companyName}" forceSelection="true" >
 			</p:autoComplete>
 
 			<h:outputText value="Call time" />
@@ -52,6 +52,9 @@
 			<p:selectOneMenu value="#{callReportController.rating}" >
 				<f:selectItems value="#{callReportController.ratings}" />
 			</p:selectOneMenu>
+
+			<h:outputText value="Rating" />
+			<p:autoComplete minQueryLength="3" maxResults="10" value="#{callReportController.productName}" completeMethod="#{callReportController.suggestProd}" forceSelection="true" />
 		</p:panelGrid>
 		<p:commandButton value="Submit" actionListener="#{callReportController.addNewReport}" update="form01" />
 		<br/>

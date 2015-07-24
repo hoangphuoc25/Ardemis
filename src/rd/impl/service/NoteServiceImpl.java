@@ -126,4 +126,28 @@ public class NoteServiceImpl implements NoteService, Serializable {
 			throw e;
 		}
 	}
+	public List<NoteDto> getNoteByStatus(String userId, String status) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<NoteDto> result = noteDao.getNoteByStatus(transaction, userId, status);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<NoteDto> getRecentNote(String userId) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<NoteDto> result = noteDao.getRecentNote(transaction, userId);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

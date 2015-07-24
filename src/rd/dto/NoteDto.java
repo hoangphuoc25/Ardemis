@@ -7,6 +7,8 @@ public class NoteDto {
 	private UserDto toUser;
 	private int seq;
 	private String note;
+	private Date createdDate;
+	private String status;
 
 	public String getNote() {
 		return note;
@@ -40,8 +42,6 @@ public class NoteDto {
 		this.toUser = toUser;
 	}
 
-	private Date createdDate;
-
 	public Date getCreatedDate() {
 		return this.createdDate;
 	}
@@ -56,9 +56,27 @@ public class NoteDto {
 		this.toUser = to;
 		this.note = note;
 		this.createdDate = createdDate;
+		this.status = "UNREAD";
+	}
+
+	public NoteDto(int seq, UserDto from, UserDto to, String note, Date createdDate, String status) {
+		this.seq = seq;
+		this.fromUser = from;
+		this.toUser = to;
+		this.note = note;
+		this.createdDate = createdDate;
+		this.status = status;
 	}
 
 	public NoteDto() {
 		super();
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }

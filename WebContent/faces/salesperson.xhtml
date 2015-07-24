@@ -12,6 +12,7 @@
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
+	<link href="../css/bootstrap/bootstrap.min.css" rel="stylesheet" />
 	<style>
 		.message {
 			display: block;
@@ -56,6 +57,9 @@
 			padding: 15px;
 			margin-bottom: 20px;
 		}
+		.newMsg {
+			background-color: #ffef8f;
+		}
 	</style>
 </h:head>
 <h:body>
@@ -80,24 +84,13 @@
 		</p:menubar>
 
 		<h:messages infoClass="alert alert-info" fatalClass="alert alert-danger" errorClass="alert alert-danger" warnClass="alert alert-warning"/>
-
-		<h4 style="font-family: Helvetica;">Add new schedule event</h4>
-		<h:panelGrid columns="2">
-			<h:outputText value="From" />
-			<p:calendar value="#{scheduleController.from}" pattern="MM/dd/yyyy HH:mm" />
-			<h:outputText value="To" />
-			<p:calendar value="#{scheduleController.to}" pattern="MM/dd/yyyy HH:mm" />
-			<h:outputText value="Title" />
-			<p:inputText value="#{scheduleController.title}" />
-			<h:outputText value="Company" />
-			<p:autoComplete forceSelection="true" value="#{scheduleController.companyName}" minQueryLength="3" maxResults="10" completeMethod="#{scheduleController.suggestCompany}" />
-		</h:panelGrid>
-		<p:commandButton value="Add" actionListener="#{scheduleController.addNewEvent}" update="form01" />
-
+		<p:outputPanel id="firstMessage">
+			<a href="#form01:tbl3">You have <span class="badge">#{scheduleController.newNotes}</span> unread message(s).</a>
+		</p:outputPanel>
 		<h3 style="font-family: Helvetica;">Your schedule</h3>
 		<p:schedule value="#{scheduleController.model}" draggable="false" resizable="false" style="max-width: 800px; margin-left:auto; margin-right: auto;"/>
 
-		<p:panel id="toggleable" header="Schedule" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px">
+		<p:panel id="toggleable" header="Schedule" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px" collapsed="true">
 			<p:dataTable id="tbl2" rowIndexVar="row" value="#{scheduleController.events}" var="event"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="15">
@@ -130,6 +123,42 @@
 	            </p:menu>
 	        </f:facet>
     	</p:panel>
+
+    	<h4 style="font-family: Helvetica;">Add new schedule event</h4>
+		<h:panelGrid columns="2">
+			<h:outputText value="From" />
+			<p:calendar value="#{scheduleController.from}" pattern="MM/dd/yyyy HH:mm" />
+			<h:outputText value="To" />
+			<p:calendar value="#{scheduleController.to}" pattern="MM/dd/yyyy HH:mm" />
+			<h:outputText value="Title" />
+			<p:inputText value="#{scheduleController.title}" />
+			<h:outputText value="Company" />
+			<p:autoComplete forceSelection="true" value="#{scheduleController.companyName}" minQueryLength="3" maxResults="10" completeMethod="#{scheduleController.suggestCompany}" />
+		</h:panelGrid>
+		<p:commandButton value="Add" actionListener="#{scheduleController.addNewEvent}" update="form01" />
+
+		<h4 style="font-family: Helvetica;">Your messages</h4>
+		<p:dataTable id="tbl3" rowIndexVar="row" value="#{scheduleController.notes}" var="note"
+				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+				rows="7" rowStyleClass="#{note.status == 'UNREAD'? 'newMsg' : null}">
+			<p:column headerText="From">
+				<h:outputText value="#{note.fromUser.name}" />
+			</p:column>
+			<p:column headerText="To">
+				<h:outputText value="#{note.toUser.name}" />
+			</p:column>
+			<p:column headerText="Date">
+				<h:outputText value="#{note.createdDate}">
+					<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Note">
+				<h:outputText value="#{note.note}" />
+			</p:column>
+			<p:column>
+				<p:commandButton value="Mark as read" actionListener="#{scheduleController.markRead(note)}" update=":form01:tbl3, :form01:firstMessage" rendered="#{note.status == 'UNREAD'}" />
+			</p:column>
+		</p:dataTable>
 	</h:form>
 </h:body>
 </html>

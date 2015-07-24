@@ -15,9 +15,11 @@ import javax.inject.Named;
 
 import org.primefaces.context.RequestContext;
 
+import rd.dto.FeedbackDto;
 import rd.dto.InvoiceDto;
 import rd.dto.ProductDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.FeedbackService;
 import rd.spec.service.InvoiceService;
 import rd.spec.service.ProductService;
 
@@ -34,6 +36,8 @@ public class ProductController implements Serializable {
 	@Inject ProductService productService;
 	@Inject SessionManager sessionManager;
 	@Inject InvoiceService invoiceService;
+	@Inject SessionController sessionController;
+	@Inject FeedbackService fbService;
 
 	private ProductDto newProd = new ProductDto();
 	private List<ProductDto> products;
@@ -78,7 +82,7 @@ public class ProductController implements Serializable {
 	}
 
 	public void startAdd() {
-		reload();
+		// reload();
 		newProd = new ProductDto();
 		addMode = true;
 	}
@@ -138,11 +142,12 @@ public class ProductController implements Serializable {
 		this.editMode = editMode;
 	}
 
-	public void showDialog() {
-		reload();
+	public void showDialog(ProductDto prod) {
+		// reload();
 		addMode = false;
 		editMode = false;
 		viewMode = true;
+		selectedProd = new ProductDto(prod);
 		newProd = new ProductDto(selectedProd);
 	}
 
@@ -155,7 +160,7 @@ public class ProductController implements Serializable {
 	}
 
 	public void startEdit() {
-		reload();
+		// reload();
 		addMode = false;
 		editMode = true;
 		viewMode = false;
@@ -224,8 +229,6 @@ public class ProductController implements Serializable {
 	}
 
 	public int getSeq() {
-		System.out.println("ProductController.getSeq()");
-		System.out.println(seq);
 		return seq;
 	}
 
@@ -235,7 +238,6 @@ public class ProductController implements Serializable {
 
 	private int seq;
 
-	@Inject SessionController sessionController;
 	public double deducePrice(ProductDto prod) {
 		if (sessionController.getCurrency() == 0)
 			return prod.getPrice();
@@ -246,5 +248,93 @@ public class ProductController implements Serializable {
 		conversationEnd();
 		sessionManager.logoff();
 		return "../portal.jsf?faces-redirect=true";
+	}
+
+	public List<FeedbackDto> getFeedbacks() throws IOException {
+		if (feedbacks == null || feedbacks.size() == 0) {
+			feedbacks = fbService.getFeedbackByProduct(seq);
+		}
+		return feedbacks;
+	}
+
+	public void setFeedbacks(List<FeedbackDto> feedbacks) {
+		this.feedbacks = feedbacks;
+	}
+
+	public List<InvoiceDto> getPurchases() throws IOException {
+		if (purchases == null || purchases.size() == 0) {
+			purchases = invoiceService.findInvoicesByProduct(seq);
+		}
+		return purchases;
+	}
+
+	public void setPurchases(List<InvoiceDto> purchases) {
+		this.purchases = purchases;
+	}
+
+	public boolean isViewDetailMode() {
+		return viewDetailMode;
+	}
+
+	public void setViewDetailMode(boolean viewDetailMode) {
+		this.viewDetailMode = viewDetailMode;
+	}
+
+	private List<InvoiceDto> purchases;
+	private List<FeedbackDto> feedbacks;
+	private boolean viewDetailMode = false;
+
+	public void startShowDetail(ProductDto prod) throws IOException {
+		// reload();
+		viewDetailMode = true;
+		feedbacks = fbService.getFeedbackByProduct(prod.getSeq());
+		purchases = invoiceService.findInvoicesByProduct(prod.getSeq());
+	}
+
+	public double deduceAmount(InvoiceDto invoice) {
+		if (sessionController.getCurrency() == 0)
+			return invoice.getAmount();
+		return invoice.getAmount()*sessionController.getRates().get(sessionController.getCurrency());
+	}
+
+	public void detailCancel() {
+		viewDetailMode = false;
+	}
+
+	public void startShowCatalog(ProductDto prod) {
+		showCatalogMode = true;
+	}
+
+	public boolean isShowCatalogMode() {
+		return showCatalogMode;
+	}
+
+	public void setShowCatalogMode(boolean showCatalogMode) {
+		this.showCatalogMode = showCatalogMode;
+	}
+
+	public String getDetailPath() {
+		detailPath = "../products/AutoCAD.xhtml";
+		return detailPath;
+	}
+
+	public void setDetailPath(String detailPath) {
+		this.detailPath = detailPath;
+	}
+
+	private boolean showCatalogMode = false;
+	private String detailPath;
+
+	public String catalogLink(ProductDto prod) {
+		if (prod.getName().equalsIgnoreCase("autocad")) {
+			return "../products/AutoCAD.jsf";
+		} else if (prod.getName().equalsIgnoreCase("revit")) {
+			return "../products/Revit.jsf";
+		} else if (prod.getName().equalsIgnoreCase("quickdesk")) {
+			return "../products/quickdesk.jsf";
+		} else if (prod.getName().equalsIgnoreCase("stormworks")) {
+			return "../products/Stormworks.jsf";
+		}
+		return "";
 	}
 }

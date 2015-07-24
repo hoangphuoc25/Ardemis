@@ -15,13 +15,16 @@ import javax.inject.Named;
 
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultScheduleModel;
+import org.primefaces.model.ScheduleEvent;
 import org.primefaces.model.ScheduleModel;
 
 import rd.dto.CompanyDto;
 import rd.dto.MeetingDto;
+import rd.dto.NoteDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.CompanyService;
 import rd.spec.service.MeetingService;
+import rd.spec.service.NoteService;
 import rd.utils.Pair;
 
 @Named
@@ -33,6 +36,7 @@ public class ScheduleController implements Serializable {
 	@Inject MeetingService meetingService;
 	@Inject SessionManager sessionManager;
 	@Inject CompanyService compService;
+	@Inject NoteService noteService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -75,11 +79,12 @@ public class ScheduleController implements Serializable {
 	}
 
 	public ScheduleModel getModel() throws IOException {
-		System.out.println("ScheduleController.getModel()");
 		if (model == null) {
 			model = new DefaultScheduleModel();
 			for (MeetingDto dto: getEvents()) {
-				model.addEvent(new DefaultScheduleEvent(dto.getDetail(), dto.getFrom(), dto.getTo()));
+				DefaultScheduleEvent dse = new DefaultScheduleEvent(dto.getDetail() + ". Client: " + dto.getCustomer().getName(), dto.getFrom(), dto.getTo());
+				dse.setId(String.valueOf(dto.getSeq()));
+				model.addEvent(dse);
 			}
 		}
 		return model;
@@ -120,7 +125,6 @@ public class ScheduleController implements Serializable {
 		to = null;
 		title = "";
 		companyName = "";
-
 	}
 
 	public String getCompanyName() {
@@ -205,11 +209,54 @@ public class ScheduleController implements Serializable {
 				break;
 			}
 		}
-		model = new DefaultScheduleModel();
-		for (MeetingDto dto: events) {
-			model.addEvent(new DefaultScheduleEvent(dto.getDetail(), dto.getFrom(), dto.getTo()));
+		for (ScheduleEvent se: model.getEvents()) {
+			if (se.getStartDate().equals(meeting.getFrom()) && se.getEndDate().equals(meeting.getTo()) &&
+					se.getTitle().contains(meeting.getDetail())) {
+				model.deleteEvent(se);
+				break;
+			}
 		}
 		sessionManager.addGlobalMessageInfo("Event removed.", null);
 	}
 
+	public List<NoteDto> getNotes() throws IOException {
+		if (notes == null || notes.size() == 0) {
+			notes = noteService.getRecentNote(sessionManager.getLoginUser().getId());
+		}
+		return notes;
+	}
+
+	public void setNotes(List<NoteDto> notes) {
+		this.notes = notes;
+	}
+
+	public int getNewNotes() throws IOException {
+		if (newNotes == 0) {
+			for (NoteDto note: getNotes()) {
+				if (note.getStatus().equalsIgnoreCase("unread")) {
+					newNotes++;
+				}
+			}
+		}
+		return newNotes;
+	}
+
+	public void setNewNotes(int newNotes) {
+		this.newNotes = newNotes;
+	}
+
+	private List<NoteDto> notes;
+	private int newNotes;
+
+	public void markRead(NoteDto note) throws IOException {
+		note.setStatus("READ");
+		noteService.updateNote(note);
+		newNotes--;
+		for (int i = 0; i < notes.size(); i++) {
+			if (notes.get(i).getSeq() == note.getSeq()) {
+				notes.set(i, note);
+				break;
+			}
+		}
+	}
 }

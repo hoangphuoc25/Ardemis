@@ -13,4 +13,6 @@ public interface NoteService {
 	public List<NoteDto> getBySender(String id) throws IOException;
 	public List<NoteDto> getByReceiver(String id) throws IOException;
 	public int getSeq() throws IOException;
+	public List<NoteDto> getNoteByStatus(String userId, String status) throws IOException;
+	public List<NoteDto> getRecentNote(String userId) throws IOException;
 }

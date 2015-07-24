@@ -3,11 +3,11 @@ package rd.impl.controler;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
-import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -16,15 +16,15 @@ import javax.inject.Named;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultScheduleModel;
 import org.primefaces.model.ScheduleModel;
-import org.primefaces.push.PushContext;
-import org.primefaces.push.PushContextFactory;
 
 import rd.dto.CompanyDto;
 import rd.dto.MeetingDto;
+import rd.dto.NoteDto;
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.CompanyService;
 import rd.spec.service.MeetingService;
+import rd.spec.service.NoteService;
 import rd.spec.service.UserService;
 
 @Named
@@ -38,6 +38,7 @@ public class ManagerController implements Serializable {
 	@Inject SessionManager sessionManager;
 	@Inject MeetingService meetingService;
 	@Inject CompanyService compService;
+	@Inject NoteService noteService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -183,10 +184,13 @@ public class ManagerController implements Serializable {
 		this.assignee = assignee;
 	}
 
-	public void assignSale() {
-		System.out.println(assignee.getId());
-		System.out.println(assignComName);
+	public void assignSale() throws IOException {
+		String noteContent = "You have been assigned this company: " + assignComName;
+		int seq = noteService.getSeq();
+		NoteDto note = new NoteDto(seq, sessionManager.getLoginUser(), assignee, noteContent, new Date());
+		noteService.addNote(note);
 		assignMode = false;
+		sessionManager.addGlobalMessageInfo("Assigned", null);
 	}
 
 	public List<String> suggestCompany(String partial) throws IOException {
@@ -200,9 +204,5 @@ public class ManagerController implements Serializable {
 
 	public void cancel() {
 		assignMode = false;
-	}
-
-	public void abc() {
-        PushContext pushContext = PushContextFactory.getDefault().getPushContext();
 	}
 }

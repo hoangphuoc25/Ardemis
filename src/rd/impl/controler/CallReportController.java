@@ -17,9 +17,11 @@ import javax.inject.Named;
 
 import rd.dto.CallReportDto;
 import rd.dto.CompanyDto;
+import rd.dto.ProductDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.CallReportService;
 import rd.spec.service.CompanyService;
+import rd.spec.service.ProductService;
 
 @Named
 @ConversationScoped
@@ -30,6 +32,7 @@ public class CallReportController implements Serializable {
 	@Inject CompanyService compService;
 	@Inject CallReportService crService;
 	@Inject SessionManager sessionManager;
+	@Inject ProductService prodService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -92,8 +95,10 @@ public class CallReportController implements Serializable {
 		System.out.println(callTime);
 		int compSeq = Integer.parseInt(companyName.split("[()]")[1]);
 		CompanyDto customer = compService.getById(compSeq);
+		int prodSeq = Integer.parseInt(productName.split("[()]")[1]);
+		ProductDto prod = prodService.getProductById(prodSeq);
 		int seq = crService.getSeq();
-		CallReportDto cr = new CallReportDto(seq, customer, callTime, callDetail, rating, sessionManager.getLoginUser());
+		CallReportDto cr = new CallReportDto(seq, customer, callTime, callDetail, rating, sessionManager.getLoginUser(), prod);
 
 		crService.addReport(cr);
 
@@ -187,5 +192,24 @@ public class CallReportController implements Serializable {
 
 	public void cancel() {
 		addMode = false;
+	}
+
+	public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
+
+	private String productName;
+
+	public List<String> suggestProd(String partial) throws IOException {
+		List<String> result = new ArrayList<String>();
+		List<ProductDto> temp = prodService.searchByName(partial);
+		for (ProductDto dto: temp) {
+			result.add(dto.getName() + "(" + dto.getSeq() + ")");
+		}
+		return result;
 	}
 }

@@ -15,9 +15,11 @@ import org.slf4j.LoggerFactory;
 
 import rd.dto.CallReportDto;
 import rd.dto.CompanyDto;
+import rd.dto.ProductDto;
 import rd.dto.UserDto;
 import rd.spec.dao.CallReportDao;
 import rd.spec.dao.CompanyDao;
+import rd.spec.dao.ProductDao;
 import rd.spec.dao.Transaction;
 import rd.spec.dao.UserDao;
 
@@ -26,20 +28,22 @@ public class CallReportDaoImpl implements CallReportDao {
 
 	private CompanyDao companyDao;
 	private UserDao userDao;
+	private ProductDao productDao;
 
 	@Inject
-	public CallReportDaoImpl(CompanyDao companyDao, UserDao userDao) {
+	public CallReportDaoImpl(CompanyDao companyDao, UserDao userDao, ProductDao productDao) {
 		this.companyDao = companyDao;
 		this.userDao = userDao;
+		this.productDao = productDao;
 	}
 
-	private static String GET_ALL = "select seq, customer_seq, call_time, detail, rating, sale_id from t_call_report order by call_time desc";
+	private static String GET_ALL = "select seq, customer_seq, call_time, detail, rating, sale_id, product_seq from t_call_report order by call_time desc";
 	private static String DELETE_CALL_REPORT = "delete from t_call_report where seq=?";
 	private static String GET_SEQ = "select max(seq)+1 from t_call_report";
-	private static String ADD_REPORT = "insert into t_call_report (seq, customer_seq, call_time, detail, rating, sale_id) values (?, ?, ?, ?, ?, ?)";
-	private static String GET_BY_ID = "select seq, customer_seq, call_time, detail, rating, sale_id from t_call_report where seq=?";
-	private static String UPDATE_CALL_REPORT = "update t_call_report set customer_seq=?, call_time=?, detail=?, rating=?, sale_id=? where seq=?";
-	private static String GET_BY_COMPANY_ID = "select seq, customer_seq, call_time, detail, rating, sale_id from t_call_report where customer_seq=?";
+	private static String ADD_REPORT = "insert into t_call_report (seq, customer_seq, call_time, detail, rating, sale_id, product_seq) values (?, ?, ?, ?, ?, ?, ?)";
+	private static String GET_BY_ID = "select seq, customer_seq, call_time, detail, rating, sale_id, product_seq from t_call_report where seq=?";
+	private static String UPDATE_CALL_REPORT = "update t_call_report set customer_seq=?, call_time=?, detail=?, rating=?, sale_id=?, product_seq=? where seq=?";
+	private static String GET_BY_COMPANY_ID = "select seq, customer_seq, call_time, detail, rating, sale_id, product_seq from t_call_report where customer_seq=?";
 
 	public void addReport(Transaction transaction, CallReportDto report) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -55,6 +59,7 @@ public class CallReportDaoImpl implements CallReportDao {
 			System.out.println((new java.sql.Timestamp(report.getCallTime().getTime())).getTime());
 			System.out.println(report.getDetail());
 			System.out.println(report.getRating());
+			System.out.println(report.getProduct().getSeq());
 			System.out.println(report.getSalesperson().getId());
 
 			Connection connection = transaction.getResource(Connection.class);
@@ -65,6 +70,7 @@ public class CallReportDaoImpl implements CallReportDao {
 			prepareStatement.setString(4, report.getDetail());
 			prepareStatement.setString(5, report.getRating());
 			prepareStatement.setString(6, report.getSalesperson().getId());
+			prepareStatement.setInt(7, report.getProduct().getSeq());
 
 			resultSet = prepareStatement.executeQuery();
 
@@ -167,7 +173,8 @@ public class CallReportDaoImpl implements CallReportDao {
 		String detail = resultSet.getString(4);
 		String rating = resultSet.getString(5);
 		UserDto salesman = userDao.findUser(transaction, resultSet.getString(6));
-		return new CallReportDto(seq, comp, callTime, detail, rating, salesman);
+		ProductDto prod = productDao.getProductById(transaction, resultSet.getInt(7));
+		return new CallReportDto(seq, comp, callTime, detail, rating, salesman, prod);
 	}
 
 	public void updateCallReport(Transaction transaction, CallReportDto report) throws IOException {
@@ -183,7 +190,8 @@ public class CallReportDaoImpl implements CallReportDao {
 			prepareStatement.setString(3, report.getDetail());
 			prepareStatement.setString(4, report.getRating());
 			prepareStatement.setString(5, report.getSalesperson().getId());
-			prepareStatement.setInt(6, report.getSeq());
+			prepareStatement.setInt(6, report.getProduct().getSeq());
+			prepareStatement.setInt(7, report.getSeq());
 
 			resultSet = prepareStatement.executeQuery();
 
