@@ -360,7 +360,7 @@ public class UserDaoImpl implements UserDao {
 
 			List<UserDto> result = new ArrayList<UserDto>();
 			while (resultSet.next()) {
-				result.add(makeUserDto(transaction, resultSet));
+				result.add(findUser(transaction, resultSet.getString(1)));
 			}
 			return result;
 		} catch (SQLException e) {

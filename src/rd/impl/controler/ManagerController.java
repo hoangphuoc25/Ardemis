@@ -1,7 +1,14 @@
 package rd.impl.controler;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,18 +20,29 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultScheduleModel;
+import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.ScheduleModel;
+import org.primefaces.model.StreamedContent;
 
 import rd.dto.CompanyDto;
 import rd.dto.MeetingDto;
 import rd.dto.NoteDto;
+import rd.dto.SaleExpenseDto;
+import rd.dto.SaleTargetDto;
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.CompanyService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.NoteService;
+import rd.spec.service.SaleExpenseService;
+import rd.spec.service.SaleTargetService;
 import rd.spec.service.UserService;
 
 @Named
@@ -39,6 +57,7 @@ public class ManagerController implements Serializable {
 	@Inject MeetingService meetingService;
 	@Inject CompanyService compService;
 	@Inject NoteService noteService;
+	@Inject SaleTargetService stService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -121,14 +140,12 @@ public class ManagerController implements Serializable {
 	private ScheduleModel model;
 
 	public ScheduleModel getModel() throws IOException {
-
-			model = new DefaultScheduleModel();
-			List<MeetingDto> temp = meetingService.getMeetingByUser(empId);
-			System.out.println(empId);
-			System.out.println(temp.size());
-			for (MeetingDto dto: temp)
-				model.addEvent(new DefaultScheduleEvent(dto.getDetail(), dto.getFrom(), dto.getTo()));
-
+		model = new DefaultScheduleModel();
+		List<MeetingDto> temp = meetingService.getMeetingByUser(empId);
+		System.out.println(empId);
+		System.out.println(temp.size());
+		for (MeetingDto dto: temp)
+			model.addEvent(new DefaultScheduleEvent(dto.getDetail(), dto.getFrom(), dto.getTo()));
 		return model;
 	}
 
@@ -185,9 +202,8 @@ public class ManagerController implements Serializable {
 	}
 
 	public void assignSale() throws IOException {
-		String noteContent = "You have been assigned this company: " + assignComName;
 		int seq = noteService.getSeq();
-		NoteDto note = new NoteDto(seq, sessionManager.getLoginUser(), assignee, noteContent, new Date());
+		NoteDto note = new NoteDto(seq, sessionManager.getLoginUser(), assignee, taskDetail, new Date());
 		noteService.addNote(note);
 		assignMode = false;
 		sessionManager.addGlobalMessageInfo("Assigned", null);
@@ -205,4 +221,220 @@ public class ManagerController implements Serializable {
 	public void cancel() {
 		assignMode = false;
 	}
+
+
+	public boolean isViewExpenseMode() {
+		return viewExpenseMode;
+	}
+
+	public void setViewExpenseMode(boolean viewExpenseMode) {
+		this.viewExpenseMode = viewExpenseMode;
+	}
+
+	private boolean viewExpenseMode = false;
+
+	@Inject SaleExpenseService seService;
+	public void viewExpense(UserDto user) throws IOException {
+		reload();
+		assignMode = false;
+		empId = "";
+		viewExpenseMode = true;
+		expList = seService.getBySalepersonId(user.getId());
+	}
+
+	public List<SaleExpenseDto> getExpList() {
+		return expList;
+	}
+
+	public void setExpList(List<SaleExpenseDto> expList) {
+		this.expList = expList;
+	}
+
+	private List<SaleExpenseDto> expList;
+
+	public void cancelViewExpense() {
+		viewExpenseMode = false;
+	}
+
+	public StreamedContent getFile() throws ParseException {
+		reload();
+		HSSFWorkbook workbook = new HSSFWorkbook();
+		HSSFSheet sheet = workbook.createSheet("Sample sheet");
+		Row rr = sheet.createRow(0);
+		Cell cc = rr.createCell(0);
+		cc.setCellValue("Name");
+		cc = rr.createCell(1);
+		cc.setCellValue("Receipt Date");
+		cc = rr.createCell(2);
+		cc.setCellValue("Purpose");
+		cc = rr.createCell(3);
+		cc.setCellValue("Receipt No");
+		cc = rr.createCell(4);
+		cc.setCellValue("Amount");
+
+		for (int i = 0; i < expList.size(); i++) {
+			Row row = sheet.createRow(i+1);
+			Cell cell = row.createCell(0);
+			cell.setCellValue(expList.get(i).getSalesperson().getName());
+			cell = row.createCell(1);
+			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			cell.setCellValue(sdf.format(expList.get(i).getReceiptDate()));
+			cell = row.createCell(2);
+			cell.setCellValue(expList.get(i).getPurpose());
+			cell = row.createCell(3);
+			cell.setCellValue(expList.get(i).getReceiptNo());
+			cell = row.createCell(4);
+			cell.setCellValue(expList.get(i).getAmount());
+		}
+		try {
+	        String path = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/");
+	        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMddHHmmss");
+	        String name = fmt.format(new Date()) + sessionManager.getLoginUser().getId() + "report.xls";
+		    FileOutputStream out = new FileOutputStream(new File(path + name));
+		    workbook.write(out);
+		    out.close();
+		    System.out.println("Excel written successfully..");
+		    InputStream stream = new FileInputStream(path + name);
+		    System.out.println(path + name);
+			file = new DefaultStreamedContent(stream, "application/vnd.ms-excel", "report.xls");
+		} catch (FileNotFoundException e) {
+			System.out.println("file not found");
+		    e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("ioexception");
+		    e.printStackTrace();
+		}
+		return file;
+	}
+
+	public void setFile(StreamedContent file) {
+		this.file = file;
+	}
+	public String getTaskDetail() {
+		return taskDetail;
+	}
+
+	public void setTaskDetail(String taskDetail) {
+		this.taskDetail = taskDetail;
+	}
+
+	public List<NoteDto> getNotes() throws IOException {
+		if (notes == null || notes.size() == 0) {
+			notes = noteService.getRecentNote(sessionManager.getLoginUser().getId());
+		}
+		return notes;
+	}
+
+	public void setNotes(List<NoteDto> notes) {
+		this.notes = notes;
+	}
+
+	public int getNewNotes() throws IOException {
+		if (newNotes == 0) {
+			for (NoteDto note: getNotes()) {
+				if (note.getStatus().equalsIgnoreCase("unread")) {
+					newNotes++;
+				}
+			}
+		}
+		return newNotes;
+	}
+
+	public void setNewNotes(int newNotes) {
+		this.newNotes = newNotes;
+	}
+
+	public SaleTargetDto getCurrentTarget() {
+		return currentTarget;
+	}
+
+	public void setCurrentTarget(SaleTargetDto currentTarget) {
+		this.currentTarget = currentTarget;
+	}
+
+	public boolean isAssignTargetMode() {
+		return assignTargetMode;
+	}
+
+	public void setAssignTargetMode(boolean assignTargetMode) {
+		this.assignTargetMode = assignTargetMode;
+	}
+
+	private StreamedContent file;
+	private String taskDetail;
+
+	private List<NoteDto> notes;
+	private int newNotes;
+
+	private SaleTargetDto currentTarget = new SaleTargetDto();
+	private boolean assignTargetMode = false;
+
+	public void startAssignTarget() {
+		assignTargetMode = true;
+		currentTarget = new SaleTargetDto();
+		System.out.println("ManagerController.startAssignTarget()");
+	}
+
+	public void assignSaleTarget() throws IOException {
+		List<UserDto> sales = userService.getUserByTeam(team);
+		int noOfEmp = sales.size();
+		int amount = currentTarget.getTarget() / noOfEmp;
+		for (UserDto dto: sales) {
+			SaleTargetDto std = new SaleTargetDto(dto, amount, currentTarget.getFromDate(), currentTarget.getToDate(), 0);
+			stService.addSaleTarget(std);
+
+			NoteDto message = new NoteDto(noteService.getSeq(), sessionManager.getLoginUser(), dto, "New sale target has been assigned: " + amount, new Date());
+			noteService.addNote(message);
+		}
+		assignTargetMode = false;
+		sessionManager.addGlobalMessageInfo("Sale target assigned", null);
+	}
+
+	public void markRead(NoteDto note) throws IOException {
+		if (note.getStatus().equalsIgnoreCase("unread"))
+			newNotes--;
+		note.setStatus("READ");
+		noteService.updateNote(note);
+		for (int i = 0; i < notes.size(); i++) {
+			if (notes.get(i).getSeq() == note.getSeq()) {
+				notes.set(i, note);
+				break;
+			}
+		}
+	}
+
+	public void startRespond(NoteDto note) {
+		setRespondMode(true);
+		setTargetUser(note.getFromUser());
+		setSelectedNote(note);
+	}
+
+	public boolean isRespondMode() {
+		return respondMode;
+	}
+
+	public void setRespondMode(boolean respondMode) {
+		this.respondMode = respondMode;
+	}
+
+	public UserDto getTargetUser() {
+		return targetUser;
+	}
+
+	public void setTargetUser(UserDto targetUser) {
+		this.targetUser = targetUser;
+	}
+
+	public NoteDto getSelectedNote() {
+		return selectedNote;
+	}
+
+	public void setSelectedNote(NoteDto selectedNote) {
+		this.selectedNote = selectedNote;
+	}
+
+	private boolean respondMode = false;
+	private UserDto targetUser;
+	private NoteDto selectedNote;
 }

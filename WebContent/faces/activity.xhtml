@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+	  <f:metadata>
+	  	<f:event listener="#{activityController.reload}" type="preRenderView"></f:event>
+	  </f:metadata>
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<h:form id="form01">
+
+		<p:menubar>
+			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink}" />
+			<p:submenu label="Products Catalog" >
+				<p:menuitem style="color: blue;" value="AutoCAD" url="../products/AutoCAD.jsf" />
+				<p:menuitem style="color: blue;" value="QuickDesk" url="../products/quickdesk.jsf" />
+				<p:menuitem style="color: blue;" value="Revit" url="../products/Revit.jsf" />
+				<p:menuitem style="color: blue;" value="Stormworks" url="../products/Stormworks.jsf" />
+			</p:submenu>
+			<p:menuitem value="Products" url="../faces/products.jsf" />
+			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Expense" url="../faces/expense.jsf" />
+			<p:submenu label="Reports">
+				<p:menuitem value="Call Report" url="../faces/calls.jsf" />
+				<p:menuitem value="Add call report" url="../faces/callReport.jsf" />
+			</p:submenu>
+			<p:menuitem value="Notes" url="../faces/notes.jsf" />
+			<p:menuitem value="LOG OUT" style="float: right" action="#{scheduleController.logout}" immediate="true" update="form01" />
+		</p:menubar>
+
+		<h:messages />
+		<p:fieldset legend="New Activity">
+			<p:panelGrid columns="2">
+				<h:outputText value="Customer" />
+				<p:autoComplete value="#{activityController.compName}" minQueryLength="3" maxResults="10" completeMethod="#{activityController.suggestCompany}" forceSelection="true" />
+				<h:outputText value="Start Date" />
+				<p:calendar value="#{activityController.newAct.startDate}" pattern="dd/MM/yyyy" />
+				<h:outputText value="Status" />
+				<p:selectOneMenu value="#{activityController.newAct.status}">
+					<f:selectItems value="#{activityController.statusOptions}" />
+				</p:selectOneMenu>
+				<h:outputText value="Remark" />
+				<p:inputTextarea value="#{activityController.newAct.remark}" />
+			</p:panelGrid>
+			<br/>
+			<p:commandButton value="Add new activity" actionListener="#{activityController.addActivity}" update=":form01"/>
+		</p:fieldset>
+
+		<p:fieldset legend="All activity">
+			<p:dataTable id="tbl1" rowIndexVar="row" value="#{activityController.allAct}" var="act"
+					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+					rows="15">
+				<p:column headerText="Customer">
+					<h:outputText value="#{act.customer.name}" />
+				</p:column>
+				<p:column headerText="Start Date">
+					<h:outputText value="#{act.startDate}">
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Status">
+					<h:outputText value="#{act.status}" />
+				</p:column>
+				<p:column headerText="Remark">
+					<h:outputText value="#{act.remark}" />
+				</p:column>
+				<p:column headerText="Action">
+					<p:commandButton value="Edit" actionListener="#{activityController.startEdit(act)}" update=":form01"/>
+					<p:commandButton value="Add new purchase" actionListener="#{activityController.startAddNewPurchase(act)}" update=":form01" />
+				</p:column>
+			</p:dataTable>
+		</p:fieldset>
+
+		<p:dialog id="editDialog" closable="false" visible="#{activityController.editMode}"
+				widgetVar="editDialog_w" modal="true" resizable="false" draggable="true" header="Edit Activity">
+			<p:panelGrid columns="2">
+				<h:outputText value="Status" />
+				<p:selectOneMenu value="#{activityController.selectedAct.status}">
+					<f:selectItems value="#{activityController.statusOptionsEditBox}" />
+				</p:selectOneMenu>
+				<h:outputText value="Remark" />
+				<p:inputTextarea value="#{activityController.selectedAct.remark}" />
+			</p:panelGrid>
+			<p:commandButton value="Confirm" actionListener="#{activityController.editAct}" update=":form01" />
+			<p:commandButton value="Cancel" actionListener="#{activityController.cancelEditAct}" update=":form01" />
+		</p:dialog>
+
+		<p:dialog id="purchaseDialog" closable="false" visible="#{activityController.addInvoiceMode}"
+				widgetVar="purchaseDialog_w" modal="true" resizable="false" draggable="true" header="Add new purchase">
+			<p:panelGrid columns="2">
+				<h:outputText value="Company" />
+				<h:outputText value="#{activityController.selectedAct.customer.name}" />
+
+				<h:outputText value="Purchase date" />
+				<p:calendar value="#{activityController.newInvoice.purchaseDate}" />
+				<h:outputText value="Product" />
+				<p:outputPanel id="p1">
+					<p:autoComplete id="srch" minQueryLength="3" maxResults="10" value="#{activityController.search}" completeMethod="#{activityController.suggest}" >
+						<p:ajax listener="#{activityController.select}" event="itemSelect" update="p1" />
+					</p:autoComplete>
+					<p:dataTable id="tb1" rowIndexVar="row" value="#{activityController.selectedProducts}" var="prod">
+						<p:column headerText="Select">
+							<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{prod.selected}" />
+						</p:column>
+						<p:column headerText="Name">
+							<h:outputText value="#{prod.name}" />
+						</p:column>
+					</p:dataTable>
+					<p:commandButton value="Delete" actionListener="#{activityController.deleteSelected}" update=":form01" />
+				</p:outputPanel>
+			</p:panelGrid>
+			<p:commandButton value="Add" actionListener="#{activityController.addNewInvoice}" update=":form01"/>
+		</p:dialog>
+	</h:form>
+</h:body>
+</html>

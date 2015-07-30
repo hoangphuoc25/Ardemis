@@ -21,10 +21,13 @@ import org.primefaces.model.ScheduleModel;
 import rd.dto.CompanyDto;
 import rd.dto.MeetingDto;
 import rd.dto.NoteDto;
+import rd.dto.SaleTargetDto;
+import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.CompanyService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.NoteService;
+import rd.spec.service.SaleTargetService;
 import rd.utils.Pair;
 
 @Named
@@ -37,6 +40,7 @@ public class ScheduleController implements Serializable {
 	@Inject SessionManager sessionManager;
 	@Inject CompanyService compService;
 	@Inject NoteService noteService;
+	@Inject SaleTargetService stService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -249,9 +253,10 @@ public class ScheduleController implements Serializable {
 	private int newNotes;
 
 	public void markRead(NoteDto note) throws IOException {
+		if (note.getStatus().equalsIgnoreCase("unread"))
+			newNotes--;
 		note.setStatus("READ");
 		noteService.updateNote(note);
-		newNotes--;
 		for (int i = 0; i < notes.size(); i++) {
 			if (notes.get(i).getSeq() == note.getSeq()) {
 				notes.set(i, note);
@@ -259,4 +264,60 @@ public class ScheduleController implements Serializable {
 			}
 		}
 	}
+
+	public String getResponseDetail() {
+		return responseDetail;
+	}
+
+	public void setResponseDetail(String responseDetail) {
+		this.responseDetail = responseDetail;
+	}
+
+	public boolean isRespondMode() {
+		return respondMode;
+	}
+
+	public void setRespondMode(boolean respondMode) {
+		this.respondMode = respondMode;
+	}
+
+	private boolean respondMode;
+	private String responseDetail;
+	private UserDto targetUser = null;
+	private NoteDto selectedNote;
+
+	public void startRespond(NoteDto note) {
+		respondMode = true;
+		targetUser = note.getFromUser();
+		selectedNote = note;
+	}
+
+	public void respond() throws IOException {
+		int seq = noteService.getSeq();
+		NoteDto note = new NoteDto(seq, sessionManager.getLoginUser(), targetUser, responseDetail, new Date());
+		noteService.addNote(note);
+		respondMode = false;
+		markRead(selectedNote);
+	}
+
+	public NoteDto getSelectedNote() {
+		return selectedNote;
+	}
+
+	public void setSelectedNote(NoteDto selectedNote) {
+		this.selectedNote = selectedNote;
+	}
+
+	public SaleTargetDto getStd() throws IOException {
+		if (std == null) {
+			std = stService.getSaleTarget(sessionManager.getLoginUser().getId());
+		}
+		return std;
+	}
+
+	public void setStd(SaleTargetDto std) {
+		this.std = std;
+	}
+
+	private SaleTargetDto std;
 }

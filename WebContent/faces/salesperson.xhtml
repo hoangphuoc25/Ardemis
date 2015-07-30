@@ -75,6 +75,7 @@
 			<p:menuitem value="Products" url="../faces/products.jsf" />
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
 			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Expense" url="../faces/expense.jsf" />
 			<p:submenu label="Reports">
 				<p:menuitem value="Call Report" url="../faces/calls.jsf" />
 				<p:menuitem value="Add call report" url="../faces/callReport.jsf" />
@@ -84,16 +85,34 @@
 		</p:menubar>
 
 		<h:messages infoClass="alert alert-info" fatalClass="alert alert-danger" errorClass="alert alert-danger" warnClass="alert alert-warning"/>
+		<br/>
 		<p:outputPanel id="firstMessage">
-			<a href="#form01:tbl3">You have <span class="badge">#{scheduleController.newNotes}</span> unread message(s).</a>
+			<a href="#form01:tbl3">You have <span class="badge badge-success">#{scheduleController.newNotes}</span> unread message(s).</a>
 		</p:outputPanel>
+		<p:panelGrid columns="2">
+			<h:outputText value="Your sale target" />
+			<h:outputText value="#{scheduleController.std.target}" />
+			<h:outputText value="Your current sale record" />
+			<h:outputText value="#{scheduleController.std.current}" />
+			<h:outputText value="From" />
+			<h:outputText value="#{scheduleController.std.fromDate}">
+				<f:convertDateTime pattern="dd/MM/yyyy" />
+			</h:outputText>
+			<h:outputText value="To" />
+			<h:outputText value="#{scheduleController.std.toDate}">
+				<f:convertDateTime pattern="dd/MM/yyyy" />
+			</h:outputText>
+		</p:panelGrid>
+
+		<a href="activity.jsf" style="color: blue; font-family: Helvetica">See all sale activities</a>
+
 		<h3 style="font-family: Helvetica;">Your schedule</h3>
 		<p:schedule value="#{scheduleController.model}" draggable="false" resizable="false" style="max-width: 800px; margin-left:auto; margin-right: auto;"/>
 
 		<p:panel id="toggleable" header="Schedule" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px" collapsed="true">
 			<p:dataTable id="tbl2" rowIndexVar="row" value="#{scheduleController.events}" var="event"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-					rows="15">
+					rows="8">
 				<p:column headerText="From">
 					<h:outputText value="#{event.from}">
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
@@ -153,12 +172,25 @@
 				</h:outputText>
 			</p:column>
 			<p:column headerText="Note">
-				<h:outputText value="#{note.note}" />
+				<h:outputText value="#{note.note}" rendered="#{productController.noteLink(note) == ''}" />
+				<h:outputLink value="#{productController.noteLink(note)}" rendered="#{productController.noteLink(note) != ''}" style="color: blue">#{note.note}</h:outputLink>
 			</p:column>
 			<p:column>
 				<p:commandButton value="Mark as read" actionListener="#{scheduleController.markRead(note)}" update=":form01:tbl3, :form01:firstMessage" rendered="#{note.status == 'UNREAD'}" />
+				<p:commandButton value="Respond" actionListener="#{scheduleController.startRespond(note)}" update=":form01" />
 			</p:column>
 		</p:dataTable>
+
+		<p:dialog id="denyDialog" closable="false" visible="#{scheduleController.respondMode}"
+				widgetVar="denyDialog_w" modal="true" resizable="false" draggable="true" header="Message">
+			<p:panelGrid columns="2">
+				<h:outputText value="Message" />
+				<p:inputTextarea value="#{scheduleController.responseDetail}" />
+			</p:panelGrid>
+			<br/>
+			<p:commandButton value="Send" actionListener="#{scheduleController.respond}" update=":form01"/>
+
+		</p:dialog>
 	</h:form>
 </h:body>
 </html>

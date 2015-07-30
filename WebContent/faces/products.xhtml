@@ -70,7 +70,7 @@
 				<h:outputText value="#{productController.deducePrice(prod)}" />
 			</p:column>
 			<p:column headerText="Link">
-				<a href="../faces/productdetail.jsf?seq=#{prod.seq}" style="color: blue; text-decoration: none;">Detail</a>
+				<a href="../faces/productdetail.jsf?seq=#{prod.seq}" style="color: blue; text-decoration: none;">Detail Page</a>
 				<p:spacer width="10px" />
 				<p:commandLink value="Edit" style="color: blue" actionListener="#{productController.showDialog(prod)}" update=":form01" />
 				<p:spacer width="10px" />
@@ -107,6 +107,9 @@
 				<h:outputText value="Price" />
 				<p:inputText value="#{productController.newProd.price}" required="true" rendered="#{productController.addMode or productController.editMode}" />
 				<h:outputText value="#{productController.newProd.price}" rendered="#{productController.viewMode}" />
+
+				<p:selectBooleanCheckbox value="#{productController.notifyOther}" rendered="#{productController.addMode or productController.editMode}" />
+				<h:outputText value="Notify other salesperson" rendered="#{productController.addMode or productController.editMode}" />
 			</p:panelGrid>
 
 			<p:commandButton value="Apply" actionListener="#{productController.apply}" update=":form01" ajax="true" rendered="#{productController.editMode or productController.addMode}" />

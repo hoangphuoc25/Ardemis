@@ -2,7 +2,9 @@ package rd.impl.controler;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
@@ -81,5 +83,40 @@ public class ProductDetailController implements Serializable {
 		if (sessionController.getCurrency() == 0)
 			return invoice.getAmount();
 		return invoice.getAmount()*sessionController.getRates().get(sessionController.getCurrency());
+	}
+
+	public Map<Integer, String> getFbDetail() {
+		if (fbDetail == null) {
+			fbDetail = new HashMap<Integer, String>();
+			fbDetail.put(1, "Not acceptable");
+			fbDetail.put(2, "Poor");
+			fbDetail.put(3, "OK");
+			fbDetail.put(4, "Good");
+			fbDetail.put(5, "Very good");
+		}
+		return fbDetail;
+	}
+
+	public void setFbDetail(Map<Integer, String> fbDetail) {
+		this.fbDetail = fbDetail;
+	}
+
+	private Map<Integer, String> fbDetail;
+
+	public String getDetail(int score) {
+		if (score == 1) {
+			return "Not acceptable";
+		} else if (score == 2) {
+			return "Poor";
+		} else if (score == 3) {
+			return "OK";
+		} else if (score == 4) {
+			return "Good";
+		} else if (score == 5) {
+			return "Very good";
+		} else {
+			return "";
+		}
+
 	}
 }

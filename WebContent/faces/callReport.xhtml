@@ -53,12 +53,11 @@
 				<f:selectItems value="#{callReportController.ratings}" />
 			</p:selectOneMenu>
 
-			<h:outputText value="Rating" />
+			<h:outputText value="Product" />
 			<p:autoComplete minQueryLength="3" maxResults="10" value="#{callReportController.productName}" completeMethod="#{callReportController.suggestProd}" forceSelection="true" />
 		</p:panelGrid>
 		<p:commandButton value="Submit" actionListener="#{callReportController.addNewReport}" update="form01" />
 		<br/>
-		<a href="companyList.jsf" style="color: blue;">Add new company</a>
 
 		<p:commandButton value="Add new company" actionListener="#{callReportController.startAdd}" update=":form01"/>
 

@@ -2,6 +2,7 @@ package rd.impl.controler;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import javax.enterprise.context.Conversation;
@@ -17,11 +18,15 @@ import org.primefaces.context.RequestContext;
 
 import rd.dto.FeedbackDto;
 import rd.dto.InvoiceDto;
+import rd.dto.NoteDto;
 import rd.dto.ProductDto;
+import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.FeedbackService;
 import rd.spec.service.InvoiceService;
+import rd.spec.service.NoteService;
 import rd.spec.service.ProductService;
+import rd.spec.service.UserService;
 
 @Named
 @ConversationScoped
@@ -38,6 +43,8 @@ public class ProductController implements Serializable {
 	@Inject InvoiceService invoiceService;
 	@Inject SessionController sessionController;
 	@Inject FeedbackService fbService;
+	@Inject UserService userService;
+	@Inject NoteService noteService;
 
 	private ProductDto newProd = new ProductDto();
 	private List<ProductDto> products;
@@ -125,6 +132,15 @@ public class ProductController implements Serializable {
 		products.add(newProd);
 		addMode = false;
 
+		if (notifyOther) {
+			List<UserDto> saleList = userService.getUserByRole("sale");
+			for (UserDto sale: saleList) {
+				String noteContent = "A new product has been added: " + newProd.getName();
+				int noteSeq = noteService.getSeq();
+				NoteDto note = new NoteDto(noteSeq, sessionManager.getLoginUser(), sale, noteContent, new Date());
+				noteService.addNote(note);
+			}
+		}
 		sessionManager.addGlobalMessageInfo("New product added", null);
 		RequestContext context = RequestContext.getCurrentInstance();
 		context.execute("prodDialog_w.hide();");
@@ -332,9 +348,31 @@ public class ProductController implements Serializable {
 			return "../products/Revit.jsf";
 		} else if (prod.getName().equalsIgnoreCase("quickdesk")) {
 			return "../products/quickdesk.jsf";
-		} else if (prod.getName().equalsIgnoreCase("stormworks")) {
+		} else {
 			return "../products/Stormworks.jsf";
 		}
-		return "";
+	}
+
+	public boolean isNotifyOther() {
+		return notifyOther;
+	}
+
+	public void setNotifyOther(boolean notifyOther) {
+		this.notifyOther = notifyOther;
+	}
+
+	private boolean notifyOther;
+
+	public String noteLink(NoteDto note) throws IOException {
+		if (note.getNote().startsWith("You have been assigned this company:")) {
+			String comSeq = note.getNote().split("[()]")[1];
+			return "../faces/history.jsf?seq="+comSeq;
+		} else if (note.getNote().startsWith("A new product has been added:")) {
+			String productName = note.getNote().split(":")[1].trim();
+			ProductDto prod = productService.getByName(productName);
+			return "../faces/productdetail.jsf?seq="+prod.getSeq();
+		} else {
+			return "";
+		}
 	}
 }

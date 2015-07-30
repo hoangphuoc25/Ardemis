@@ -24,17 +24,27 @@ import rd.spec.dao.UserDao;
 public class FeedbackDaoImpl implements FeedbackDao {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	@Inject ProductDao prodDao;
-	@Inject UserDao userDao;
+	@Inject
+	ProductDao prodDao;
+	@Inject
+	UserDao userDao;
 
-	public List<FeedbackDto> getFeedbackByProduct(Transaction transaction, int seq) throws IOException {
+	private static String GET_SEQ = "select max(seq)+1 from t_feedback";
+	private static String ADD_FEEDBACK = "insert into t_feedback (seq, product_id, rating, user_id, feedback, feature, "
+			+ "third_party_support, performance, user_ex, user_in, usability, stability) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	private static String GET_BY_ID = "select seq, product_id, rating, user_id, feedback, feature, third_party_support, performance, user_ex, user_in, usability, stability from t_feedback where seq=?";
+	private static String GET_FEEDBACK_BY_PRODUCT = "select seq, product_id, rating, user_id, feedback, feature, third_party_support, performance, user_ex, user_in, usability, stability from t_feedback where product_id=?";
+
+	public List<FeedbackDto> getFeedbackByProduct(Transaction transaction,
+			int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
 		try {
 			Connection connection = transaction.getResource(Connection.class);
-			prepareStatement = connection.prepareStatement(GET_FEEDBACK_BY_PRODUCT);
+			prepareStatement = connection
+					.prepareStatement(GET_FEEDBACK_BY_PRODUCT);
 			prepareStatement.setInt(1, seq);
 			resultSet = prepareStatement.executeQuery();
 
@@ -63,9 +73,8 @@ public class FeedbackDaoImpl implements FeedbackDao {
 		}
 	}
 
-	private static String GET_FEEDBACK_BY_PRODUCT = "select seq, product_id, rating, user_id, feedback from t_feedback where product_id=?";
-
-	public FeedbackDto getById(Transaction transaction, int seq) throws IOException {
+	public FeedbackDto getById(Transaction transaction, int seq)
+			throws IOException {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -100,9 +109,8 @@ public class FeedbackDaoImpl implements FeedbackDao {
 		}
 	}
 
-	private static String GET_BY_ID = "select seq, product_id, rating, user_id, feedback from t_feedback where seq=?";
-
-	public void addFeedback(Transaction transaction, FeedbackDto fb) throws IOException {
+	public void addFeedback(Transaction transaction, FeedbackDto fb)
+			throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
@@ -115,6 +123,15 @@ public class FeedbackDaoImpl implements FeedbackDao {
 			prepareStatement.setInt(3, fb.getRating());
 			prepareStatement.setString(4, fb.getCustomer().getId());
 			prepareStatement.setString(5, fb.getFeedback());
+
+			prepareStatement.setInt(6, fb.getFeature());
+			prepareStatement.setInt(7, fb.getThirdPartySupport());
+			prepareStatement.setInt(8, fb.getPerformance());
+			prepareStatement.setInt(9, fb.getUserExperience());
+			prepareStatement.setInt(10, fb.getUserInterface());
+			prepareStatement.setInt(11, fb.getUsability());
+			prepareStatement.setInt(12, fb.getStability());
+
 			resultSet = prepareStatement.executeQuery();
 
 		} catch (SQLException e) {
@@ -136,8 +153,6 @@ public class FeedbackDaoImpl implements FeedbackDao {
 			}
 		}
 	}
-
-	private static String ADD_FEEDBACK = "insert into t_feedback (seq, product_id, rating, user_id, feedback) values (?, ?, ?, ?, ?)";
 
 	public int getSeq(Transaction transaction) throws IOException {
 		PreparedStatement prepareStatement = null;
@@ -173,14 +188,23 @@ public class FeedbackDaoImpl implements FeedbackDao {
 		}
 	}
 
-	private static String GET_SEQ = "select max(seq)+1 from t_feedback";
-
-	private FeedbackDto makeFeedbackDto(Transaction transaction, ResultSet resultSet) throws IOException, SQLException {
+	private FeedbackDto makeFeedbackDto(Transaction transaction,
+			ResultSet resultSet) throws IOException, SQLException {
 		int seq = resultSet.getInt(1);
-		ProductDto product = prodDao.getProductById(transaction, resultSet.getInt(2));
+		ProductDto product = prodDao.getProductById(transaction,
+				resultSet.getInt(2));
 		int rating = resultSet.getInt(3);
 		UserDto user = userDao.findUser(transaction, resultSet.getString(4));
 		String feedback = resultSet.getString(5);
-		return new FeedbackDto(seq, product, rating, user, feedback);
+		int feature = resultSet.getInt(6);
+		int thirdPartySupport = resultSet.getInt(7);
+		int performance = resultSet.getInt(8);
+		int userExperience = resultSet.getInt(9);
+		int userInterface = resultSet.getInt(10);
+		int usability = resultSet.getInt(11);
+		int stability = resultSet.getInt(12);
+		return new FeedbackDto(seq, product, rating, user, feedback, feature,
+				thirdPartySupport, performance, userExperience, userInterface,
+				usability, stability);
 	}
 }

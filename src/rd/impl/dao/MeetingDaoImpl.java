@@ -103,7 +103,7 @@ public class MeetingDaoImpl implements MeetingDao {
 		}
 	}
 
-	private static String GET_MEETING_BY_USER = "select seq, user_id, from_date, to_date, detail, customer_id from t_meeting where user_id=?";
+	private static String GET_MEETING_BY_USER = "select seq, user_id, from_date, to_date, detail, customer_id from t_meeting where user_id=? order by from_date desc";
 
 	public void editMeeting(Transaction transaction, MeetingDto meeting) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -310,5 +310,5 @@ public class MeetingDaoImpl implements MeetingDao {
 			}
 		}
 	}
-	private static String GET_MEETING_TODAY = "select seq, user_id, from_date, to_date, detail, customer_id from t_meeting where from_date > ? and from_date < ?";
+	private static String GET_MEETING_TODAY = "select seq, user_id, from_date, to_date, detail, customer_id from t_meeting where from_date >= ? and from_date < ?";
 }

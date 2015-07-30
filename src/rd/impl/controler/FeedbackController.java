@@ -3,13 +3,16 @@ package rd.impl.controler;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
+import javax.faces.model.SelectItem;
 import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -132,6 +135,67 @@ public class FeedbackController implements Serializable {
 		conversationEnd();
 		sessionManager.logoff();
 		return "../portal.jsf?faces-redirect=true";
+	}
+
+	public List<SelectItem> getSelectOptions() {
+		if (selectOptions == null) {
+			selectOptions = new ArrayList<SelectItem>();
+			selectOptions.add(new SelectItem(0, "Select"));
+			selectOptions.add(new SelectItem(1, "Not acceptable"));
+			selectOptions.add(new SelectItem(2, "Poor"));
+			selectOptions.add(new SelectItem(3, "OK"));
+			selectOptions.add(new SelectItem(4, "Good"));
+			selectOptions.add(new SelectItem(5, "Very good"));
+		}
+		return selectOptions;
+	}
+
+	public void setSelectOptions(List<SelectItem> selectOptions) {
+		this.selectOptions = selectOptions;
+	}
+
+	public FeedbackDto getFb() {
+		if (fb == null) {
+			fb = new FeedbackDto();
+		}
+		return fb;
+	}
+
+	public void setFb(FeedbackDto fb) {
+		this.fb = fb;
+	}
+
+	public boolean isFeedbackMode() {
+		return feedbackMode;
+	}
+
+	public void setFeedbackMode(boolean feedbackMode) {
+		this.feedbackMode = feedbackMode;
+	}
+
+	private List<SelectItem> selectOptions;
+	private FeedbackDto fb;
+	private boolean feedbackMode;
+
+	public void sendFeedback() throws IOException {
+		System.out.println("FeedbackController.addFeedback()");
+		int seq = fbService.getSeq();
+		ProductDto prod = prodService.getProductById(product);
+		UserDto user = sessionManager.getLoginUser();
+		fb.setSeq(seq);
+		fb.setProduct(prod);
+		fb.setFeedback(feedback);
+		fb.setCustomer(user);
+		fbService.addFeedback(fb);
+		submit();
+		feedbackMode = false;
+		fb = new FeedbackDto();
+	}
+
+	public void startFeedback() {
+		reload();
+		feedbackMode = true;
+		System.out.println("FeedbackController.startFeedback()");
 	}
 }
 

@@ -37,13 +37,13 @@ public class CallReportDaoImpl implements CallReportDao {
 		this.productDao = productDao;
 	}
 
-	private static String GET_ALL = "select seq, customer_seq, call_time, detail, rating, sale_id, product_seq from t_call_report order by call_time desc";
+	private static String GET_ALL = "select seq, customer_seq, call_time, detail, rating, sale_id, product_seq, call_back from t_call_report order by call_time desc";
 	private static String DELETE_CALL_REPORT = "delete from t_call_report where seq=?";
 	private static String GET_SEQ = "select max(seq)+1 from t_call_report";
-	private static String ADD_REPORT = "insert into t_call_report (seq, customer_seq, call_time, detail, rating, sale_id, product_seq) values (?, ?, ?, ?, ?, ?, ?)";
-	private static String GET_BY_ID = "select seq, customer_seq, call_time, detail, rating, sale_id, product_seq from t_call_report where seq=?";
-	private static String UPDATE_CALL_REPORT = "update t_call_report set customer_seq=?, call_time=?, detail=?, rating=?, sale_id=?, product_seq=? where seq=?";
-	private static String GET_BY_COMPANY_ID = "select seq, customer_seq, call_time, detail, rating, sale_id, product_seq from t_call_report where customer_seq=?";
+	private static String ADD_REPORT = "insert into t_call_report (seq, customer_seq, call_time, detail, rating, sale_id, product_seq, call_back) values (?, ?, ?, ?, ?, ?, ?, ?)";
+	private static String GET_BY_ID = "select seq, customer_seq, call_time, detail, rating, sale_id, product_seq, call_back from t_call_report where seq=?";
+	private static String UPDATE_CALL_REPORT = "update t_call_report set customer_seq=?, call_time=?, detail=?, rating=?, sale_id=?, product_seq=?, call_back=? where seq=?";
+	private static String GET_BY_COMPANY_ID = "select seq, customer_seq, call_time, detail, rating, sale_id, product_seq, call_back=? from t_call_report where customer_seq=?";
 
 	public void addReport(Transaction transaction, CallReportDto report) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -51,17 +51,6 @@ public class CallReportDaoImpl implements CallReportDao {
 		ResultSet resultSet = null;
 
 		try {
-			System.out.println("CallReportDaoImpl.addReport()");
-			System.out.println(getSeq(transaction));
-			System.out.println(report.getCustomer().getSeq());
-			System.out.println(report.getCallTime());
-			System.out.println(report.getCallTime().getTime());
-			System.out.println((new java.sql.Timestamp(report.getCallTime().getTime())).getTime());
-			System.out.println(report.getDetail());
-			System.out.println(report.getRating());
-			System.out.println(report.getProduct().getSeq());
-			System.out.println(report.getSalesperson().getId());
-
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(ADD_REPORT);
 			prepareStatement.setInt(1, getSeq(transaction));
@@ -70,7 +59,8 @@ public class CallReportDaoImpl implements CallReportDao {
 			prepareStatement.setString(4, report.getDetail());
 			prepareStatement.setString(5, report.getRating());
 			prepareStatement.setString(6, report.getSalesperson().getId());
-			prepareStatement.setInt(7, report.getProduct().getSeq());
+			prepareStatement.setInt(7, report.getCallBack());
+			prepareStatement.setInt(8, report.getProduct().getSeq());
 
 			resultSet = prepareStatement.executeQuery();
 
@@ -174,7 +164,8 @@ public class CallReportDaoImpl implements CallReportDao {
 		String rating = resultSet.getString(5);
 		UserDto salesman = userDao.findUser(transaction, resultSet.getString(6));
 		ProductDto prod = productDao.getProductById(transaction, resultSet.getInt(7));
-		return new CallReportDto(seq, comp, callTime, detail, rating, salesman, prod);
+		int callBack = resultSet.getInt(8);
+		return new CallReportDto(seq, comp, callTime, detail, rating, salesman, prod, callBack);
 	}
 
 	public void updateCallReport(Transaction transaction, CallReportDto report) throws IOException {
@@ -191,7 +182,8 @@ public class CallReportDaoImpl implements CallReportDao {
 			prepareStatement.setString(4, report.getRating());
 			prepareStatement.setString(5, report.getSalesperson().getId());
 			prepareStatement.setInt(6, report.getProduct().getSeq());
-			prepareStatement.setInt(7, report.getSeq());
+			prepareStatement.setInt(8, report.getCallBack());
+			prepareStatement.setInt(8, report.getSeq());
 
 			resultSet = prepareStatement.executeQuery();
 

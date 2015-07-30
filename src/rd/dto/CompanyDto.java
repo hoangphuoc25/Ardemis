@@ -10,6 +10,7 @@ public class CompanyDto {
 	private String location;
 	private String remark;
 	private String phone;
+	private String contactStatus;
 
 	public CompanyDto(int seq, String name, String size, String industry, String type,
 			int yearFounded, String location, String phone, String remark) {
@@ -22,6 +23,7 @@ public class CompanyDto {
 		this.location = location;
 		this.remark = remark;
 		this.phone = phone;
+		this.contactStatus = "new";
 	}
 
 	public CompanyDto() {
@@ -97,5 +99,13 @@ public class CompanyDto {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getContactStatus() {
+		return contactStatus;
+	}
+
+	public void setContactStatus(String contactStatus) {
+		this.contactStatus = contactStatus;
 	}
 }

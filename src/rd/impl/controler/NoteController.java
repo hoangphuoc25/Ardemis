@@ -154,6 +154,7 @@ public class NoteController implements Serializable {
 		newNote.setFromUser(sessionManager.getLoginUser());
 		newNote.setToUser(toUser);
 		newNote.setCreatedDate(new Date());
+		newNote.setStatus("UNREAD");
 		noteService.addNote(newNote);
 		notes.add(newNote);
 		logger.error("newnote added");

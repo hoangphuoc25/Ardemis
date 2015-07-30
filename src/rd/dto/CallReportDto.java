@@ -34,7 +34,7 @@ public class CallReportDto {
 		this.detail = detail;
 	}
 
-	public CallReportDto(int seq, CompanyDto customer, Date callTime, String detail, String rating, UserDto user, ProductDto product) {
+	public CallReportDto(int seq, CompanyDto customer, Date callTime, String detail, String rating, UserDto user, ProductDto product, int callBack) {
 		this.seq = seq;
 		this.customer = customer;
 		this.callTime = callTime;
@@ -77,6 +77,15 @@ public class CallReportDto {
 		this.product = product;
 	}
 
+	public int getCallBack() {
+		return callBack;
+	}
+
+	public void setCallBack(int callBack) {
+		this.callBack = callBack;
+	}
+
 	private UserDto salesperson;
 	private ProductDto product;
+	private int callBack;
 }

@@ -92,17 +92,20 @@ public class CallReportController implements Serializable {
 
 	public void addNewReport() throws IOException {
 
+		if (callBackUnit.equalsIgnoreCase("month")) {
+			callBackNo *= 30;
+		}
 		System.out.println(callTime);
 		int compSeq = Integer.parseInt(companyName.split("[()]")[1]);
 		CompanyDto customer = compService.getById(compSeq);
 		int prodSeq = Integer.parseInt(productName.split("[()]")[1]);
 		ProductDto prod = prodService.getProductById(prodSeq);
 		int seq = crService.getSeq();
-		CallReportDto cr = new CallReportDto(seq, customer, callTime, callDetail, rating, sessionManager.getLoginUser(), prod);
+		CallReportDto cr = new CallReportDto(seq, customer, callTime, callDetail, rating, sessionManager.getLoginUser(), prod, callBackNo);
 
 		crService.addReport(cr);
 
-		callTime = null;
+		callTime = new Date();
 		callDetail = "";
 		this.rating = "";
 		this.companyName = "";
@@ -121,9 +124,10 @@ public class CallReportController implements Serializable {
 	public List<String> getRatings() {
 		if (ratings == null || ratings.size() == 0) {
 			ratings = new ArrayList<String>();
-			ratings.add("POSITIVE");
-			ratings.add("NEUTRAL");
-			ratings.add("NEGATIVE");
+			ratings.add("Follow-up");
+			ratings.add("Contact again later");
+			ratings.add("Not interested");
+			ratings.add("Unresponsive");
 		}
 		return ratings;
 	}
@@ -212,4 +216,37 @@ public class CallReportController implements Serializable {
 		}
 		return result;
 	}
+
+	public List<String> getCallBackUnits() {
+		if (callBackUnits == null) {
+			callBackUnits = new ArrayList<String>();
+			callBackUnits.add("day");
+			callBackUnits.add("month");
+		}
+		return callBackUnits;
+	}
+
+	public void setCallBackUnit(List<String> callBackUnits) {
+		this.callBackUnits = callBackUnits;
+	}
+
+	public int getCallBackNo() {
+		return callBackNo;
+	}
+
+	public void setCallBackNo(int callBackNo) {
+		this.callBackNo = callBackNo;
+	}
+
+	public String getCallBackUnit() {
+		return callBackUnit;
+	}
+
+	public void setCallBackUnit(String callBackUnit) {
+		this.callBackUnit = callBackUnit;
+	}
+
+	private int callBackNo;
+	private List<String> callBackUnits;
+	private String callBackUnit;
 }

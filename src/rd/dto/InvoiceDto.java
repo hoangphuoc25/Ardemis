@@ -9,6 +9,7 @@ public class InvoiceDto {
 	private Date purchaseDate;
 	private double amount;
 	private List<ProductDto> products;
+	private UserDto salesperson;
 
 	public InvoiceDto(int seq, CompanyDto company, Date purchaseDate, double amount, List<ProductDto> products) {
 		this.seq = seq;
@@ -18,8 +19,18 @@ public class InvoiceDto {
 		this.products = products;
 	}
 
+	public InvoiceDto(int seq, CompanyDto company, Date purchaseDate, double amount, List<ProductDto> products, UserDto salesperson) {
+		this.seq = seq;
+		this.customer = company;
+		this.purchaseDate = purchaseDate;
+		this.amount = amount;
+		this.products = products;
+		this.salesperson = salesperson;
+	}
+
 	public InvoiceDto() {
 		customer = new CompanyDto();
+		this.purchaseDate = new Date();
 	}
 
 	public int getSeq() {
@@ -60,5 +71,13 @@ public class InvoiceDto {
 
 	public void setProducts(List<ProductDto> products) {
 		this.products = products;
+	}
+
+	public UserDto getSalesperson() {
+		return salesperson;
+	}
+
+	public void setSalesperson(UserDto salesperson) {
+		this.salesperson = salesperson;
 	}
 }

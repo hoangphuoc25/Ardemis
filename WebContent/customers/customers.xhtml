@@ -6,6 +6,9 @@
 	  xmlns:ui="http://java.sun.com/jsf/facelets"
 	  xmlns:p="http://primefaces.org/ui"
 	  >
+	  <f:metadata>
+	  	<f:event listener="#{feedbackController.reload}" type="preRenderView"></f:event>
+	  </f:metadata>
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
@@ -71,23 +74,53 @@
 			</p:column>
 		</p:dataTable>
 
-		<p:panel id="toggleable" header="Add feedback" toggleable="true" toggleSpeed="200" closeSpeed="200" widgetVar="panel" style="margin-bottom:20px" collapsed="true">
-
+		<p:panel id="toggleable" header="Add feedback" toggleable="true" toggleSpeed="200" closeSpeed="200" widgetVar="panel" style="margin-bottom:20px" collapsed="false">
 			<h3 style="font-family: Helvetica;">New feedback</h3>
 			<p:panelGrid columns="2" >
 				<h:outputText value="Product" />
 				<p:selectOneMenu value="#{feedbackController.product}" validator="#{feedbackController.validateProduct}" >
 					<f:selectItem itemLabel="Select Item" itemValue="-1" />
 					<f:selectItems value="#{databaseUtil.prods}" />
+					<p:ajax update=":form01:toggleable" />
 				</p:selectOneMenu>
-				<h:outputText value="Rating" />
+			</p:panelGrid>
+			<p:commandButton value="Feedback" actionListener="#{feedbackController.startFeedback}" update=":form01" rendered="#{feedbackController.product > 0}" />
+		</p:panel>
+
+		<p:dialog id="feedbackDialog" closable="false" visible="#{feedbackController.feedbackMode}"
+				widgetVar="feedbackDialog_w" modal="true" resizable="false" draggable="true" header="Feedback">
+			<p:panelGrid columns="2">
+				<h:outputText value="How do you think about this software's feature?" />
+				<p:selectOneMenu value="#{feedbackController.fb.feature}">
+					<f:selectItems value="#{feedbackController.selectOptions}" />
+				</p:selectOneMenu>
+				<h:outputText value="How do you think about this software's third party support?" />
+				<p:selectOneMenu value="#{feedbackController.fb.thirdPartySupport}">
+					<f:selectItems value="#{feedbackController.selectOptions}" />
+				</p:selectOneMenu>
+				<h:outputText value="How's your user experience with this software?" />
+				<p:selectOneMenu value="#{feedbackController.fb.userExperience}">
+					<f:selectItems value="#{feedbackController.selectOptions}" />
+				</p:selectOneMenu>
+				<h:outputText value="How do you think about this software's user interface?" />
+				<p:selectOneMenu value="#{feedbackController.fb.userInterface}">
+					<f:selectItems value="#{feedbackController.selectOptions}" />
+				</p:selectOneMenu>
+				<h:outputText value="How do you think about this software's usability?" />
+				<p:selectOneMenu value="#{feedbackController.fb.usability}">
+					<f:selectItems value="#{feedbackController.selectOptions}" />
+				</p:selectOneMenu>
+				<h:outputText value="How do you think about this software's stability?" />
+				<p:selectOneMenu value="#{feedbackController.fb.stability}">
+					<f:selectItems value="#{feedbackController.selectOptions}" />
+				</p:selectOneMenu>
+				<h:outputText value="Overall quality" />
 				<p:rating value="#{feedbackController.rating}" />
-				<h:outputText value="Feedback" />
+				<h:outputText value="General feedback" />
 				<p:inputTextarea value="#{feedbackController.feedback}" />
 			</p:panelGrid>
-			<br/>
-			<p:commandButton value="Submit" actionListener="#{feedbackController.addFeedback}" update="form01" />
-		</p:panel>
+			<p:commandButton value="Send" actionListener="#{feedbackController.sendFeedback}" update=":form01"/>
+		</p:dialog>
 	</h:form>
 </h:body>
 </html>

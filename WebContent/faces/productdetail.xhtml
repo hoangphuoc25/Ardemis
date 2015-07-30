@@ -13,6 +13,11 @@
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
+	<style>
+		.myTable td:nth-child(3) {
+			width: 500px;
+		}
+	</style>
 </h:head>
 <h:body>
 	<h:form id="form01">
@@ -28,6 +33,10 @@
 				<p:menuitem value="Expense" url="../faces/expense.jsf" />
 				<p:menuitem value="Sale report" url="../faces/report.jsf" />
 				<p:menuitem value="Add new purchase" url="../faces/report.jsf" />
+			</p:submenu>
+			<p:submenu label="Call Reports">
+				<p:menuitem value="Call Report" url="../faces/calls.jsf" />
+				<p:menuitem value="Add call report" url="../faces/callReport.jsf" />
 			</p:submenu>
 			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
 			<p:menuitem value="Notes" url="../faces/notes.jsf" />
@@ -67,11 +76,11 @@
 		</p:dataTable>
 
 		<h3>Feedbacks</h3>
-		<p:dataTable id="tbl2" rowIndexVar="row" value="#{productDetailController.feedbacks}" var="fb"
+		<p:dataTable styleClass="myTable" id="tbl2" rowIndexVar="row" value="#{productDetailController.feedbacks}" var="fb"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 				rows="15">
-			<p:column headerText="User id">
-				<h:outputText value="#{fb.customer.id}" />
+			<p:column headerText="User">
+				<h:outputText value="#{fb.customer.name}" />
 			</p:column>
 			<p:column headerText="Rating">
 				<p:rating value="#{fb.rating}" readonly="true" />
@@ -79,6 +88,28 @@
 			<p:column headerText="Feedback">
 				<h:outputText value="#{fb.feedback}" />
 			</p:column>
+			<p:column headerText="Feature">
+				<h:outputText value="#{productDetailController.fbDetail[fb.feature]}" />
+			</p:column>
+			<p:column headerText="Third party support">
+				<h:outputText value="#{productDetailController.fbDetail[fb.thirdPartySupport]}" />
+			</p:column>
+			<p:column headerText="Performance">
+				<h:outputText value="#{productDetailController.fbDetail[fb.performance]}" />
+			</p:column>
+			<p:column headerText="UX">
+				<h:outputText value="#{productDetailController.fbDetail[fb.userExperience]}" />
+			</p:column>
+			<p:column headerText="UI">
+				<h:outputText value="#{productDetailController.fbDetail[fb.userInterface]}" />
+			</p:column>
+			<p:column headerText="Usability">
+				<h:outputText value="#{productDetailController.fbDetail[fb.usability]}" />
+			</p:column>
+			<p:column headerText="Stability">
+				<h:outputText value="#{productDetailController.fbDetail[fb.stability]}" />
+			</p:column>
+
 		</p:dataTable>
 		<h:outputText style="font-family: Arial;" value="There seems to be nothing here" rendered="#{productDetailController.seq == 0}" />
 	</h:form>
