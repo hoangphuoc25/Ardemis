@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import rd.dto.CompanyDto;
 import rd.dto.InvoiceDto;
 import rd.dto.ProductDto;
 
@@ -20,4 +21,5 @@ public interface InvoiceService {
 	public List<InvoiceDto> searchInvoiceBeforeDate(Date date) throws IOException;
 	public List<InvoiceDto> searchInvoiceAfterDate(Date date) throws IOException;
 	public List<InvoiceDto> searchInvoiceBeforeAfter(Date after, Date before) throws IOException;
+	public List<CompanyDto> findCompanyByProduct(int seq) throws IOException;
 }

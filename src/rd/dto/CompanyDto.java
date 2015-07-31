@@ -13,7 +13,7 @@ public class CompanyDto {
 	private String contactStatus;
 
 	public CompanyDto(int seq, String name, String size, String industry, String type,
-			int yearFounded, String location, String phone, String remark) {
+			int yearFounded, String location, String phone, String remark, String contactStatus) {
 		this.name = name;
 		this.seq = seq;
 		this.size = size;
@@ -23,11 +23,12 @@ public class CompanyDto {
 		this.location = location;
 		this.remark = remark;
 		this.phone = phone;
-		this.contactStatus = "new";
+		this.contactStatus = contactStatus;
 	}
 
 	public CompanyDto() {
 		super();
+		this.contactStatus = "new";
 	}
 
 	public int getSeq() {

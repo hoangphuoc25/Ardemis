@@ -98,6 +98,10 @@
 				<p:selectOneMenu value="#{feedbackController.fb.thirdPartySupport}">
 					<f:selectItems value="#{feedbackController.selectOptions}" />
 				</p:selectOneMenu>
+				<h:outputText value="How do you think about this software's performance in heavy-work condition?" />
+				<p:selectOneMenu value="#{feedbackController.fb.performance}">
+					<f:selectItems value="#{feedbackController.selectOptions}" />
+				</p:selectOneMenu>
 				<h:outputText value="How's your user experience with this software?" />
 				<p:selectOneMenu value="#{feedbackController.fb.userExperience}">
 					<f:selectItems value="#{feedbackController.selectOptions}" />
@@ -120,6 +124,7 @@
 				<p:inputTextarea value="#{feedbackController.feedback}" />
 			</p:panelGrid>
 			<p:commandButton value="Send" actionListener="#{feedbackController.sendFeedback}" update=":form01"/>
+			<p:commandButton value="Cancel" actionListener="#{feedbackController.cancelFeedback}" update=":form01"/>
 		</p:dialog>
 	</h:form>
 </h:body>

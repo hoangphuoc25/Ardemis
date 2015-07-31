@@ -6,6 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -13,78 +16,32 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import rd.dto.CallReportDto;
 import rd.dto.CompanyDto;
-import rd.dto.ProductDto;
-import rd.dto.UserDto;
-import rd.spec.dao.CallReportDao;
+import rd.dto.ScheduleTaskDto;
 import rd.spec.dao.CompanyDao;
-import rd.spec.dao.ProductDao;
+import rd.spec.dao.ScheduleTaskDao;
 import rd.spec.dao.Transaction;
-import rd.spec.dao.UserDao;
 
-public class CallReportDaoImpl implements CallReportDao {
+public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private CompanyDao companyDao;
-	private UserDao userDao;
-	private ProductDao productDao;
+	private static String GET_SEQ = "select max(seq)+1 from t_event";
+	private static String ADD_EVENT = "insert into t_event (seq, category, customer_seq, time, username, detail) values (?, ?, ?, ?, ?, ?) ";
+	private static String UPDATE_EVENT = "update t_event set category=?, customer_seq=?, time=?, username=?, detail=? where seq=?";
+	private static String DELETE_EVENT = "delete from t_event where seq=?";
+	private static String GET_BY_ID = "select seq, category, customer_seq, time, username, detail from t_event where seq=?";
+	private static String GET_BY_USER = "select seq, category, customer_seq, time, username, detail from t_event where username=? order by time asc";
+	private static String GET_BY_USER_TODAY = "select seq, category, customer_seq, time, username, detail from t_event where username=? and time>=? and time<?";
+
+	private CompanyDao compDao;
 
 	@Inject
-	public CallReportDaoImpl(CompanyDao companyDao, UserDao userDao, ProductDao productDao) {
-		this.companyDao = companyDao;
-		this.userDao = userDao;
-		this.productDao = productDao;
-	}
-
-	private static String GET_ALL = "select seq, customer_seq, call_time, detail, rating, sale_id, product_seq, call_back from t_call_report order by call_time desc";
-	private static String DELETE_CALL_REPORT = "delete from t_call_report where seq=?";
-	private static String GET_SEQ = "select max(seq)+1 from t_call_report";
-	private static String ADD_REPORT = "insert into t_call_report (seq, customer_seq, call_time, detail, rating, sale_id, product_seq, call_back) values (?, ?, ?, ?, ?, ?, ?, ?)";
-	private static String GET_BY_ID = "select seq, customer_seq, call_time, detail, rating, sale_id, product_seq, call_back from t_call_report where seq=?";
-	private static String UPDATE_CALL_REPORT = "update t_call_report set customer_seq=?, call_time=?, detail=?, rating=?, sale_id=?, product_seq=?, call_back=? where seq=?";
-	private static String GET_BY_COMPANY_ID = "select seq, customer_seq, call_time, detail, rating, sale_id, product_seq, call_back from t_call_report where customer_seq=? order by call_time desc";
-
-	public void addReport(Transaction transaction, CallReportDto report) throws IOException {
-		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		PreparedStatement prepareStatement = null;
-		ResultSet resultSet = null;
-
-		try {
-			Connection connection = transaction.getResource(Connection.class);
-			prepareStatement = connection.prepareStatement(ADD_REPORT);
-			prepareStatement.setInt(1, getSeq(transaction));
-			prepareStatement.setInt(2, report.getCustomer().getSeq());
-			prepareStatement.setTimestamp(3, new java.sql.Timestamp(report.getCallTime().getTime()));
-			prepareStatement.setString(4, report.getDetail());
-			prepareStatement.setString(5, report.getRating());
-			prepareStatement.setString(6, report.getSalesperson().getId());
-			prepareStatement.setInt(7, report.getProduct().getSeq());
-			prepareStatement.setInt(8, report.getCallBack());
-
-			resultSet = prepareStatement.executeQuery();
-
-		} catch (SQLException e) {
-			throw new IOException(e);
-		} finally {
-			if (resultSet != null) {
-				try {
-					resultSet.close();
-				} catch (SQLException e) {
-					logger.warn(e.getMessage(), e);
-				}
-			}
-			if (prepareStatement != null) {
-				try {
-					prepareStatement.close();
-				} catch (SQLException e) {
-					logger.warn(e.getMessage(), e);
-				}
-			}
-		}
+	public ScheduleTaskDaoImpl(CompanyDao compDao) {
+		this.compDao = compDao;
 	}
 
 	public int getSeq(Transaction transaction) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -93,11 +50,11 @@ public class CallReportDaoImpl implements CallReportDao {
 			prepareStatement = connection.prepareStatement(GET_SEQ);
 			resultSet = prepareStatement.executeQuery();
 
-			int result = 1;
-			if (resultSet.next()) {
-				result = resultSet.getInt(1);
+			int seq = 1;
+			while (resultSet.next()) {
+				seq = resultSet.getInt(1);
 			}
-			return result;
+			return seq;
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {
@@ -108,7 +65,6 @@ public class CallReportDaoImpl implements CallReportDao {
 					logger.warn(e.getMessage(), e);
 				}
 			}
-
 			if (prepareStatement != null) {
 				try {
 					prepareStatement.close();
@@ -119,7 +75,113 @@ public class CallReportDaoImpl implements CallReportDao {
 		}
 	}
 
-	public CallReportDto getById(Transaction transaction, int seq) throws IOException {
+	public void addEvent(Transaction transaction, ScheduleTaskDto evt)
+			throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(ADD_EVENT);
+			prepareStatement.setInt(1, getSeq(transaction));
+			prepareStatement.setString(2, evt.getCategory());
+			prepareStatement.setInt(3, evt.getCustomer().getSeq());
+			prepareStatement.setTimestamp(4, new java.sql.Timestamp(evt.getTime().getTime()));
+			prepareStatement.setString(5, evt.getUsername());
+			prepareStatement.setString(6, evt.getDetail());
+
+			resultSet = prepareStatement.executeQuery();
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	public void updateEvent(Transaction transaction, ScheduleTaskDto evt) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(UPDATE_EVENT);
+			prepareStatement.setString(1, evt.getCategory());
+			prepareStatement.setInt(2, evt.getCustomer().getSeq());
+			prepareStatement.setTimestamp(3, new java.sql.Timestamp(evt.getTime().getTime()));
+			prepareStatement.setString(4, evt.getUsername());
+			prepareStatement.setString(5, evt.getDetail());
+			prepareStatement.setInt(6, evt.getSeq());
+
+			resultSet = prepareStatement.executeQuery();
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	public void deleteEvent(Transaction transaction, int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(DELETE_EVENT);
+			prepareStatement.setInt(1, seq);
+			resultSet = prepareStatement.executeQuery();
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	public ScheduleTaskDto getById(Transaction transaction, int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
@@ -130,9 +192,9 @@ public class CallReportDaoImpl implements CallReportDao {
 			prepareStatement.setInt(1, seq);
 			resultSet = prepareStatement.executeQuery();
 
-			CallReportDto result = new CallReportDto();
+			ScheduleTaskDto result = new ScheduleTaskDto();
 			while (resultSet.next()) {
-				result = makeCallReportDto(transaction, resultSet);
+				result = makeScheduleTaskDto(transaction, resultSet);
 			}
 			return result;
 
@@ -156,156 +218,104 @@ public class CallReportDaoImpl implements CallReportDao {
 		}
 	}
 
-	private CallReportDto makeCallReportDto(Transaction transaction, ResultSet resultSet) throws IOException, SQLException {
+	public List<ScheduleTaskDto> getByUser(Transaction transaction, String username) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_USER);
+			prepareStatement.setString(1, username);
+			resultSet = prepareStatement.executeQuery();
+
+			List<ScheduleTaskDto> result = new ArrayList<ScheduleTaskDto>();
+			while (resultSet.next()) {
+				result.add(makeScheduleTaskDto(transaction, resultSet));
+			}
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	public List<ScheduleTaskDto> getByUserToday(Transaction transaction, String username) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Calendar date = new GregorianCalendar();
+			date.set(Calendar.HOUR_OF_DAY, 0);
+			date.set(Calendar.MINUTE, 0);
+			date.set(Calendar.SECOND, 0);
+			date.set(Calendar.MILLISECOND, 0);
+
+			Calendar nextDay = new GregorianCalendar();
+			nextDay.set(Calendar.HOUR_OF_DAY, 0);
+			nextDay.set(Calendar.MINUTE, 0);
+			nextDay.set(Calendar.SECOND, 0);
+			nextDay.set(Calendar.MILLISECOND, 0);
+			nextDay.add(Calendar.DAY_OF_MONTH, 1);
+
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_USER_TODAY);
+			prepareStatement.setString(1, username);
+			prepareStatement.setDate(2, new java.sql.Date(date.getTime().getTime()));
+			prepareStatement.setDate(3, new java.sql.Date(nextDay.getTime().getTime()));
+
+			resultSet = prepareStatement.executeQuery();
+
+			List<ScheduleTaskDto> result = new ArrayList<ScheduleTaskDto>();
+			while (resultSet.next()) {
+				result.add(makeScheduleTaskDto(transaction, resultSet));
+			}
+			System.out.println(result.size());
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	private ScheduleTaskDto makeScheduleTaskDto(Transaction transaction, ResultSet resultSet) throws SQLException, IOException {
 		int seq = resultSet.getInt(1);
-		CompanyDto comp = companyDao.getById(transaction, resultSet.getInt(2));
-		java.util.Date callTime = new java.util.Date(resultSet.getTimestamp(3).getTime());
-		String detail = resultSet.getString(4);
-		String rating = resultSet.getString(5);
-		UserDto salesman = userDao.findUser(transaction, resultSet.getString(6));
-		ProductDto prod = productDao.getProductById(transaction, resultSet.getInt(7));
-		int callBack = resultSet.getInt(8);
+		String category = resultSet.getString(2);
+		CompanyDto comp = compDao.getById(transaction, resultSet.getInt(3));
+		Date time = new Date(resultSet.getTimestamp(4).getTime());
+		String username = resultSet.getString(5);
+		String detail = resultSet.getString(6);
 
-		return new CallReportDto(seq, comp, callTime, detail, rating, salesman, prod, callBack);
-	}
-
-	public void updateCallReport(Transaction transaction, CallReportDto report) throws IOException {
-		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		PreparedStatement prepareStatement = null;
-		ResultSet resultSet = null;
-
-		try {
-			Connection connection = transaction.getResource(Connection.class);
-			prepareStatement = connection.prepareStatement(UPDATE_CALL_REPORT);
-			prepareStatement.setInt(1, report.getCustomer().getSeq());
-			prepareStatement.setTimestamp(2, new java.sql.Timestamp(report.getCallTime().getTime()));
-			prepareStatement.setString(3, report.getDetail());
-			prepareStatement.setString(4, report.getRating());
-			prepareStatement.setString(5, report.getSalesperson().getId());
-			prepareStatement.setInt(6, report.getProduct().getSeq());
-			prepareStatement.setInt(7, report.getCallBack());
-			prepareStatement.setInt(8, report.getSeq());
-
-			resultSet = prepareStatement.executeQuery();
-
-		} catch (SQLException e) {
-			throw new IOException(e);
-		} finally {
-			if (resultSet != null) {
-				try {
-					resultSet.close();
-				} catch (SQLException e) {
-					logger.warn(e.getMessage(), e);
-				}
-			}
-			if (prepareStatement != null) {
-				try {
-					prepareStatement.close();
-				} catch (SQLException e) {
-					logger.warn(e.getMessage(), e);
-				}
-			}
-		}
-	}
-
-	public void deleteCallReport(Transaction transaction, CallReportDto cr) throws IOException {
-		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		PreparedStatement prepareStatement = null;
-		ResultSet resultSet = null;
-
-		try {
-			Connection connection = transaction.getResource(Connection.class);
-			prepareStatement = connection.prepareStatement(DELETE_CALL_REPORT);
-			prepareStatement.setInt(1, cr.getSeq());
-			resultSet = prepareStatement.executeQuery();
-
-		} catch (SQLException e) {
-			throw new IOException(e);
-		} finally {
-			if (resultSet != null) {
-				try {
-					resultSet.close();
-				} catch (SQLException e) {
-					logger.warn(e.getMessage(), e);
-				}
-			}
-			if (prepareStatement != null) {
-				try {
-					prepareStatement.close();
-				} catch (SQLException e) {
-					logger.warn(e.getMessage(), e);
-				}
-			}
-		}
-	}
-
-	public List<CallReportDto> getAll(Transaction transaction) throws IOException {
-		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		PreparedStatement prepareStatement = null;
-		ResultSet resultSet = null;
-
-		try {
-			Connection connection = transaction.getResource(Connection.class);
-			prepareStatement = connection.prepareStatement(GET_ALL);
-			resultSet = prepareStatement.executeQuery();
-
-			List<CallReportDto> all = new ArrayList<CallReportDto>();
-			while (resultSet.next()) {
-				all.add(makeCallReportDto(transaction, resultSet));
-			}
-			return all;
-		} catch (SQLException e) {
-			throw new IOException(e);
-		} finally {
-			if (resultSet != null) {
-				try {
-					resultSet.close();
-				} catch (SQLException e) {
-					logger.warn(e.getMessage(), e);
-				}
-			}
-			if (prepareStatement != null) {
-				try {
-					prepareStatement.close();
-				} catch (SQLException e) {
-					logger.warn(e.getMessage(), e);
-				}
-			}
-		}
-	}
-	public List<CallReportDto> getByCompanyId(Transaction transaction, int seq) throws IOException {
-		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		PreparedStatement prepareStatement = null;
-		ResultSet resultSet = null;
-
-		try {
-			Connection connection = transaction.getResource(Connection.class);
-			prepareStatement = connection.prepareStatement(GET_BY_COMPANY_ID);
-			prepareStatement.setInt(1, seq);
-			resultSet = prepareStatement.executeQuery();
-
-			List<CallReportDto> result = new ArrayList<CallReportDto>();
-			while (resultSet.next()) {
-				result.add(makeCallReportDto(transaction, resultSet));
-			}
-			return result;
-		} catch (SQLException e) {
-			throw new IOException(e);
-		} finally {
-			if (resultSet != null) {
-				try {
-					resultSet.close();
-				} catch (SQLException e) {
-					logger.warn(e.getMessage(), e);
-				}
-			}
-			if (prepareStatement != null) {
-				try {
-					prepareStatement.close();
-				} catch (SQLException e) {
-					logger.warn(e.getMessage(), e);
-				}
-			}
-		}
+		return new ScheduleTaskDto(seq, category, comp, time, username, detail);
 	}
 }

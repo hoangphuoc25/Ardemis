@@ -8,6 +8,7 @@
 	  >
 	  <f:metadata>
 	  	<f:event listener="#{callReportController.reload}" type="preRenderView"></f:event>
+	  	<f:viewParam name="custSeq" value="#{callReportController.custSeq}"></f:viewParam>
 	  </f:metadata>
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -48,13 +49,27 @@
 			<h:outputText value="Detail" />
 			<p:inputTextarea value="#{callReportController.callDetail}" />
 
-			<h:outputText value="Rating" />
+			<h:outputText value="Action" />
 			<p:selectOneMenu value="#{callReportController.rating}" >
 				<f:selectItems value="#{callReportController.ratings}" />
 			</p:selectOneMenu>
 
 			<h:outputText value="Product" />
 			<p:autoComplete minQueryLength="3" maxResults="10" value="#{callReportController.productName}" completeMethod="#{callReportController.suggestProd}" forceSelection="true" />
+
+			<h:outputText value="Call back after" />
+			<p:outputPanel>
+				<p:panelGrid columns="2">
+					<p:inputText value="#{callReportController.callBackNo}" />
+					<p:selectOneMenu value="#{callReportController.callBackUnit}">
+						<f:selectItems value="#{callReportController.callBackUnits}" />
+					</p:selectOneMenu>
+				</p:panelGrid>
+			</p:outputPanel>
+
+			<h:outputText value="Call back again on"/>
+			<p:calendar value="#{callReportController.callBackAgainTime}" pattern="dd/MM/yyyy HH:mm" />
+
 		</p:panelGrid>
 		<p:commandButton value="Submit" actionListener="#{callReportController.addNewReport}" update="form01" />
 		<br/>

@@ -2,6 +2,7 @@ package rd.impl.controler;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.Conversation;
@@ -19,10 +20,12 @@ import org.slf4j.LoggerFactory;
 
 import rd.dto.CompanyDto;
 import rd.dto.InvoiceDto;
+import rd.dto.ProductDto;
 import rd.dto.TeamDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.CompanyService;
 import rd.spec.service.InvoiceService;
+import rd.spec.service.ProductService;
 import rd.spec.service.TeamService;
 import rd.utils.DatabaseUtil;
 
@@ -40,6 +43,7 @@ public class SalespersonController implements Serializable {
 	@Inject CompanyService comService;
 	@Inject SessionManager sessionManager;
 	@Inject InvoiceService invoiceService;
+	@Inject ProductService prodService;
 
 	private List<TeamDto> teams;
 	private List<CompanyDto> customerList;
@@ -79,8 +83,11 @@ public class SalespersonController implements Serializable {
 	}
 
 	public List<CompanyDto> getCustomerList() throws IOException {
-		if (customerList == null) {
+		if (customerList == null && (status == null || status.isEmpty())) {
 			customerList = comService.getAll();
+		} else if (customerList == null && !status.isEmpty()) {
+			customerList = comService.getCompanyByContactStatus(status);
+			showingMode = status;
 		}
 		return customerList;
 	}
@@ -113,7 +120,7 @@ public class SalespersonController implements Serializable {
 	}
 
 	public void startAdd() {
-		reload();
+		// reload();
 		logger.error("COMPLETED");
 		addMode = true;
 	}
@@ -215,6 +222,62 @@ public class SalespersonController implements Serializable {
 		conversationEnd();
 		sessionManager.logoff();
 		return "../portal.jsf?faces-redirect=true";
+	}
+
+	public String getShowingMode() {
+		return showingMode;
+	}
+
+	public void setShowingMode(String showingMode) {
+		this.showingMode = showingMode;
+	}
+
+	private String showingMode = "all";
+
+	public void updateCompanyList() throws IOException {
+		if (showingMode.equals("all"))
+			customerList = comService.getAll();
+		else
+			customerList = comService.getCompanyByContactStatus(showingMode);
+		purchasedProduct = "";
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getPurchasedProduct() {
+		return purchasedProduct;
+	}
+
+	public void setPurchasedProduct(String purchasedProduct) {
+		this.purchasedProduct = purchasedProduct;
+	}
+
+	private String status;
+
+	private String purchasedProduct;
+
+	public List<String> suggestProductList(String partial) throws IOException {
+		List<ProductDto> temp = prodService.searchByName(partial);
+		List<String> result = new ArrayList<String>();
+		for (ProductDto dto: temp) {
+			result.add(dto.getName() + "("+ dto.getSeq() + ")");
+		}
+		return result;
+	}
+
+	public void searchCompanyByProduct() throws NumberFormatException, IOException {
+		if (purchasedProduct.isEmpty())
+			customerList = comService.getAll();
+		else
+			customerList = invoiceService.findCompanyByProduct(Integer.parseInt(purchasedProduct.split("[()]")[1]));
+		showingMode = "all";
+		purchasedProduct = "";
 	}
 }
 

@@ -12,4 +12,5 @@ public interface ActivityService {
 	public void updateActivity(ActivityDto act) throws IOException;
 	public void deleteActivity(ActivityDto act) throws IOException;
 	public int getSeq() throws IOException;
+	public List<ActivityDto> findByStatus(String status, String username) throws IOException;
 }

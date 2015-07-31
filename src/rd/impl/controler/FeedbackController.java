@@ -197,5 +197,10 @@ public class FeedbackController implements Serializable {
 		feedbackMode = true;
 		System.out.println("FeedbackController.startFeedback()");
 	}
+
+	public void cancelFeedback() {
+		feedbackMode = false;
+		fb = new FeedbackDto();
+	}
 }
 

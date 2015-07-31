@@ -179,6 +179,7 @@ public class HistoryController implements Serializable {
 		}
 		newInvoice.setProducts(selectedProducts);
 		newInvoice.setAmount(amount);
+		newInvoice.setSalesperson(sessionManager.getLoginUser());
 		invoiceService.addInvoice(newInvoice);
 
 		sessionManager.addGlobalMessageInfo("New invoice added", null);

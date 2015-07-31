@@ -14,4 +14,5 @@ public interface CompanyDao {
 	public List<CompanyDto> searchCompanyByName(Transaction transaction, String name) throws IOException;
 	public List<CompanyDto> getAll(Transaction transaction) throws IOException;
 	public int getSeq(Transaction transaction) throws IOException;
+	public List<CompanyDto> getCompanyByContactStatus(Transaction transaction, String status) throws IOException;
 }

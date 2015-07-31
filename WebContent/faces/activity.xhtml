@@ -53,6 +53,16 @@
 			<p:commandButton value="Add new activity" actionListener="#{activityController.addActivity}" update=":form01"/>
 		</p:fieldset>
 
+		<br/>
+		<p:selectOneMenu value="#{activityController.showingMode}">
+			<f:selectItem itemLabel="All activity" itemValue="all" />
+			<f:selectItem itemLabel="Contacted" itemValue="contacted" />
+			<f:selectItem itemLabel="Completed" itemValue="completed" />
+			<f:selectItem itemLabel="Negotiating" itemValue="negotiate" />
+			<f:selectItem itemLabel="Halted" itemValue="halted" />
+			<p:ajax event="change" listener="#{activityController.updateAllAct}" update=":form01" />
+		</p:selectOneMenu>
+
 		<p:fieldset legend="All activity">
 			<p:dataTable id="tbl1" rowIndexVar="row" value="#{activityController.allAct}" var="act"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
@@ -73,7 +83,11 @@
 				</p:column>
 				<p:column headerText="Action">
 					<p:commandButton value="Edit" actionListener="#{activityController.startEdit(act)}" update=":form01"/>
-					<p:commandButton value="Add new purchase" actionListener="#{activityController.startAddNewPurchase(act)}" update=":form01" />
+					<p:commandButton value="Add new purchase" actionListener="#{activityController.startAddNewPurchase(act)}" update=":form01"
+						rendered="#{act.status != 'Halted' and act.status != 'Completed'}" />
+					<p:commandButton value="Add meeting" actionListener="#{activityController.startAddMeeting(act)}" update=":form01" />
+					<p:commandButton value="Delete" actionListener="#{activityController.deleteActivity(act)}" update=":form01"
+						rendered="#{act.status == 'Contacted'}" />
 				</p:column>
 			</p:dataTable>
 		</p:fieldset>
@@ -94,6 +108,7 @@
 
 		<p:dialog id="purchaseDialog" closable="false" visible="#{activityController.addInvoiceMode}"
 				widgetVar="purchaseDialog_w" modal="true" resizable="false" draggable="true" header="Add new purchase">
+			<p:messages />
 			<p:panelGrid columns="2">
 				<h:outputText value="Company" />
 				<h:outputText value="#{activityController.selectedAct.customer.name}" />
@@ -117,6 +132,21 @@
 				</p:outputPanel>
 			</p:panelGrid>
 			<p:commandButton value="Add" actionListener="#{activityController.addNewInvoice}" update=":form01"/>
+			<p:commandButton value="Cancel" actionListener="#{activityController.cancelAddInvoice}" update=":form01"/>
+		</p:dialog>
+
+		<p:dialog id="meetingDialog" closable="false" visible="#{activityController.addMeetingMode}"
+				widgetVar="meetingDialog_w" modal="true" resizable="false" draggable="true" header="New Meeting">
+			<p:messages />
+			<p:panelGrid columns="2">
+				<h:outputText value="From" />
+				<p:calendar value="#{activityController.newMeeting.from}" pattern="MM/dd/yyyy HH:mm" />
+				<h:outputText value="To" />
+				<p:calendar value="#{activityController.newMeeting.to}" pattern="MM/dd/yyyy HH:mm" />
+				<h:outputText value="Title" />
+				<p:inputText value="#{activityController.newMeeting.detail}" />
+			</p:panelGrid>
+			<p:commandButton value="Add" actionListener="#{activityController.addNewMeeting}" update=":form01" />
 		</p:dialog>
 	</h:form>
 </h:body>

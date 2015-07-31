@@ -97,4 +97,16 @@ public class ActivityServiceImpl implements ActivityService, Serializable {
 			throw e;
 		}
 	}
+	public List<ActivityDto> findByStatus(String status, String username) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ActivityDto> result = activityDao.findByStatus(transaction, status, username);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

@@ -13,4 +13,5 @@ public interface MeetingService {
 	public MeetingDto getById(int seq) throws IOException;
 	public int getSeq() throws IOException;
 	public List<MeetingDto> getMeetingToday() throws IOException;
+	public List<MeetingDto> getMeetingToday(String username) throws IOException;
 }

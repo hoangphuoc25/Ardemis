@@ -3,7 +3,9 @@ package rd.impl.controler;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.enterprise.context.Conversation;
@@ -18,10 +20,12 @@ import javax.inject.Named;
 import rd.dto.CallReportDto;
 import rd.dto.CompanyDto;
 import rd.dto.ProductDto;
+import rd.dto.ScheduleTaskDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.CallReportService;
 import rd.spec.service.CompanyService;
 import rd.spec.service.ProductService;
+import rd.spec.service.ScheduleTaskService;
 
 @Named
 @ConversationScoped
@@ -33,6 +37,8 @@ public class CallReportController implements Serializable {
 	@Inject CallReportService crService;
 	@Inject SessionManager sessionManager;
 	@Inject ProductService prodService;
+
+	@Inject ScheduleTaskService stService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -66,7 +72,11 @@ public class CallReportController implements Serializable {
 		this.callDetail = callDetail;
 	}
 
-	public String getCompanyName() {
+	public String getCompanyName() throws IOException {
+		if ((companyName == null || companyName.isEmpty()) && custSeq != 0) {
+			CompanyDto comp = compService.getById(custSeq);
+			companyName = comp.getName() +"(" + comp.getSeq() + ")";
+		}
 		return companyName;
 	}
 
@@ -91,6 +101,14 @@ public class CallReportController implements Serializable {
 	}
 
 	public void addNewReport() throws IOException {
+		if (callBackAgainTime != null && (callBackAgainTime.getTime() < (new Date()).getTime())) {
+			sessionManager.addGlobalMessageFatal("Invalid call back time", null);
+			return;
+		}
+		if (callBackNo < 0) {
+			sessionManager.addGlobalMessageFatal("Invalid call back time", null);
+			return;
+		}
 
 		if (callBackUnit.equalsIgnoreCase("month")) {
 			callBackNo *= 30;
@@ -105,10 +123,41 @@ public class CallReportController implements Serializable {
 
 		crService.addReport(cr);
 
+		if (cr.getRating().equalsIgnoreCase("contact again later") || cr.getRating().equalsIgnoreCase("follow-up")) {
+			Calendar date = new GregorianCalendar();
+			date.setTime(callTime);
+			date.add(Calendar.DAY_OF_YEAR, callBackNo);
+			Date temp = null;
+			if (callBackAgainTime != null) {
+				temp = callBackAgainTime;
+			} else {
+				temp = date.getTime();
+			}
+			String category = "";
+			if (cr.getRating().equalsIgnoreCase("contact again later"))
+				category = "Call back again";
+			else if (cr.getRating().equalsIgnoreCase("Follow-up"))
+				category = "Follow-up call";
+
+			int stSeq = stService.getSeq();
+			ScheduleTaskDto task = new ScheduleTaskDto(stSeq, category, customer, temp, sessionManager.getLoginUser().getId(), callDetail);
+			stService.addEvent(task);
+		}
+
+		if (customer.getContactStatus().equalsIgnoreCase("new")) {
+			customer.setContactStatus("contacted");
+			compService.updateCompany(customer);
+		}
+
 		callTime = new Date();
 		callDetail = "";
 		this.rating = "";
 		this.companyName = "";
+
+		callBackNo = 0;
+		callBackUnit = "day";
+		callBackAgainTime = null;
+		prod = new ProductDto();
 
 		sessionManager.addGlobalMessageInfo("New call report added", null);
 	}
@@ -246,7 +295,25 @@ public class CallReportController implements Serializable {
 		this.callBackUnit = callBackUnit;
 	}
 
+	public int getCustSeq() {
+		return custSeq;
+	}
+
+	public void setCustSeq(int custSeq) {
+		this.custSeq = custSeq;
+	}
+
+	public Date getCallBackAgainTime() {
+		return callBackAgainTime;
+	}
+
+	public void setCallBackAgainTime(Date callBackAgainTime) {
+		this.callBackAgainTime = callBackAgainTime;
+	}
+
 	private int callBackNo;
 	private List<String> callBackUnits;
 	private String callBackUnit;
+	private int custSeq;
+	private Date callBackAgainTime;
 }

@@ -377,6 +377,20 @@ public class ManagerController implements Serializable {
 	}
 
 	public void assignSaleTarget() throws IOException {
+		if (currentTarget.getFromDate().getTime() > (new Date()).getTime() ||
+				currentTarget.getToDate().getTime() <= (new Date()).getTime()) {
+			sessionManager.addGlobalMessageFatal("Time period must cover today", null);
+			return;
+		}
+		if (currentTarget.getFromDate().getTime() > currentTarget.getToDate().getTime()) {
+			sessionManager.addGlobalMessageFatal("Start date must not be later than end date", null);
+			return;
+		}
+		if (currentTarget.getTarget() <= 0) {
+			sessionManager.addGlobalMessageFatal("Invalid target amount.", null);
+			return;
+		}
+
 		List<UserDto> sales = userService.getUserByTeam(team);
 		int noOfEmp = sales.size();
 		int amount = currentTarget.getTarget() / noOfEmp;
@@ -384,7 +398,12 @@ public class ManagerController implements Serializable {
 			SaleTargetDto std = new SaleTargetDto(dto, amount, currentTarget.getFromDate(), currentTarget.getToDate(), 0);
 			stService.addSaleTarget(std);
 
-			NoteDto message = new NoteDto(noteService.getSeq(), sessionManager.getLoginUser(), dto, "New sale target has been assigned: " + amount, new Date());
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			String fromDateStr = sdf.format(currentTarget.getFromDate());
+			String toDateStr = sdf.format(currentTarget.getToDate());
+			String messageContent = "New sale target has been assigned: " + amount + " from " + fromDateStr + " to " + toDateStr;
+
+			NoteDto message = new NoteDto(noteService.getSeq(), sessionManager.getLoginUser(), dto, messageContent, new Date());
 			noteService.addNote(message);
 		}
 		assignTargetMode = false;

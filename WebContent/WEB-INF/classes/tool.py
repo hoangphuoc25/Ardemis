@@ -283,7 +283,7 @@ def dao_int_new_method(temp):
 		args = p.search(method_sign).group(0)
 		method_name = method_sign.replace(args, "")
 		result += '\t'
-		if (len(args) == 2):	# no args
+		if (args is None or len(args) == 2):	# no args
 			result += "public {0} {1}(Transaction transaction) throws IOException;\n".format(return_type, method_name)
 		else:
 			result += "public {0} {1}(Transaction transaction, {2}) throws IOException;\n".format(return_type, method_name, args[1:-1])

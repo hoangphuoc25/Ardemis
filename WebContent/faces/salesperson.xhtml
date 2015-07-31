@@ -12,7 +12,7 @@
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
-	<link href="../css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+
 	<style>
 		.message {
 			display: block;
@@ -89,27 +89,34 @@
 		<p:outputPanel id="firstMessage">
 			<a href="#form01:tbl3">You have <span class="badge badge-success">#{scheduleController.newNotes}</span> unread message(s).</a>
 		</p:outputPanel>
-		<p:panelGrid columns="2">
-			<h:outputText value="Your sale target" />
-			<h:outputText value="#{scheduleController.std.target}" />
-			<h:outputText value="Your current sale record" />
-			<h:outputText value="#{scheduleController.std.current}" />
-			<h:outputText value="From" />
-			<h:outputText value="#{scheduleController.std.fromDate}">
-				<f:convertDateTime pattern="dd/MM/yyyy" />
-			</h:outputText>
-			<h:outputText value="To" />
-			<h:outputText value="#{scheduleController.std.toDate}">
-				<f:convertDateTime pattern="dd/MM/yyyy" />
-			</h:outputText>
-		</p:panelGrid>
 
-		<a href="activity.jsf" style="color: blue; font-family: Helvetica">See all sale activities</a>
+		<p:fieldset legend="Your sale misson">
+			<p:panelGrid columns="3">
+				<h:outputText value="Your sale target" />
+				<h:outputText value="#{scheduleController.std.target}" />
+				<h:outputText value="" />
+				<h:outputText value="Your current sale record" />
+				<h:outputText value="#{scheduleController.std.current} (#{scheduleController.percentage} %)" />
+				<p:menuButton value="Actions">
+					<p:menuitem value="See all sale activities" url="activity.jsf" />
+					<p:menuitem value="Find company" url="companyList.jsf" target="_blank" />
+				</p:menuButton>
+				<h:outputText value="From" />
+				<h:outputText value="#{scheduleController.std.fromDate}">
+					<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
+				<h:outputText value="" />
 
-		<h3 style="font-family: Helvetica;">Your schedule</h3>
-		<p:schedule value="#{scheduleController.model}" draggable="false" resizable="false" style="max-width: 800px; margin-left:auto; margin-right: auto;"/>
+				<h:outputText value="To" />
+				<h:outputText value="#{scheduleController.std.toDate}">
+					<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
+				<h:outputText value="" />
 
-		<p:panel id="toggleable" header="Schedule" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px" collapsed="true">
+			</p:panelGrid>
+		</p:fieldset>
+
+		<p:panel id="toggleable" header="Schedule Today" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px">
 			<p:dataTable id="tbl2" rowIndexVar="row" value="#{scheduleController.events}" var="event"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="8">
@@ -141,20 +148,56 @@
 	                </p:submenu>
 	            </p:menu>
 	        </f:facet>
+	        <br/>
+	        <p:commandButton value="Add new meeting" actionListener="#{scheduleController.startAddMeeting}" update=":form01"/>
     	</p:panel>
 
-    	<h4 style="font-family: Helvetica;">Add new schedule event</h4>
-		<h:panelGrid columns="2">
-			<h:outputText value="From" />
-			<p:calendar value="#{scheduleController.from}" pattern="MM/dd/yyyy HH:mm" />
-			<h:outputText value="To" />
-			<p:calendar value="#{scheduleController.to}" pattern="MM/dd/yyyy HH:mm" />
-			<h:outputText value="Title" />
-			<p:inputText value="#{scheduleController.title}" />
-			<h:outputText value="Company" />
-			<p:autoComplete forceSelection="true" value="#{scheduleController.companyName}" minQueryLength="3" maxResults="10" completeMethod="#{scheduleController.suggestCompany}" />
-		</h:panelGrid>
-		<p:commandButton value="Add" actionListener="#{scheduleController.addNewEvent}" update="form01" />
+		<p:panel id="tasks" header="Task today" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="tasksPanel" style="margin-bottom:20px">
+			<p:dataTable id="taskTbl" rowIndexVar="row" value="#{scheduleController.tasks}" var="task"
+					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+					rows="15" >
+				<p:column headerText="Category">
+					<h:outputText value="#{task.category}" />
+				</p:column>
+				<p:column headerText="Customer">
+					<h:outputText value="#{task.customer.name}" />
+				</p:column>
+				<p:column headerText="Time">
+					<h:outputText value="#{task.time}">
+						<f:convertDateTime pattern="HH:mm" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Detail">
+					<h:outputText value="#{task.detail}" />
+				</p:column>
+				<p:column headerText="Action">
+					<p:commandButton value="Delete" actionListener="#{scheduleController.deleteTask(task)}" update=":form01:tasks" />
+					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditTask(task)}" update=":form01" />
+					<p:commandButton value="Create new sale activity" actionListener="#{scheduleController.startAddNewAct(task)}" update=":form01" />
+				</p:column>
+			</p:dataTable>
+			<br/>
+			<p:commandButton value="Add new task" actionListener="#{scheduleController.startAddTask}" update=":form01"/>
+		</p:panel>
+
+    	<h4 style="font-family: Helvetica;">Add new meeting</h4>
+   		<p:dialog id="newMeetingDialog" closable="false" visible="#{scheduleController.addMeetingMode}"
+				widgetVar="newMeetingDialog_w" modal="true" resizable="false" draggable="true" header="">
+			<p:messages />
+			<p:panelGrid columns="2">
+				<h:outputText value="From" />
+				<p:calendar value="#{scheduleController.from}" pattern="MM/dd/yyyy HH:mm" />
+				<h:outputText value="To" />
+				<p:calendar value="#{scheduleController.to}" pattern="MM/dd/yyyy HH:mm" />
+				<h:outputText value="Title" />
+				<p:inputText value="#{scheduleController.title}" />
+				<h:outputText value="Company" />
+				<p:autoComplete forceSelection="true" value="#{scheduleController.companyName}" minQueryLength="3" maxResults="10" completeMethod="#{scheduleController.suggestCompany}" />
+			</p:panelGrid>
+			<p:commandButton value="Add" actionListener="#{scheduleController.addNewEvent}" update=":form01" />
+			<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelAddMeeting}" update=":form01" />
+		</p:dialog>
+
 
 		<h4 style="font-family: Helvetica;">Your messages</h4>
 		<p:dataTable id="tbl3" rowIndexVar="row" value="#{scheduleController.notes}" var="note"
@@ -183,13 +226,73 @@
 
 		<p:dialog id="denyDialog" closable="false" visible="#{scheduleController.respondMode}"
 				widgetVar="denyDialog_w" modal="true" resizable="false" draggable="true" header="Message">
+			<p:messages />
 			<p:panelGrid columns="2">
 				<h:outputText value="Message" />
 				<p:inputTextarea value="#{scheduleController.responseDetail}" />
 			</p:panelGrid>
 			<br/>
 			<p:commandButton value="Send" actionListener="#{scheduleController.respond}" update=":form01"/>
+			<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelRespond}" update=":form01"/>
+		</p:dialog>
 
+		<p:dialog id="addTaskDialog" closable="false" visible="#{scheduleController.addTaskMode}"
+				widgetVar="addTaskDialog_w" modal="true" resizable="false" draggable="true" header="Add new task">
+			<p:messages />
+			<p:panelGrid columns="2">
+				<h:outputText value="Action" />
+				<p:inputText value="#{scheduleController.newTask.category}" />
+
+				<h:outputText value="Time" />
+				<p:calendar value="#{scheduleController.newTask.time}" pattern="dd/MM/yyy HH:mm" />
+
+				<h:outputText value="Customer" />
+				<p:autoComplete forceSelection="true" value="#{scheduleController.companyName_2}" minQueryLength="3" maxResults="10" completeMethod="#{scheduleController.suggestCompany}" />
+
+				<h:outputText value="Detail" />
+				<p:inputTextarea value="#{scheduleController.newTask.detail}" />
+
+			</p:panelGrid>
+			<p:commandButton value="Add" actionListener="#{scheduleController.addNewTask}" update=":form01"/>
+			<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelAddTask}" update=":form01"/>
+		</p:dialog>
+
+		<p:dialog id="editTaskDialog" closable="false" visible="#{scheduleController.editTaskMode}"
+				widgetVar="editTaskDialog_w" modal="true" resizable="false" draggable="true" header="Edit Task">
+			<p:panelGrid columns="2">
+				<h:outputText value="Action" />
+				<p:inputText value="#{scheduleController.editingTask.category}" />
+
+				<h:outputText value="Customer" />
+				<h:outputText value="#{scheduleController.editingTask.customer.name}" />
+
+				<h:outputText value="Time" />
+				<p:calendar value="#{scheduleController.editingTask.time}" pattern="dd/MM/yyyy HH:mm" />
+
+				<h:outputText value="Detail" />
+				<p:inputText value="#{scheduleController.editingTask.detail}" />
+			</p:panelGrid>
+			<p:commandButton value="Confirm" actionListener="#{scheduleController.editTask}" update=":form01" />
+			<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelEditTask}" update=":form01" />
+		</p:dialog>
+
+		<p:dialog id="newActDialog" closable="false" visible="#{scheduleController.addActivityMode}"
+				widgetVar="newActDialog_w" modal="true" resizable="false" draggable="true" header="Add new activity">
+			<p:panelGrid columns="2">
+				<h:outputText value="Customer" />
+				<h:outputText value="#{scheduleController.newAct.customer.name}" />
+
+				<h:outputText value="Start date" />
+				<p:calendar value="#{scheduleController.newAct.startDate}" pattern="dd/MM/yyyy" />
+
+				<h:outputText value="Status" />
+				<h:outputText value="Contacted" />
+
+				<h:outputText value="Remark" />
+				<p:inputTextarea value="#{scheduleController.newAct.remark}" />
+			</p:panelGrid>
+			<p:commandButton value="Add" actionListener="#{scheduleController.addNewAct}" update=":form01"/>
+			<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelAddNewAct}" update=":form01"/>
 		</p:dialog>
 	</h:form>
 </h:body>

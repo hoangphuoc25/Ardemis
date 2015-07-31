@@ -126,4 +126,16 @@ public class CompanyServiceImpl implements CompanyService, Serializable {
 			throw e;
 		}
 	}
+	public List<CompanyDto> getCompanyByContactStatus(String status) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<CompanyDto> result = companyDao.getCompanyByContactStatus(transaction, status);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

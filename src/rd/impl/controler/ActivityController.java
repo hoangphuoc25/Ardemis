@@ -2,6 +2,7 @@ package rd.impl.controler;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -15,12 +16,14 @@ import javax.inject.Named;
 import rd.dto.ActivityDto;
 import rd.dto.CompanyDto;
 import rd.dto.InvoiceDto;
+import rd.dto.MeetingDto;
 import rd.dto.ProductDto;
 import rd.dto.SaleTargetDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.ActivityService;
 import rd.spec.service.CompanyService;
 import rd.spec.service.InvoiceService;
+import rd.spec.service.MeetingService;
 import rd.spec.service.ProductService;
 import rd.spec.service.SaleTargetService;
 
@@ -36,6 +39,7 @@ public class ActivityController implements Serializable {
 	@Inject InvoiceService invoiceService;
 	@Inject ProductService prodService;
 	@Inject SaleTargetService stService;
+	@Inject MeetingService meetingService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -56,6 +60,9 @@ public class ActivityController implements Serializable {
 	public ActivityDto getNewAct() {
 		if (newAct == null) {
 			newAct = new ActivityDto();
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+			String date = sdf.format(new Date());
+			newAct.setRemark(date + ":\n");
 		}
 		return newAct;
 	}
@@ -159,6 +166,11 @@ public class ActivityController implements Serializable {
 	public void startEdit(ActivityDto act) {
 		editMode = true;
 		selectedAct = act;
+		String content = act.getRemark();
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+		String date = sdf.format(new Date());
+		content += "\n\n" + date + ":\n";
+		selectedAct.setRemark(content);
 	}
 
 	public void editAct() throws IOException {
@@ -210,6 +222,7 @@ public class ActivityController implements Serializable {
 		}
 		getNewInvoice().setProducts(getSelectedProducts());
 		getNewInvoice().setAmount(amount);
+		newInvoice.setSalesperson(sessionManager.getLoginUser());
 		invoiceService.addInvoice(getNewInvoice());
 
 		getStd().setCurrent(getStd().getCurrent() + (int) Math.ceil(amount));
@@ -223,6 +236,15 @@ public class ActivityController implements Serializable {
 		selectedAct.setStatus("Completed");
 		editAct();
 		addInvoiceMode = false;
+
+		if (!showingMode.equalsIgnoreCase("all")) {
+			for (int i = allAct.size() - 1; i >= 0; i--) {
+				if (allAct.get(i).getSeq() == selectedAct.getSeq()) {
+					allAct.remove(i);
+					break;
+				}
+			}
+		}
 	}
 
 	public InvoiceDto getNewInvoice() {
@@ -271,16 +293,26 @@ public class ActivityController implements Serializable {
 				return;
 		}
 		selectedProducts.add(prod);
+		search = "";
 	}
 
-	public void cancelEditAct() {
+	public void cancelEditAct() throws IOException {
 		editMode = false;
+		for (int i = 0; i < allAct.size(); i++) {
+			if (allAct.get(i).getSeq() == selectedAct.getSeq()) {
+				ActivityDto temp = actService.getById(selectedAct.getSeq());
+				allAct.set(i, temp);
+				break;
+			}
+		}
 		selectedAct = new ActivityDto();
 	}
 
 	public void cancelAddInvoice() {
 		addInvoiceMode = false;
 		newInvoice = new InvoiceDto();
+		selectedProducts = new ArrayList<ProductDto>();
+		search = "";
 	}
 
 	public void deleteSelected() {
@@ -318,6 +350,72 @@ public class ActivityController implements Serializable {
 		this.statusOptionsEditBox = statusOptionsEditBox;
 	}
 
+	public MeetingDto getNewMeeting() {
+		if (newMeeting == null) {
+			newMeeting = new MeetingDto();
+		}
+		return newMeeting;
+	}
+
+	public void setNewMeeting(MeetingDto newMeeting) {
+		this.newMeeting = newMeeting;
+	}
+
+	public boolean isAddMeetingMode() {
+		return addMeetingMode;
+	}
+
+	public void setAddMeetingMode(boolean addMeetingMode) {
+		this.addMeetingMode = addMeetingMode;
+	}
+
 	private SaleTargetDto std;
+	private MeetingDto newMeeting;
+	private boolean addMeetingMode = false;
+
+	public void startAddMeeting(ActivityDto act) throws IOException {
+		newMeeting = new MeetingDto();
+		newMeeting.setCustomer(act.getCustomer());
+		newMeeting.setSalesperson(sessionManager.getLoginUser());
+		addMeetingMode = true;
+	}
+
+	public void addNewMeeting() throws IOException {
+		if (newMeeting.getFrom().getTime() > newMeeting.getTo().getTime()) {
+			sessionManager.addGlobalMessageFatal("Invalid time", null);
+			return;
+		}
+		meetingService.addMeeting(newMeeting);
+		sessionManager.addGlobalMessageInfo("New meeting added", null);
+		addMeetingMode = false;
+	}
+
+	public String getShowingMode() {
+		return showingMode;
+	}
+
+	public void setShowingMode(String showingMode) {
+		this.showingMode = showingMode;
+	}
+
+	private String showingMode = "all";
+
+	public void updateAllAct() throws IOException {
+		if (showingMode.equalsIgnoreCase("all")) {
+			allAct = actService.getByUser(sessionManager.getLoginUser().getId());
+		} else {
+			allAct = actService.findByStatus(showingMode, sessionManager.getLoginUser().getId());
+		}
+	}
+
+	public void deleteActivity(ActivityDto act) throws IOException {
+		for (int i = allAct.size() - 1; i >= 0; i--) {
+			if (allAct.get(i).getSeq() == act.getSeq()) {
+				allAct.remove(i);
+				break;
+			}
+		}
+		actService.deleteActivity(act);
+	}
 }
 

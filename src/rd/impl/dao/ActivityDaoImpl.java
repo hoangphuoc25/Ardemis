@@ -40,6 +40,7 @@ public class ActivityDaoImpl implements ActivityDao {
 	private static String GET_BY_USER = "select seq, customer_seq, start_date, status, remark, salesperson from t_activity where salesperson=?";
 	private static String DELETE_ACTIVITY = "delete from t_activity where seq=?";
 	private static String UPDATE_ACTIVITY = "update t_activity set customer_seq=?, start_date=?, status=?, remark=?, salesperson=? where seq=?";
+	private static String FIND_BY_STATUS = "select seq, customer_seq, start_date, status, remark, salesperson from t_activity where salesperson=? and lower(status)=?";
 
 	public void addActivity(Transaction transaction, ActivityDto act)
 			throws IOException {
@@ -255,6 +256,43 @@ public class ActivityDaoImpl implements ActivityDao {
 				seq = resultSet.getInt(1);
 			}
 			return seq;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	public List<ActivityDto> findByStatus(Transaction transaction, String status, String username) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(FIND_BY_STATUS);
+			prepareStatement.setString(1, username);
+			prepareStatement.setString(2, status);
+			resultSet = prepareStatement.executeQuery();
+
+			List<ActivityDto> result = new ArrayList<ActivityDto>();
+			while (resultSet.next()) {
+				result.add(makeActivityDto(transaction, resultSet));
+			}
+			return result;
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {

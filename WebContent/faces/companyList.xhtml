@@ -6,6 +6,10 @@
 	  xmlns:ui="http://java.sun.com/jsf/facelets"
 	  xmlns:p="http://primefaces.org/ui"
 	  >
+	  	<f:metadata>
+			<f:viewParam name="status" value="#{salespersonController.status}"></f:viewParam>
+			<f:event listener="#{salespersonController.reload}" type="preRenderView"></f:event>
+		</f:metadata>
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
@@ -91,7 +95,8 @@
 		</p:selectOneMenu>
 
 		<h:messages infoClass="alert alert-success" errorClass="alert alert-error" fatalClass="alert alert-block" />
-
+		<br/>
+		<p:commandButton value="Add new customer" actionListener="#{salespersonController.startAdd}" oncomplete="custDialog_w.show()" update=":form01"/>
 		<p:dataTable id="table1" rowIndexVar="row" value="#{salespersonController.customerList}" var="comp"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 				rows="15" rowKey="#{comp.seq}">
@@ -122,25 +127,36 @@
 			</p:column>
 
 			<p:column headerText="Link">
-				<h:outputLink value="#{salespersonController.link(comp.name)}" target="_blank" style="color: blue;">Google news</h:outputLink>
-				<p:spacer width="20" />
+				<a href="callReport.jsf?custSeq=#{comp.seq}" style="color: blue;">Add call report</a>
+				<p:spacer width="10" />
 				<a href="history.jsf?seq=#{comp.seq}" style="color: blue;">Detail</a>
-				<p:spacer width="20" />
+				<p:spacer width="10" />
 				<h:commandButton value="Delete" actionListener="#{salespersonController.remove(comp)}" update="form01"
 					rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager') or facesContext.externalContext.isUserInRole('support')}"/>
-				<p:spacer width="20" />
+				<p:spacer width="10" />
 				<a href="editCompany.jsf?seq=#{comp.seq}" style="color: blue;">Edit</a>
 			</p:column>
 		</p:dataTable>
 
-		<br/>
-		<p:commandButton value="Add new customer" actionListener="#{salespersonController.startAdd}" oncomplete="custDialog_w.show()" update=":form01"/>
+		<h:panelGrid columns="2">
+			<h:outputText value="Showing" />
+			<p:selectOneMenu value="#{salespersonController.showingMode}">
+				<f:selectItem itemLabel="All Company" itemValue="all" />
+				<f:selectItem itemLabel="New Company" itemValue="new" />
+				<f:selectItem itemLabel="Contacted Company" itemValue="contacted" />
+				<p:ajax event="change" listener="#{salespersonController.updateCompanyList}" update=":form01" />
+			</p:selectOneMenu>
+		</h:panelGrid>
 		<br/>
 
 		<p:panelGrid columns="3">
 			<h:outputText value="Search" />
 			<p:inputText binding="#{a}"/>
 			<p:commandButton actionListener="#{salespersonController.search(a.value)}" value="Search" update=":form01" />
+
+			<h:outputText value="Purchased product" />
+			<p:autoComplete minQueryLength="3" maxResults="10" forceSelection="true" completeMethod="#{salespersonController.suggestProductList}" value="#{salespersonController.purchasedProduct}" />
+			<p:commandButton value="Search" actionListener="#{salespersonController.searchCompanyByProduct}" update=":form01" />
 		</p:panelGrid>
 
 		<p:dialog id="custDialog" closable="false" widgetVar="custDialog_w" rendered="#{salespersonController.addMode}" visible="#{salespersonController.addMode}"

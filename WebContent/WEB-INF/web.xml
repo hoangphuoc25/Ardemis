@@ -21,7 +21,7 @@
   </context-param>
   <context-param>
     <param-name>primefaces.THEME</param-name>
-    <param-value>delta</param-value>
+    <param-value>bluesky</param-value>
   </context-param>
   <error-page>
      <exception-type>java.lang.Throwable</exception-type>

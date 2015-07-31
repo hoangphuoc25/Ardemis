@@ -13,4 +13,5 @@ public interface MeetingDao {
 	public MeetingDto getById(Transaction transaction, int seq) throws IOException;
 	public int getSeq(Transaction transaction) throws IOException;
 	public List<MeetingDto> getMeetingToday(Transaction transaction) throws IOException;
+	public List<MeetingDto> getMeetingToday(Transaction transaction, String username) throws IOException;
 }

@@ -3,9 +3,11 @@ package rd.impl.controler;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.enterprise.context.Conversation;
@@ -15,19 +17,22 @@ import javax.inject.Named;
 
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultScheduleModel;
-import org.primefaces.model.ScheduleEvent;
 import org.primefaces.model.ScheduleModel;
 
+import rd.dto.ActivityDto;
 import rd.dto.CompanyDto;
 import rd.dto.MeetingDto;
 import rd.dto.NoteDto;
 import rd.dto.SaleTargetDto;
+import rd.dto.ScheduleTaskDto;
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.ActivityService;
 import rd.spec.service.CompanyService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.NoteService;
 import rd.spec.service.SaleTargetService;
+import rd.spec.service.ScheduleTaskService;
 import rd.utils.Pair;
 
 @Named
@@ -41,6 +46,8 @@ public class ScheduleController implements Serializable {
 	@Inject CompanyService compService;
 	@Inject NoteService noteService;
 	@Inject SaleTargetService stService;
+	@Inject ScheduleTaskService taskService;
+	@Inject ActivityService actService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -105,21 +112,21 @@ public class ScheduleController implements Serializable {
 	private String companyName;
 
 	public void addNewEvent() throws IOException {
-		reload();
+		// reload();
 		if (to.getTime() < from.getTime()) {
 			sessionManager.addGlobalMessageFatal("Invalid date info", null);
 			return;
 		}
+		System.out.println("ScheduleController.addNewEvent()");
+		System.out.println(companyName);
 		CompanyDto comp = compService.getById(Integer.parseInt(companyName.split("[()]")[1]));
 		System.out.println(Integer.parseInt(companyName.split("[()]")[1]));
 		MeetingDto newMeeting = new MeetingDto(meetingService.getSeq(), from, to, title, comp, sessionManager.getLoginUser());
 		meetingService.addMeeting(newMeeting);
-		if (model == null) {
-			System.out.println("model is null");
-		}
 
-		model.addEvent(new DefaultScheduleEvent(title, from, to));
-		events.add(newMeeting);
+		if (isToday(newMeeting)) {
+			events.add(newMeeting);
+		}
 
 		sessionManager.addGlobalMessageInfo("New schedule event added", null);
 		if (!checkConflict()) {
@@ -129,6 +136,7 @@ public class ScheduleController implements Serializable {
 		to = null;
 		title = "";
 		companyName = "";
+		addMeetingMode = false;
 	}
 
 	public String getCompanyName() {
@@ -194,7 +202,7 @@ public class ScheduleController implements Serializable {
 
 	public List<MeetingDto> getEvents() throws IOException {
 		if (events == null) {
-			events = meetingService.getMeetingByUser(sessionManager.getLoginUser().getId());
+			events = meetingService.getMeetingToday(sessionManager.getLoginUser().getId());
 		}
 		return events;
 	}
@@ -210,13 +218,6 @@ public class ScheduleController implements Serializable {
 			if (events.get(i).getSeq() == meeting.getSeq()) {
 				events.remove(i);
 				meetingService.deleteMeeting(meeting.getSeq());
-				break;
-			}
-		}
-		for (ScheduleEvent se: model.getEvents()) {
-			if (se.getStartDate().equals(meeting.getFrom()) && se.getEndDate().equals(meeting.getTo()) &&
-					se.getTitle().contains(meeting.getDetail())) {
-				model.deleteEvent(se);
 				break;
 			}
 		}
@@ -293,6 +294,11 @@ public class ScheduleController implements Serializable {
 	}
 
 	public void respond() throws IOException {
+		if (responseDetail == null || responseDetail.isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Response can't be empty", null);
+			return;
+		}
+
 		int seq = noteService.getSeq();
 		NoteDto note = new NoteDto(seq, sessionManager.getLoginUser(), targetUser, responseDetail, new Date());
 		noteService.addNote(note);
@@ -319,5 +325,241 @@ public class ScheduleController implements Serializable {
 		this.std = std;
 	}
 
+	public List<ScheduleTaskDto> getTasks() throws IOException {
+		if (tasks == null) {
+			tasks = taskService.getByUserToday(sessionManager.getLoginUser().getId());
+		}
+		return tasks;
+	}
+
+	public void setTasks(List<ScheduleTaskDto> tasks) {
+		this.tasks = tasks;
+	}
+
 	private SaleTargetDto std;
+	private List<ScheduleTaskDto> tasks;
+	private ScheduleTaskDto editingTask;
+	private boolean editTaskMode = false;
+
+	public void cancelRespond() {
+		respondMode = false;
+	}
+
+	public ScheduleTaskDto getEditingTask() {
+		if (editingTask == null) {
+			editingTask = new ScheduleTaskDto();
+		}
+		return editingTask;
+	}
+
+	public void setEditingTask(ScheduleTaskDto editingTask) {
+		this.editingTask = editingTask;
+	}
+
+	public void startEditTask(ScheduleTaskDto task) {
+		editTaskMode = true;
+		editingTask = task;
+	}
+
+	public boolean isEditTaskMode() {
+		return editTaskMode;
+	}
+
+	public void setEditTaskMode(boolean editTaskMode) {
+		this.editTaskMode = editTaskMode;
+	}
+
+	public void cancelEditTask() throws IOException {
+		editTaskMode = false;
+		for (int i = tasks.size() - 1; i >= 0; i--) {
+			if (tasks.get(i).getSeq() == editingTask.getSeq()) {
+				tasks.set(i, taskService.getById(editingTask.getSeq()));
+				break;
+			}
+		}
+		editingTask = new ScheduleTaskDto();
+	}
+
+	public void editTask() throws IOException {
+		taskService.updateEvent(editingTask);
+		sessionManager.addGlobalMessageInfo("Task updated", null);
+		editTaskMode = false;
+	}
+
+	public void deleteTask(ScheduleTaskDto task) throws IOException {
+		for (int i = tasks.size() - 1; i >= 0; i--) {
+			if (tasks.get(i).getSeq() == task.getSeq()) {
+				tasks.remove(i);
+				break;
+			}
+		}
+		taskService.deleteEvent(task.getSeq());
+	}
+
+	public double getPercentage() throws IOException {
+		percentage = Math.floor((double)getStd().getCurrent() / (double) getStd().getTarget() * 10000) / 100;
+		return percentage;
+	}
+
+	public void setPercentage(double percentage) {
+		this.percentage = percentage;
+	}
+
+	public boolean isAddMeetingMode() {
+		return addMeetingMode;
+	}
+
+	public void setAddMeetingMode(boolean addMeetingMode) {
+		this.addMeetingMode = addMeetingMode;
+	}
+
+	private double percentage;
+
+	private boolean addMeetingMode = false;
+	private boolean addTaskMode = false;
+	private ScheduleTaskDto newTask;
+
+	public void startAddMeeting() {
+		addMeetingMode = true;
+	}
+
+	public void cancelAddMeeting() {
+		addMeetingMode = false;
+	}
+
+	public boolean isAddTaskMode() {
+		return addTaskMode;
+	}
+
+	public void setAddTaskMode(boolean addTaskMode) {
+		this.addTaskMode = addTaskMode;
+	}
+
+	public void startAddTask() {
+		addTaskMode = true;
+	}
+
+	public void cancelAddTask() {
+		addTaskMode = false;
+	}
+
+	public void addNewTask() throws NumberFormatException, IOException {
+		if (companyName_2 == null || companyName_2.isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Company name invalid", null);
+			return;
+		}
+
+		CompanyDto comp = compService.getById(Integer.parseInt(companyName_2.split("[()]")[1]));
+		newTask.setCustomer(comp);
+		newTask.setSeq(taskService.getSeq());
+		newTask.setUsername(sessionManager.getLoginUser().getId());
+
+		taskService.addEvent(newTask);
+
+		sessionManager.addGlobalMessageInfo("New task added", null);
+		if (isToday(newTask)) {
+			tasks.add(newTask);
+		}
+
+		addTaskMode = false;
+		companyName_2 = "";
+		newTask = new ScheduleTaskDto();
+
+
+	}
+
+	private boolean isToday(ScheduleTaskDto newTask) {
+		Calendar date = new GregorianCalendar();
+		date.set(Calendar.HOUR_OF_DAY, 0);
+		date.set(Calendar.MINUTE, 0);
+		date.set(Calendar.SECOND, 0);
+		date.set(Calendar.MILLISECOND, 0);
+
+		Calendar nextDay = new GregorianCalendar();
+		nextDay.set(Calendar.HOUR_OF_DAY, 0);
+		nextDay.set(Calendar.MINUTE, 0);
+		nextDay.set(Calendar.SECOND, 0);
+		nextDay.set(Calendar.MILLISECOND, 0);
+		nextDay.add(Calendar.DAY_OF_MONTH, 1);
+
+		return (newTask.getTime().getTime() >= date.getTime().getTime()) && (newTask.getTime().getTime() < nextDay.getTime().getTime());
+	}
+
+	private boolean isToday(MeetingDto meeting) {
+		Calendar date = new GregorianCalendar();
+		date.set(Calendar.HOUR_OF_DAY, 0);
+		date.set(Calendar.MINUTE, 0);
+		date.set(Calendar.SECOND, 0);
+		date.set(Calendar.MILLISECOND, 0);
+
+		Calendar nextDay = new GregorianCalendar();
+		nextDay.set(Calendar.HOUR_OF_DAY, 0);
+		nextDay.set(Calendar.MINUTE, 0);
+		nextDay.set(Calendar.SECOND, 0);
+		nextDay.set(Calendar.MILLISECOND, 0);
+		nextDay.add(Calendar.DAY_OF_MONTH, 1);
+
+		return (meeting.getFrom().getTime() >= date.getTime().getTime() && meeting.getFrom().getTime() < nextDay.getTime().getTime());
+	}
+
+	public ScheduleTaskDto getNewTask() {
+		if (newTask == null) {
+			newTask = new ScheduleTaskDto();
+		}
+		return newTask;
+	}
+
+	public void setNewTask(ScheduleTaskDto newTask) {
+		this.newTask = newTask;
+	}
+
+	public String getCompanyName_2() {
+		return companyName_2;
+	}
+
+	public void setCompanyName_2(String companyName_2) {
+		this.companyName_2 = companyName_2;
+	}
+
+	public boolean isAddActivityMode() {
+		return addActivityMode;
+	}
+
+	public void setAddActivityMode(boolean addActivityMode) {
+		this.addActivityMode = addActivityMode;
+	}
+
+	private String companyName_2;
+	private boolean addActivityMode = false;
+	private ActivityDto newAct;
+
+	public void startAddNewAct(ScheduleTaskDto task) {
+		getNewAct().setCustomer(task.getCustomer());
+		newAct.setStatus("Contacted");
+		addActivityMode = true;
+	}
+
+	public void addNewAct() throws IOException {
+		int seq = actService.getSeq();
+		newAct.setSeq(seq);
+		newAct.setSalesperson(sessionManager.getLoginUser());
+		actService.addActivity(getNewAct());
+		sessionManager.addGlobalMessageInfo("New activity added", null);
+		addActivityMode = false;
+	}
+
+	public void cancelAddNewAct() {
+		addActivityMode = false;
+	}
+
+	public ActivityDto getNewAct() {
+		if (newAct == null) {
+			newAct = new ActivityDto();
+		}
+		return newAct;
+	}
+
+	public void setNewAct(ActivityDto newAct) {
+		this.newAct = newAct;
+	}
 }

@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import rd.dto.CompanyDto;
 import rd.dto.InvoiceDto;
 import rd.dto.ProductDto;
 import rd.spec.dao.InvoiceDao;
@@ -163,6 +164,18 @@ public class InvoiceServiceImpl implements InvoiceService, Serializable {
 		try{
 			transaction.begin();
 			List<InvoiceDto> result = invoiceDao.searchInvoiceBeforeAfter(transaction, after, before);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<CompanyDto> findCompanyByProduct(int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<CompanyDto> result = invoiceDao.findCompanyByProduct(transaction, seq);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {

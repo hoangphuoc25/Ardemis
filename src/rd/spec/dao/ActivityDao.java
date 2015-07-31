@@ -12,4 +12,5 @@ public interface ActivityDao {
 	public void updateActivity(Transaction transaction, ActivityDto act) throws IOException;
 	public void deleteActivity(Transaction transaction, ActivityDto act) throws IOException;
 	public int getSeq(Transaction transaction) throws IOException;
+	public List<ActivityDto> findByStatus(Transaction transaction, String status, String username) throws IOException;
 }

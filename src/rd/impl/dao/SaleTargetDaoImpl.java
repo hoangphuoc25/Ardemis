@@ -72,9 +72,7 @@ public class SaleTargetDaoImpl implements SaleTargetDao {
 		UserDto sale = userDao.findUser(transaction, resultSet.getString(1));
 		int target = resultSet.getInt(2);
 		Date fromDate = new Date(resultSet.getDate(3).getTime());
-		System.out.println(fromDate);
 		Date toDate = new Date(resultSet.getDate(4).getTime());
-		System.out.println(toDate);
 		int current = resultSet.getInt(5);
 		return new SaleTargetDto(sale, target, fromDate, toDate, current);
 	}
@@ -87,6 +85,8 @@ public class SaleTargetDaoImpl implements SaleTargetDao {
 
 		try {
 			Connection connection = transaction.getResource(Connection.class);
+			// int current = (getByUser(transaction, std.getSale().getId())).getCurrent();
+
 			prepareStatement = connection.prepareStatement(DELETE_SALE_TARGET);
 			prepareStatement.setString(1, std.getSale().getId());
 			resultSet = prepareStatement.executeQuery();
@@ -94,10 +94,8 @@ public class SaleTargetDaoImpl implements SaleTargetDao {
 			prepareStatement = connection.prepareStatement(ADD_SALE_TARGET);
 			prepareStatement.setString(1, std.getSale().getId());
 			prepareStatement.setInt(2, std.getTarget());
-			prepareStatement.setDate(3, new java.sql.Date(std.getFromDate()
-					.getTime()));
-			prepareStatement.setDate(4, new java.sql.Date(std.getToDate()
-					.getTime()));
+			prepareStatement.setDate(3, new java.sql.Date(std.getFromDate().getTime()));
+			prepareStatement.setDate(4, new java.sql.Date(std.getToDate().getTime()));
 			prepareStatement.setInt(5, std.getCurrent());
 
 			resultSet = prepareStatement.executeQuery();
@@ -195,4 +193,44 @@ public class SaleTargetDaoImpl implements SaleTargetDao {
 	}
 
 	private static String UPDATE_SALE_TARGET = "update t_sale_target set target=?, from_date=?, to_date=?, current_record=? where sale=?";
+
+	private SaleTargetDto getByUser(Transaction transaction, String user)
+			throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_USER);
+			prepareStatement.setString(1, user);
+			resultSet = prepareStatement.executeQuery();
+
+			SaleTargetDto std = null;
+			if (resultSet.next()) {
+				std = makeSaleTargetDto(transaction, resultSet);
+			}
+
+			return std;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	private static String GET_BY_USER = "select seq, target, from_date, to_date, current_record from t_sale where sale=?";
 }

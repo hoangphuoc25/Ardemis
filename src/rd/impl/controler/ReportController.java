@@ -199,6 +199,7 @@ public class ReportController implements Serializable {
 		}
 		getNewInvoice().setProducts(getSelectedProducts());
 		getNewInvoice().setAmount(amount);
+		newInvoice.setSalesperson(sessionManager.getLoginUser());
 		invoiceService.addInvoice(getNewInvoice());
 
 		invoices.add(newInvoice);

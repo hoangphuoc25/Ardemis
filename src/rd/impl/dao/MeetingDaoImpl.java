@@ -310,5 +310,58 @@ public class MeetingDaoImpl implements MeetingDao {
 			}
 		}
 	}
-	private static String GET_MEETING_TODAY = "select seq, user_id, from_date, to_date, detail, customer_id from t_meeting where from_date >= ? and from_date < ?";
+	private static String GET_MEETING_TODAY = "select seq, user_id, from_date, to_date, detail, customer_id from t_meeting where from_date >= ? and from_date < ? order by from_date asc";
+
+	public List<MeetingDto> getMeetingToday(Transaction transaction, String username) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Calendar date = new GregorianCalendar();
+			date.set(Calendar.HOUR_OF_DAY, 0);
+			date.set(Calendar.MINUTE, 0);
+			date.set(Calendar.SECOND, 0);
+			date.set(Calendar.MILLISECOND, 0);
+
+			Calendar nextDay = new GregorianCalendar();
+			nextDay.set(Calendar.HOUR_OF_DAY, 0);
+			nextDay.set(Calendar.MINUTE, 0);
+			nextDay.set(Calendar.SECOND, 0);
+			nextDay.set(Calendar.MILLISECOND, 0);
+			nextDay.add(Calendar.DAY_OF_MONTH, 1);
+
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_MEETING_TODAY_USER);
+			prepareStatement.setDate(1, new java.sql.Date(date.getTime().getTime()));
+			prepareStatement.setDate(2, new java.sql.Date(nextDay.getTime().getTime()));
+			prepareStatement.setString(3, username);
+
+			resultSet = prepareStatement.executeQuery();
+
+			List<MeetingDto> result = new ArrayList<MeetingDto>();
+			while (resultSet.next()) {
+				result.add(makeMeetingDto(transaction, resultSet));
+			}
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_MEETING_TODAY_USER = "select seq, user_id, from_date, to_date, detail, customer_id from t_meeting where from_date >= ? and from_date < ? and user_id=?";
 }

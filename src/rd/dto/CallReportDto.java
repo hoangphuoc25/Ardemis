@@ -42,6 +42,7 @@ public class CallReportDto {
 		this.rating = rating;
 		this.salesperson = user;
 		this.product = product;
+		this.callBack = callBack;
 	}
 
 	public CallReportDto() {}

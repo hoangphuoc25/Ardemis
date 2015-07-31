@@ -209,6 +209,7 @@
 		<p:outputPanel id="saleTargetArea">
 			<p:dialog id="saleTargetDialog" closable="false" visible="#{managerController.assignTargetMode}"
 					widgetVar="saleTargetDialog_w" modal="true" resizable="false" draggable="true" header="Sale target">
+				<p:messages />
 				<p:panelGrid columns="2">
 					<h:outputText value="Target" />
 					<p:inputText value="#{managerController.currentTarget.target}" />
