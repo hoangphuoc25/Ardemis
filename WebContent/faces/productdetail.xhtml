@@ -53,7 +53,7 @@
 
 		<h3>Purchase history</h3>
 		<p:dataTable id="tbl1" rowIndexVar="row" value="#{productDetailController.purchases}" var="purchase"
-				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}" row="20">
+				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}" rows="10">
 			<p:column headerText="Id">
 				<h:outputText value="#{purchase.seq}" />
 			</p:column>
@@ -78,7 +78,7 @@
 		<h3>Feedbacks</h3>
 		<p:dataTable styleClass="myTable" id="tbl2" rowIndexVar="row" value="#{productDetailController.feedbacks}" var="fb"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-				rows="15">
+				rows="10">
 			<p:column headerText="User">
 				<h:outputText value="#{fb.customer.name}" />
 			</p:column>

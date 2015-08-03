@@ -116,7 +116,7 @@
 			</p:panelGrid>
 		</p:fieldset>
 
-		<p:panel id="toggleable" header="Schedule Today" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px">
+		<p:panel id="toggleable" header="Meeting schedule today" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px">
 			<p:dataTable id="tbl2" rowIndexVar="row" value="#{scheduleController.events}" var="event"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="8">
@@ -156,11 +156,14 @@
 			<p:dataTable id="taskTbl" rowIndexVar="row" value="#{scheduleController.tasks}" var="task"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="15" >
-				<p:column headerText="Category">
+				<p:column headerText="Action">
 					<h:outputText value="#{task.category}" />
 				</p:column>
 				<p:column headerText="Customer">
 					<h:outputText value="#{task.customer.name}" />
+					<br/>
+					<h:outputText value="Contact no: #{task.customer.phone}" />
+
 				</p:column>
 				<p:column headerText="Time">
 					<h:outputText value="#{task.time}">
@@ -174,6 +177,7 @@
 					<p:commandButton value="Delete" actionListener="#{scheduleController.deleteTask(task)}" update=":form01:tasks" />
 					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditTask(task)}" update=":form01" />
 					<p:commandButton value="Create new sale activity" actionListener="#{scheduleController.startAddNewAct(task)}" update=":form01" />
+					<a href="callReport.jsf?custSeq=#{task.customer.seq}" style="color: blue;">Add a follow-up call record</a>
 				</p:column>
 			</p:dataTable>
 			<br/>
@@ -290,10 +294,27 @@
 
 				<h:outputText value="Remark" />
 				<p:inputTextarea value="#{scheduleController.newAct.remark}" />
+
+				<h:outputText value="First meeting start time" />
+				<p:calendar value="#{scheduleController.firstMeeting.from}" pattern="dd/MM/yyyy HH:mm"/>
+
+				<h:outputText value="First meeting end time" />
+				<p:calendar value="#{scheduleController.firstMeeting.to}" pattern="dd/MM/yyyy HH:mm"/>
 			</p:panelGrid>
 			<p:commandButton value="Add" actionListener="#{scheduleController.addNewAct}" update=":form01"/>
 			<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelAddNewAct}" update=":form01"/>
 		</p:dialog>
+
+		<p:outputPanel id="contactArea">
+			<p:dialog id="contactNoDialog" closable="false" visible="#{scheduleController.viewContactMode}"
+					widgetVar="contactNoDialog_w" modal="true" resizable="false" draggable="true" header="Contact number">
+				<p:commandButton value="Close" actionListener="#{scheduleController.cancelViewContact}" update=":form01:contactArea" />
+				<p:panelGrid columns="2">
+					<h:outputText value="Contact number" />
+					<h:outputText value="#{scheduleController.contactNumber}" />
+				</p:panelGrid>
+			</p:dialog>
+		</p:outputPanel>
 	</h:form>
 </h:body>
 </html>

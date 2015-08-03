@@ -82,18 +82,24 @@
 					<h:outputText value="#{act.remark}" />
 				</p:column>
 				<p:column headerText="Action">
-					<p:commandButton value="Edit" actionListener="#{activityController.startEdit(act)}" update=":form01"/>
-					<p:commandButton value="Add new purchase" actionListener="#{activityController.startAddNewPurchase(act)}" update=":form01"
-						rendered="#{act.status != 'Halted' and act.status != 'Completed'}" />
-					<p:commandButton value="Add meeting" actionListener="#{activityController.startAddMeeting(act)}" update=":form01" />
-					<p:commandButton value="Delete" actionListener="#{activityController.deleteActivity(act)}" update=":form01"
-						rendered="#{act.status == 'Contacted'}" />
+
+					<p:menuButton value="Actions">
+						<p:menuitem value="Update" actionListener="#{activityController.startEdit(act)}" update=":form01"/>
+						<p:menuitem value="Add new purchase" actionListener="#{activityController.startAddNewPurchase(act)}" update=":form01"
+							rendered="#{act.status != 'Halted' and act.status != 'Completed'}" />
+						<p:menuitem value="Add meeting" actionListener="#{activityController.startAddMeeting(act)}" update=":form01" />
+						<p:menuitem value="Delete" actionListener="#{activityController.deleteActivity(act)}" update=":form01"
+							rendered="#{act.status == 'Contacted'}" />
+						<p:menuitem value="Add task" actionListener="#{activityController.startAddTask(act)}" update=":form01"/>
+						<p:menuitem value="Find related call and tasks" actionListener="#{activityController.startFindRelatedTask(act)}" update=":form01:relatedTaskArea"/>
+					</p:menuButton>
 				</p:column>
 			</p:dataTable>
 		</p:fieldset>
 
 		<p:dialog id="editDialog" closable="false" visible="#{activityController.editMode}"
-				widgetVar="editDialog_w" modal="true" resizable="false" draggable="true" header="Edit Activity">
+				widgetVar="editDialog_w" modal="true" resizable="false" draggable="true" header="Update Activity">
+			<p:messages />
 			<p:panelGrid columns="2">
 				<h:outputText value="Status" />
 				<p:selectOneMenu value="#{activityController.selectedAct.status}">
@@ -147,7 +153,73 @@
 				<p:inputText value="#{activityController.newMeeting.detail}" />
 			</p:panelGrid>
 			<p:commandButton value="Add" actionListener="#{activityController.addNewMeeting}" update=":form01" />
+			<p:commandButton value="Cancel" actionListener="#{activityController.cancelAddNewMeeting}" update=":form01"/>
 		</p:dialog>
+
+		<p:dialog id="newTaskDialog" closable="false" visible="#{activityController.addTaskMode}"
+				widgetVar="newTaskDialog_w" modal="true" resizable="false" draggable="true" header="Add new task">
+			<p:panelGrid columns="2">
+				<h:outputText value="Action" />
+				<h:outputText value="Follow-up call" />
+
+				<h:outputText value="Customer" />
+				<h:outputText value="#{activityController.newTask.customer.name}" />
+
+				<h:outputText value="Time" />
+				<p:calendar value="#{activityController.newTask.time}" pattern="dd/MM/yyyy HH:mm" />
+			</p:panelGrid>
+			<p:commandButton value="Add" actionListener="#{activityController.addTask}" update=":form01"/>
+			<p:commandButton value="Cancel" actionListener="#{activityController.cancelAddTask}" update=":form01"/>
+		</p:dialog>
+
+		<p:outputPanel id="relatedTaskArea">
+			<p:dialog id="relatedDialog" closable="false" visible="#{activityController.viewRelatedTask}"
+					widgetVar="relatedDialog_w" modal="true" resizable="false" draggable="true" header="Related calls">
+				<p:commandButton value="Close" actionListener="#{activityController.cancelViewRelatedTask}" update=":form01" />
+				<p:panelGrid columns="2">
+					<p:fieldset legend="Call records">
+						<p:dataTable id="tbl2" rowIndexVar="row" value="#{activityController.relatedCallRecords}" var="call"
+								paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+								rows="8">
+							<p:column headerText="Caller">
+								<h:outputText value="#{call.salesperson.name}" />
+							</p:column>
+							<p:column headerText="Call time">
+								<h:outputText value="#{call.callTime}" />
+							</p:column>
+							<p:column headerText="Action">
+								<h:outputText value="#{call.rating}" />
+							</p:column>
+							<p:column headerText="Product">
+								<h:outputText value="#{call.product.name}" />
+							</p:column>
+							<p:column headerText="Detail">
+								<h:outputText value="#{call.detail}" />
+							</p:column>
+
+						</p:dataTable>
+					</p:fieldset>
+
+					<p:fieldset legend="Sale activities">
+						<p:dataTable id="tbl3" rowIndexVar="row" value="#{activityController.relatedTask}" var="task"
+								paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+								rows="7" >
+							<p:column headerText="Action">
+								<h:outputText value="#{task.category}" />
+							</p:column>
+							<p:column headerText="Time">
+								<h:outputText value="#{task.time}">
+									<f:convertDateTime pattern="dd/MM/yyyy" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="Detail">
+								<h:outputText value="#{task.detail}" />
+							</p:column>
+						</p:dataTable>
+					</p:fieldset>
+				</p:panelGrid>
+			</p:dialog>
+		</p:outputPanel>
 	</h:form>
 </h:body>
 </html>

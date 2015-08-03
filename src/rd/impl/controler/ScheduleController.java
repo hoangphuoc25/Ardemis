@@ -533,10 +533,14 @@ public class ScheduleController implements Serializable {
 	private boolean addActivityMode = false;
 	private ActivityDto newAct;
 
-	public void startAddNewAct(ScheduleTaskDto task) {
+	public void startAddNewAct(ScheduleTaskDto task) throws IOException {
 		getNewAct().setCustomer(task.getCustomer());
 		newAct.setStatus("Contacted");
 		addActivityMode = true;
+
+		firstMeeting = new MeetingDto();
+		firstMeeting.setCustomer(task.getCustomer());
+		firstMeeting.setSalesperson(sessionManager.getLoginUser());
 	}
 
 	public void addNewAct() throws IOException {
@@ -544,6 +548,11 @@ public class ScheduleController implements Serializable {
 		newAct.setSeq(seq);
 		newAct.setSalesperson(sessionManager.getLoginUser());
 		actService.addActivity(getNewAct());
+
+		firstMeeting.setDetail(newAct.getRemark());
+		meetingService.addMeeting(firstMeeting);
+		firstMeeting = new MeetingDto();
+
 		sessionManager.addGlobalMessageInfo("New activity added", null);
 		addActivityMode = false;
 	}
@@ -561,5 +570,43 @@ public class ScheduleController implements Serializable {
 
 	public void setNewAct(ActivityDto newAct) {
 		this.newAct = newAct;
+	}
+
+	public MeetingDto getFirstMeeting() {
+		return firstMeeting;
+	}
+
+	public void setFirstMeeting(MeetingDto firstMeeting) {
+		this.firstMeeting = firstMeeting;
+	}
+
+	public boolean isViewContactMode() {
+		return viewContactMode;
+	}
+
+	public void setViewContactMode(boolean viewContactMode) {
+		this.viewContactMode = viewContactMode;
+	}
+
+	private MeetingDto firstMeeting = new MeetingDto();
+	private boolean viewContactMode = false;
+	private String contactNumber;
+
+	public void startViewContact(ScheduleTaskDto task) {
+		contactNumber = task.getCustomer().getPhone();
+		viewContactMode = true;
+	}
+
+	public void cancelViewContact() {
+		viewContactMode = false;
+		contactNumber = "";
+	}
+
+	public String getContactNumber() {
+		return contactNumber;
+	}
+
+	public void setContactNumber(String contactNumber) {
+		this.contactNumber = contactNumber;
 	}
 }

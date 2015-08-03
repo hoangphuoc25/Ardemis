@@ -138,4 +138,40 @@ public class CompanyServiceImpl implements CompanyService, Serializable {
 			throw e;
 		}
 	}
+	public List<CompanyDto> searchByIndustry(String industry) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<CompanyDto> result = companyDao.searchByIndustry(transaction, industry);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<CompanyDto> searchByLocation(String location) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<CompanyDto> result = companyDao.searchByLocation(transaction, location);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public CompanyDto searchCompanyByNameExact(String name) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			CompanyDto result = companyDao.searchCompanyByNameExact(transaction, name);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

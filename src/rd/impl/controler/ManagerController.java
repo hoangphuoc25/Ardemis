@@ -11,6 +11,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.enterprise.context.Conversation;
@@ -31,16 +32,22 @@ import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.ScheduleModel;
 import org.primefaces.model.StreamedContent;
 
+import rd.dto.ActivityDto;
 import rd.dto.CompanyDto;
 import rd.dto.MeetingDto;
 import rd.dto.NoteDto;
+import rd.dto.ProductDto;
+import rd.dto.PromotionDto;
 import rd.dto.SaleExpenseDto;
 import rd.dto.SaleTargetDto;
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.ActivityService;
 import rd.spec.service.CompanyService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.NoteService;
+import rd.spec.service.ProductService;
+import rd.spec.service.PromotionService;
 import rd.spec.service.SaleExpenseService;
 import rd.spec.service.SaleTargetService;
 import rd.spec.service.UserService;
@@ -453,7 +460,135 @@ public class ManagerController implements Serializable {
 		this.selectedNote = selectedNote;
 	}
 
+	public List<ProductDto> getSelectedProducts() {
+		return selectedProducts;
+	}
+
+	public void setSelectedProducts(List<ProductDto> selectedProducts) {
+		this.selectedProducts = selectedProducts;
+	}
+
+	public boolean isAddPromoMode() {
+		return addPromoMode;
+	}
+
+	public void setAddPromoMode(boolean addPromoMode) {
+		this.addPromoMode = addPromoMode;
+	}
+
+	public String getProdSearch() {
+		return prodSearch;
+	}
+
+	public void setProdSearch(String prodSearch) {
+		this.prodSearch = prodSearch;
+	}
+
+	public PromotionDto getNewPromo() {
+		if (newPromo == null) {
+			newPromo = new PromotionDto();
+		}
+		return newPromo;
+	}
+
+	public void setNewPromo(PromotionDto newPromo) {
+		this.newPromo = newPromo;
+	}
+
 	private boolean respondMode = false;
 	private UserDto targetUser;
 	private NoteDto selectedNote;
+
+	private List<ProductDto> selectedProducts;
+	private boolean addPromoMode = false;
+	private String prodSearch;
+	private PromotionDto newPromo;
+
+	@Inject ProductService prodService;
+	@Inject PromotionService promoService;
+
+	public void select() throws IOException {
+		if (getSelectedProducts() == null) {
+			setSelectedProducts(new ArrayList<ProductDto>());
+		}
+		int seq = Integer.parseInt(prodSearch.split("[()]")[1]);
+		ProductDto prod = prodService.getProductById(seq);
+		for (int i = 0; i < selectedProducts.size(); i++) {
+			if (selectedProducts.get(i).getSeq() == seq)
+				return;
+		}
+		selectedProducts.add(prod);
+		prodSearch = "";
+	}
+
+	public void deleteSelected() {
+		for (Iterator<ProductDto> iterator = getSelectedProducts().iterator(); iterator.hasNext();) {
+		    ProductDto t = iterator.next();
+		    if (t.isSelected()) {
+		        iterator.remove();
+		    }
+		}
+	}
+
+	public List<String> suggestProd(String partial) throws IOException {
+		List<ProductDto> temp = prodService.searchByName(partial);
+		List<String> result = new ArrayList<String>();
+		for (ProductDto dto: temp) {
+			result.add(dto.getName() + "("+dto.getSeq()+")");
+		}
+		return result;
+	}
+
+	public void createPromo() throws IOException {
+		newPromo.setProductList(selectedProducts);
+		promoService.addPromotion(newPromo);
+		sessionManager.addGlobalMessageInfo("New promo added", null);
+		addPromoMode = false;
+	}
+
+	public void cancelCreatePromo() {
+		addPromoMode = false;
+		selectedProducts = new ArrayList<ProductDto>();
+	}
+
+	public void startCreatePromotion() {
+		addPromoMode = true;
+		selectedProducts = new ArrayList<ProductDto>();
+	}
+
+	public void cancelAssignTask() {
+		assignTargetMode = false;
+		currentTarget = new SaleTargetDto();
+	}
+
+	public boolean isViewActivityMode() {
+		return viewActivityMode;
+	}
+
+	public void setViewActivityMode(boolean viewActivityMode) {
+		this.viewActivityMode = viewActivityMode;
+	}
+
+	private boolean viewActivityMode = false;
+	private List<ActivityDto> allAct = new ArrayList<ActivityDto>();
+
+	@Inject ActivityService actService;
+
+	public void viewActivity(UserDto sale) throws IOException {
+		viewActivityMode = true;
+		allAct = actService.getByUser(sale.getId());
+	}
+
+	public List<ActivityDto> getAllAct() {
+		return allAct;
+	}
+
+	public void setAllAct(List<ActivityDto> allAct) {
+		this.allAct = allAct;
+	}
+
+	public void cancelViewActivity() {
+		allAct = new ArrayList<ActivityDto>();
+		viewActivityMode = false;
+	}
 }

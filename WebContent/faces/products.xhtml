@@ -54,39 +54,109 @@
 
 		<p:outputPanel rendered="#{productController.seq == 0}" >
 		<h3 style="font-family: Helvetica">All products</h3>
-		<p:dataTable id="tbl1" rowIndexVar="row" value="#{productController.products}" var="prod"
-				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-				rows="15" selection="#{productController.selectedProd}" selectionMode="single" rowKey="#{prod.seq}">
-			<p:column headerText="Name">
-				<h:outputText value="#{prod.name}" />
-			</p:column>
-			<p:column headerText="Summary" style="max-width: 650px;">
-				<h:outputText value="#{prod.summary}" />
-			</p:column>
-			<p:column headerText="Target">
-				<h:outputText value="#{prod.target}" />
-			</p:column>
-			<p:column headerText="Price">
-				<h:outputText value="#{productController.deducePrice(prod)}" />
-			</p:column>
-			<p:column headerText="Link">
-				<a href="../faces/productdetail.jsf?seq=#{prod.seq}" style="color: blue; text-decoration: none;">Detail Page</a>
-				<p:spacer width="10px" />
-				<p:commandLink value="Edit" style="color: blue" actionListener="#{productController.showDialog(prod)}" update=":form01" />
-				<p:spacer width="10px" />
-				<p:commandLink value="Detail" style="color: blue" actionListener="#{productController.startShowDetail(prod)}" update=":form01" />
-				<p:spacer width="10px" />
-				<a href="#{productController.catalogLink(prod)}" target="_blank" style="color: blue;">Catalog</a>
-			</p:column>
+		<p:fieldset legend="All products">
+			<p:dataTable id="tbl1" rowIndexVar="row" value="#{productController.products}" var="prod"
+					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+					rows="10" selection="#{productController.selectedProd}" selectionMode="single" rowKey="#{prod.seq}">
+				<p:column headerText="Name">
+					<h:outputText value="#{prod.name}" />
+				</p:column>
+				<p:column headerText="Summary" style="max-width: 650px;">
+					<h:outputText value="#{prod.summary}" />
+				</p:column>
+				<p:column headerText="Target">
+					<h:outputText value="#{prod.target}" />
+				</p:column>
+				<p:column headerText="Price">
+					<h:outputText value="#{productController.deducePrice(prod)}" />
+				</p:column>
+				<p:column headerText="Link">
+					<a href="../faces/productdetail.jsf?seq=#{prod.seq}" style="color: blue; text-decoration: none;">Detail Page</a>
+					<p:spacer width="10px" />
+					<p:commandLink value="Edit" style="color: blue" actionListener="#{productController.showDialog(prod)}" update=":form01" />
+					<p:spacer width="10px" />
+					<a href="#{productController.catalogLink(prod)}" target="_blank" style="color: blue;">Catalog</a>
+				</p:column>
+			</p:dataTable>
+			<p:commandButton value="Add new Product" actionListener="#{productController.startAdd}" oncomplete="prodDialog_w.show()" update="form01"
+					rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager') or facesContext.externalContext.isUserInRole('support') }"/>
+		</p:fieldset>
 
-		</p:dataTable>
+		<p:panelGrid columns="4">
+			<h:outputText value="Product name" />
+			<p:inputText value="#{productController.searchStr}" />
+			<p:commandButton value="Search" actionListener="#{productController.search}" update=":form01" />
+			<p:commandButton value="Clear" actionListener="#{productController.clearProdSearch}" update=":form01" />
+		</p:panelGrid>
 
-		<h:outputText value="Search" />
-		<p:inputText value="#{productController.searchStr}" />
-		<p:commandButton value="Search" actionListener="#{productController.search}" update=":form01" />
 
-		<p:commandButton value="Add new Product" actionListener="#{productController.startAdd}" oncomplete="prodDialog_w.show()" update="form01"
-			rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager') or facesContext.externalContext.isUserInRole('support') }"/>
+		<p:fieldset legend="All promotions" id="allpromo">
+			<p:dataTable id="tbl2" rowIndexVar="row" value="#{productController.allPromo}" var="promo"
+					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+					rows="8">
+				<p:column headerText="Start Date">
+					<h:outputText value="#{promo.startDate}">
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="End Date">
+					<h:outputText value="#{promo.endDate}">
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Products">
+					<h:outputText value="#{productController.getProductList(promo)}" />
+				</p:column>
+				<p:column headerText="Discount">
+					<h:outputText value="#{promo.discount}" />
+				</p:column>
+				<p:column headerText="Package price">
+					<h:outputText value="#{productController.calcPrice(promo)}" />
+				</p:column>
+			</p:dataTable>
+			<p:commandButton value="Create promotion" actionListener="#{productController.startCreatePromotion}" update=":form01:promotionArea"
+				rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager') or facesContext.externalContext.isUserInRole('support')}" />
+		</p:fieldset>
+
+		<p:outputPanel id="promotionArea">
+			<p:dialog id="promoDialog" closable="false" visible="#{productController.addPromoMode}"
+					widgetVar="promoDialog_w" modal="true" resizable="false" draggable="true" header="Add promotion">
+				<p:panelGrid columns="2">
+					<h:outputText value="Start date" />
+					<p:calendar value="#{productController.newPromo.startDate}" pattern="dd/MM/yyyy" />
+
+					<h:outputText value="End date" />
+					<p:calendar value="#{productController.newPromo.endDate}" pattern="dd/MM/yyyy" />
+
+					<h:outputText value="Products" />
+					<p:outputPanel id="p1">
+						<p:autoComplete minQueryLength="3" maxResults="10" value="#{productController.prodSearch}" completeMethod="#{productController.suggestProd}" >
+							<p:ajax listener="#{productController.select}" event="itemSelect" update="p1" />
+						</p:autoComplete>
+						<p:dataTable id="tb1" rowIndexVar="row" value="#{productController.selectedProducts}" var="prod">
+							<p:column headerText="Select">
+								<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{prod.selected}" />
+							</p:column>
+							<p:column headerText="Name">
+								<h:outputText value="#{prod.name}" />
+							</p:column>
+						</p:dataTable>
+						<p:commandButton value="Delete" actionListener="#{productController.deleteSelected}" update=":form01" />
+					</p:outputPanel>
+					<h:outputText value="Discount" />
+					<p:inputText value="#{productController.newPromo.discount}" />
+				</p:panelGrid>
+				<p:commandButton value="Create" actionListener="#{productController.createPromo}" update=":form01" />
+				<p:commandButton value="Cancel" actionListener="#{productController.cancelCreatePromo}" update=":form01" />
+			</p:dialog>
+			<h:panelGrid columns="4">
+				<h:outputText value="Product name" />
+				<p:autoComplete value="#{productController.promoProdSearch}" minQueryLength="3" maxResults="10" forceSelection="true" completeMethod="#{productController.suggestProdForPromoSearch}" />
+				<p:commandButton value="Search for promo" actionListener="#{productController.searchPromoByProduct}" update=":form01:allpromo" />
+				<p:commandButton value="Clear" actionListener="#{productController.clearPromoSearch}" update=":form01:allpromo" />
+			</h:panelGrid>
+		</p:outputPanel>
+
 
 		<p:dialog id="prodDialog" closable="false" rendered="#{productController.addMode or productController.viewMode or productController.editMode}" visible="true"
 				widgetVar="prodDialog_w" modal="true" resizable="false" draggable="true" header="Product Detail" style="max-width: 500px;">
@@ -135,7 +205,7 @@
 				widgetVar="detailDialog_w" modal="true" resizable="false" draggable="true" header="Product Detail">
 			<p:scrollPanel mode="native" style="max-height: 650px; max-width:500px;">
 				<h3>Purchase history</h3>
-				<p:dataTable id="tbl2" rowIndexVar="row" value="#{productController.purchases}" var="purchase"
+				<p:dataTable id="tbl3" rowIndexVar="row" value="#{productController.purchases}" var="purchase"
 						paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}" row="20">
 					<p:column headerText="Id">
 						<h:outputText value="#{purchase.seq}" />
@@ -159,7 +229,7 @@
 				</p:dataTable>
 
 				<h3>Feedbacks</h3>
-				<p:dataTable id="tbl3" rowIndexVar="row" value="#{productController.feedbacks}" var="fb"
+				<p:dataTable id="tbl4" rowIndexVar="row" value="#{productController.feedbacks}" var="fb"
 						paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 						rows="15">
 					<p:column headerText="User id">
@@ -175,14 +245,6 @@
 
 				<p:commandButton value="Cancel" actionListener="#{productController.detailCancel}" oncomplete="detailDialog_w.hide()" update=":form01" />
 			</p:scrollPanel>
-		</p:dialog>
-
-		<p:dialog id="catalog" closable="false" visible="false"
-				widgetVar="catalog_w" modal="true" resizable="false" draggable="true" header="Product Catalog">
-			<p:commandButton value="Close" onclick="catalog_w.hide()" update=":form01" />
-			<p:scrollPanel mode="native" style="max-height: 650px;">
-	    		<ui:include src="#{productController.detailPath}" />
-	    	</p:scrollPanel>
 		</p:dialog>
 
 	</h:form>

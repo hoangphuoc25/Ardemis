@@ -18,11 +18,13 @@ import org.primefaces.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import rd.dto.CallReportDto;
 import rd.dto.CompanyDto;
 import rd.dto.InvoiceDto;
 import rd.dto.ProductDto;
 import rd.dto.TeamDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.CallReportService;
 import rd.spec.service.CompanyService;
 import rd.spec.service.InvoiceService;
 import rd.spec.service.ProductService;
@@ -197,10 +199,9 @@ public class SalespersonController implements Serializable {
 
 	public void validateCompName(FacesContext facesContext, UIComponent component, Object value) throws IOException {
 		String name = value.toString().trim();
-		List<CompanyDto> comp = comService.searchCompanyByName(name);
-		if (comp != null && comp.size() > 0) {
+		CompanyDto comp = comService.searchCompanyByNameExact(name);
+		if (comp != null)
 			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "A company with this name already exists.", null));
-		}
 	}
 
 	public void remove(CompanyDto comp) throws IOException {
@@ -278,6 +279,84 @@ public class SalespersonController implements Serializable {
 			customerList = invoiceService.findCompanyByProduct(Integer.parseInt(purchasedProduct.split("[()]")[1]));
 		showingMode = "all";
 		purchasedProduct = "";
+	}
+
+	public void searchIndustry(String industry) throws IOException {
+		customerList = comService.searchByIndustry(industry);
+	}
+
+	public void searchLocation(String location) throws IOException {
+		customerList = comService.searchByLocation(location);
+	}
+
+	public void clearSearch() throws IOException {
+		customerList = comService.getAll();
+	}
+
+	public boolean isViewDetailMode() {
+		return viewDetailMode;
+	}
+
+	public void setViewDetailMode(boolean viewDetailMode) {
+		this.viewDetailMode = viewDetailMode;
+	}
+
+	public CompanyDto getSelectedComp() {
+		if (selectedComp == null) {
+			selectedComp = new CompanyDto();
+		}
+		return selectedComp;
+	}
+
+	public void setSelectedComp(CompanyDto selectedComp) {
+		this.selectedComp = selectedComp;
+	}
+
+	public List<CallReportDto> getCallResults() {
+		return callResults;
+	}
+
+	public void setCallResults(List<CallReportDto> callResults) {
+		this.callResults = callResults;
+	}
+
+	public List<InvoiceDto> getPurchases() {
+		return purchases;
+	}
+
+	public void setPurchases(List<InvoiceDto> purchases) {
+		this.purchases = purchases;
+	}
+
+	private boolean viewDetailMode = false;
+	private CompanyDto selectedComp;
+	private List<CallReportDto> callResults;
+	private List<InvoiceDto> purchases;
+
+	@Inject CallReportService crService;
+
+	public String productPurchased(InvoiceDto invoice) throws IOException {
+		List<ProductDto> prods = invoiceService.getProductByInvoiceId(invoice.getSeq());
+		String result = "";
+		for (ProductDto dto: prods) {
+			result += dto.getName() + ", ";
+		}
+		if (result.length() > 2)
+			result = result.substring(0, result.length() - 2);
+		return result;
+	}
+
+	public void startViewingComp(CompanyDto comp) throws IOException {
+		callResults = crService.getByCompanyId(comp.getSeq());
+		purchases = invoiceService.getByCustomer(comp.getSeq());
+		viewDetailMode = true;
+		selectedComp = comp;
+	}
+
+	public void cancelViewDetailMode() {
+		viewDetailMode = false;
+		callResults = new ArrayList<CallReportDto>();
+		purchases = new ArrayList<InvoiceDto>();
 	}
 }
 

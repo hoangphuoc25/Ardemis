@@ -14,18 +14,22 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import rd.dto.ActivityDto;
+import rd.dto.CallReportDto;
 import rd.dto.CompanyDto;
 import rd.dto.InvoiceDto;
 import rd.dto.MeetingDto;
 import rd.dto.ProductDto;
 import rd.dto.SaleTargetDto;
+import rd.dto.ScheduleTaskDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.ActivityService;
+import rd.spec.service.CallReportService;
 import rd.spec.service.CompanyService;
 import rd.spec.service.InvoiceService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.ProductService;
 import rd.spec.service.SaleTargetService;
+import rd.spec.service.ScheduleTaskService;
 
 @Named
 @ConversationScoped
@@ -182,6 +186,7 @@ public class ActivityController implements Serializable {
 			}
 		}
 		editMode = false;
+		sessionManager.addGlobalMessageInfo("Sale activity update", null);
 	}
 
 	public boolean isAddInvoiceMode() {
@@ -381,6 +386,10 @@ public class ActivityController implements Serializable {
 	}
 
 	public void addNewMeeting() throws IOException {
+		if (newMeeting.getFrom() == null || newMeeting.getTo() == null) {
+			sessionManager.addGlobalMessageFatal("Start time and end time are required", null);
+			return;
+		}
 		if (newMeeting.getFrom().getTime() > newMeeting.getTo().getTime()) {
 			sessionManager.addGlobalMessageFatal("Invalid time", null);
 			return;
@@ -416,6 +425,95 @@ public class ActivityController implements Serializable {
 			}
 		}
 		actService.deleteActivity(act);
+	}
+
+	public boolean isAddTaskMode() {
+		return addTaskMode;
+	}
+
+	public void setAddTaskMode(boolean addTaskMode) {
+		this.addTaskMode = addTaskMode;
+	}
+
+	private boolean addTaskMode = false;
+	private ScheduleTaskDto newTask;
+
+	public void startAddTask(ActivityDto act) throws IOException {
+		addTaskMode = true;
+		newTask.setCustomer(act.getCustomer());
+		newTask.setUsername(sessionManager.getLoginUser().getId());
+	}
+
+	public ScheduleTaskDto getNewTask() {
+		if (newTask == null) {
+			newTask = new ScheduleTaskDto();
+		}
+		return newTask;
+	}
+
+	public void setNewTask(ScheduleTaskDto newTask) {
+		this.newTask = newTask;
+	}
+
+	@Inject ScheduleTaskService taskService;
+	public void addTask() throws IOException {
+		taskService.addEvent(newTask);
+		newTask = new ScheduleTaskDto();
+		sessionManager.addGlobalMessageInfo("New task added", null);
+		addTaskMode = false;
+	}
+
+	public void cancelAddTask() {
+		addTaskMode = false;
+		newTask = new ScheduleTaskDto();
+	}
+
+	public void cancelAddNewMeeting() {
+		addMeetingMode = false;
+		newMeeting = new MeetingDto();
+	}
+
+
+	private List<ScheduleTaskDto> relatedTask;
+	private List<CallReportDto> relatedCallRecords;
+	private boolean viewRelatedTask = false;
+
+	@Inject CallReportService crService;
+
+	public void startFindRelatedTask(ActivityDto act) throws IOException {
+		viewRelatedTask = true;
+		relatedCallRecords = crService.getByCompanyId(act.getCustomer().getSeq());
+		relatedTask = taskService.getByCompany(act.getCustomer().getSeq());
+	}
+
+	public void cancelViewRelatedTask() {
+		viewRelatedTask = false;
+		relatedCallRecords = new ArrayList<CallReportDto>();
+		relatedTask = new ArrayList<ScheduleTaskDto>();
+	}
+
+	public List<CallReportDto> getRelatedCallRecords() {
+		return relatedCallRecords;
+	}
+
+	public void setRelatedCallRecords(List<CallReportDto> relatedCallRecords) {
+		this.relatedCallRecords = relatedCallRecords;
+	}
+
+	public List<ScheduleTaskDto> getRelatedTask() {
+		return relatedTask;
+	}
+
+	public void setRelatedTask(List<ScheduleTaskDto> relatedTask) {
+		this.relatedTask = relatedTask;
+	}
+
+	public boolean isViewRelatedTask() {
+		return viewRelatedTask;
+	}
+
+	public void setViewRelatedTask(boolean viewRelatedTask) {
+		this.viewRelatedTask = viewRelatedTask;
 	}
 }
 

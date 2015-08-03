@@ -110,6 +110,15 @@ public class CallReportController implements Serializable {
 			return;
 		}
 
+		if (productName.isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Product name can't be empty", null);
+			return;
+		}
+		if (companyName.isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Company name can't be empty", null);
+			return;
+		}
+
 		if (callBackUnit.equalsIgnoreCase("month")) {
 			callBackNo *= 30;
 		}

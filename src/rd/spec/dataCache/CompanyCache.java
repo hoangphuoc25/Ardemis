@@ -9,4 +9,5 @@ public interface CompanyCache {
 	public CompanyDto getCompany(int seq) throws IOException;
 	public void put(CompanyDto company);
 	public void remove(int seq);
+	public CompanyDto search(String name);
 }

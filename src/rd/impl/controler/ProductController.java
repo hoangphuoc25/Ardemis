@@ -2,7 +2,9 @@ package rd.impl.controler;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.enterprise.context.Conversation;
@@ -20,12 +22,14 @@ import rd.dto.FeedbackDto;
 import rd.dto.InvoiceDto;
 import rd.dto.NoteDto;
 import rd.dto.ProductDto;
+import rd.dto.PromotionDto;
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.FeedbackService;
 import rd.spec.service.InvoiceService;
 import rd.spec.service.NoteService;
 import rd.spec.service.ProductService;
+import rd.spec.service.PromotionService;
 import rd.spec.service.UserService;
 
 @Named
@@ -62,7 +66,7 @@ public class ProductController implements Serializable {
 	}
 
 	public List<ProductDto> getProducts() throws IOException {
-		if (products == null || products.size() == 0) {
+		if (products == null) {
 			products = productService.getAll();
 		}
 		return products;
@@ -374,5 +378,182 @@ public class ProductController implements Serializable {
 		} else {
 			return "";
 		}
+	}
+
+	private List<ProductDto> selectedProducts;
+	private boolean addPromoMode = false;
+	private String prodSearch;
+	private PromotionDto newPromo;
+
+	@Inject ProductService prodService;
+	@Inject PromotionService promoService;
+
+	public void select() throws IOException {
+		if (getSelectedProducts() == null) {
+			setSelectedProducts(new ArrayList<ProductDto>());
+		}
+		int seq = Integer.parseInt(getProdSearch().split("[()]")[1]);
+		ProductDto prod = prodService.getProductById(seq);
+		for (int i = 0; i < getSelectedProducts().size(); i++) {
+			if (getSelectedProducts().get(i).getSeq() == seq)
+				return;
+		}
+		getSelectedProducts().add(prod);
+		setProdSearch("");
+	}
+
+	public void deleteSelected() {
+		for (Iterator<ProductDto> iterator = getSelectedProducts().iterator(); iterator.hasNext();) {
+		    ProductDto t = iterator.next();
+		    if (t.isSelected()) {
+		        iterator.remove();
+		    }
+		}
+	}
+
+	public List<String> suggestProd(String partial) throws IOException {
+		List<ProductDto> temp = prodService.searchByName(partial);
+		List<String> result = new ArrayList<String>();
+		for (ProductDto dto: temp) {
+			result.add(dto.getName() + "("+dto.getSeq()+")");
+		}
+		return result;
+	}
+
+	public void createPromo() throws IOException {
+		getNewPromo().setProductList(getSelectedProducts());
+		promoService.addPromotion(getNewPromo());
+		sessionManager.addGlobalMessageInfo("New promo added", null);
+		setAddPromoMode(false);
+	}
+
+	public void cancelCreatePromo() {
+		setAddPromoMode(false);
+		setSelectedProducts(new ArrayList<ProductDto>());
+	}
+
+	public void startCreatePromotion() {
+		setAddPromoMode(true);
+		setSelectedProducts(new ArrayList<ProductDto>());
+	}
+
+	public boolean isAddPromoMode() {
+		return addPromoMode;
+	}
+
+	public void setAddPromoMode(boolean addPromoMode) {
+		this.addPromoMode = addPromoMode;
+	}
+
+	public List<ProductDto> getSelectedProducts() {
+		return selectedProducts;
+	}
+
+	public void setSelectedProducts(List<ProductDto> selectedProducts) {
+		this.selectedProducts = selectedProducts;
+	}
+
+	public PromotionDto getNewPromo() {
+		if (newPromo == null) {
+			newPromo = new PromotionDto();
+		}
+		return newPromo;
+	}
+
+	public void setNewPromo(PromotionDto newPromo) {
+		this.newPromo = newPromo;
+	}
+
+	public String getProdSearch() {
+		return prodSearch;
+	}
+
+	public void setProdSearch(String prodSearch) {
+		this.prodSearch = prodSearch;
+	}
+
+
+
+
+	public List<PromotionDto> getAllPromo() throws IOException {
+		if (allPromo == null) {
+			allPromo = promoService.getActive();
+			for (PromotionDto dto: allPromo) {
+				dto.setProductList(promoService.getProductList(dto.getSeq()));
+			}
+		}
+		return allPromo;
+	}
+
+	public void setAllPromo(List<PromotionDto> allPromo) {
+		this.allPromo = allPromo;
+	}
+
+	private List<PromotionDto> allPromo;
+
+	public String getProductList(PromotionDto promo) {
+		String result = "";
+		for (ProductDto dto: promo.getProductList()) {
+			result += dto.getName() + ", ";
+		}
+		if (result.length() >= 2) {
+			result = result.substring(0, result.length() - 2);
+		}
+		return result;
+	}
+
+	public double calcPrice(PromotionDto promo) {
+		double price = 0;
+		for (ProductDto dto: promo.getProductList()) {
+			price += dto.getPrice();
+		}
+		price = price * (1 - (double)promo.getDiscount()/(double)100);
+		price = price * sessionController.getRates().get(sessionController.getCurrency());
+		return price;
+	}
+
+	public String getPromoProdSearch() {
+		return promoProdSearch;
+	}
+
+	public void setPromoProdSearch(String promoProdSearch) {
+		this.promoProdSearch = promoProdSearch;
+	}
+
+	private String promoProdSearch;
+
+	public void searchPromoByProduct() throws IOException {
+		int prodSeq = Integer.parseInt(promoProdSearch.split("[()]")[1]);
+		List<PromotionDto> result = new ArrayList<PromotionDto>();
+		for (PromotionDto dto: allPromo) {
+			for (ProductDto prodDto: dto.getProductList()) {
+				if (prodDto.getSeq() == prodSeq) {
+					result.add(dto);
+					break;
+				}
+			}
+		}
+		allPromo = result;
+		System.out.println(allPromo.size());
+	}
+
+	public List<String> suggestProdForPromoSearch(String partial) throws IOException {
+		List<ProductDto> temp = prodService.searchByName(partial);
+		List<String> result = new ArrayList<String>();
+		for (ProductDto dto: temp) {
+			result.add(dto.getName() + "(" + dto.getSeq() + ")");
+		}
+		return result;
+	}
+
+	public void clearPromoSearch() throws IOException {
+		allPromo = promoService.getActive();
+		for (PromotionDto dto: allPromo) {
+			dto.setProductList(promoService.getProductList(dto.getSeq()));
+		}
+	}
+
+	public void clearProdSearch() throws IOException {
+		products = productService.getAll();
 	}
 }

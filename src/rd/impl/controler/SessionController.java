@@ -53,6 +53,9 @@ public class SessionController implements Serializable {
 	}
 
 	public int getCurrency() {
+		if (currency == 0) {
+			currency = 1;
+		}
 		return currency;
 	}
 

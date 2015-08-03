@@ -9,12 +9,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import rd.dto.ProductDto;
 import rd.spec.dao.ProductDao;
 import rd.spec.dao.Transaction;
+import rd.spec.dataCache.ProductCache;
 
 public class ProductDaoImpl implements ProductDao, Serializable {
 	/**
@@ -22,6 +25,13 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	private ProductCache prodCache;
+
+	@Inject
+	public ProductDaoImpl(ProductCache prodCache) {
+		this.prodCache = prodCache;
+	}
 
 	private static String GET_ALL = "select seq, name, summary, target, price from t_product order by seq";
 	private static String GET_SEQ  = "select max(seq)+1 from t_product";
@@ -47,6 +57,8 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 			prepareStatement.setDouble(5, product.getPrice());
 
 			resultSet = prepareStatement.executeQuery();
+			prodCache.putProduct(product);
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {
@@ -113,6 +125,8 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 			prepareStatement.setInt(1, seq);
 			resultSet = prepareStatement.executeQuery();
 
+			prodCache.removeProduct(seq);
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {
@@ -135,6 +149,12 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 
 	public ProductDto getProductById(Transaction transaction, int seq) throws IOException {
 		// ATTENTION: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+
+		ProductDto temp = prodCache.getProduct(seq);
+		if (temp != null) {
+			return temp;
+		}
+
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -147,6 +167,7 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 			ProductDto result = null;
 			while (resultSet.next()) {
 				result = makeProductDto(resultSet);
+				prodCache.putProduct(result);
 			}
 			return result;
 		} catch (SQLException e) {
@@ -194,6 +215,8 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 
 			resultSet = prepareStatement.executeQuery();
 
+			prodCache.putProduct(product);
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {
@@ -227,7 +250,9 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 
 			List<ProductDto> result = new ArrayList<ProductDto>();
 			while (resultSet.next()) {
-				result.add(makeProductDto(resultSet));
+				ProductDto temp = makeProductDto(resultSet);
+				result.add(temp);
+				prodCache.putProduct(temp);
 			}
 			return result;
 		} catch (SQLException e) {
@@ -252,6 +277,9 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 
 	public List<ProductDto> getAll(Transaction transaction) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+
+		prodCache.clear();
+
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -262,7 +290,9 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 
 			List<ProductDto> all = new ArrayList<ProductDto>();
 			while (resultSet.next()) {
-				all.add(makeProductDto(resultSet));
+				ProductDto temp = makeProductDto(resultSet);
+				all.add(temp);
+				prodCache.putProduct(temp);
 			}
 			return all;
 		} catch (SQLException e) {
@@ -299,6 +329,7 @@ public class ProductDaoImpl implements ProductDao, Serializable {
 			ProductDto result = null;
 			while (resultSet.next()) {
 				result = makeProductDto(resultSet);
+				prodCache.putProduct(result);
 			}
 			return result;
 		} catch (SQLException e) {

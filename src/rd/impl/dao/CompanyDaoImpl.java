@@ -45,6 +45,10 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 	private static String GET_ALL = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark, contact_status from t_clientcompany order by seq";
 	private static String SEARCH_COMPANY_BY_NAME = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark, contact_status from t_clientcompany where upper(name) like ?";
 
+	private static String GET_COMPANY_BY_CONTACT_STATUS = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark, contact_status from t_clientcompany where lower(contact_status)=?";
+	private static String SEARCH_BY_INDUSTRY = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark, contact_status from t_clientcompany where upper(industry) like ?";
+	private static String SEARCH_BY_LOCATION = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark, contact_status from t_clientcompany where upper(location) like ?";
+
 	public int getSeq(Transaction transaction) throws IOException {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
@@ -88,8 +92,6 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 		try {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(UPDATE_COMPANY);
-			System.out.println("CompanyDaoImpl.updateCompany()");
-			System.out.println(com.getName());
 			prepareStatement.setString(1, com.getName());
 			prepareStatement.setString(2, com.getSize());
 			prepareStatement.setString(3, com.getIndustry());
@@ -258,7 +260,9 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 
 			List<CompanyDto> result = new ArrayList<CompanyDto>();
 			while (resultSet.next()) {
-				result.add(makeCompanyDto(resultSet));
+				CompanyDto temp = makeCompanyDto(resultSet);
+				result.add(temp);
+				comCache.put(temp);
 			}
 			return result;
 		} catch (SQLException e) {
@@ -294,7 +298,9 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 
 			List<CompanyDto> result = new ArrayList<CompanyDto>();
 			while (resultSet.next()) {
-				result.add(makeCompanyDto(resultSet));
+				CompanyDto temp = makeCompanyDto(resultSet);
+				result.add(temp);
+				comCache.put(temp);
 			}
 			return result;
 		} catch (SQLException e) {
@@ -333,6 +339,8 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 
 	public List<CompanyDto> getAll(Transaction transaction) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		comCache.clear();
+
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -343,7 +351,9 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 			List<CompanyDto> result = new ArrayList<CompanyDto>();
 
 			while (resultSet.next()) {
-				result.add(makeCompanyDto(resultSet));
+				CompanyDto temp = makeCompanyDto(resultSet);
+				result.add(temp);
+				comCache.put(temp);
 			}
 
 			return result;
@@ -380,7 +390,9 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 
 			List<CompanyDto> result = new ArrayList<CompanyDto>();
 			while (resultSet.next()) {
-				result.add(makeCompanyDto(resultSet));
+				CompanyDto temp = makeCompanyDto(resultSet);
+				result.add(temp);
+				comCache.put(temp);
 			}
 			return result;
 
@@ -403,5 +415,125 @@ public class CompanyDaoImpl implements CompanyDao, Serializable {
 			}
 		}
 	}
-	private static String GET_COMPANY_BY_CONTACT_STATUS = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark, contact_status from t_clientcompany where lower(contact_status)=?";
+
+	public List<CompanyDto> searchByIndustry(Transaction transaction, String industry) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_BY_INDUSTRY);
+			prepareStatement.setString(1, "%" + industry.toUpperCase() + "%");
+			resultSet = prepareStatement.executeQuery();
+
+			List<CompanyDto> result = new ArrayList<CompanyDto>();
+			while (resultSet.next()) {
+				CompanyDto temp = makeCompanyDto(resultSet);
+				result.add(temp);
+				comCache.put(temp);
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	public List<CompanyDto> searchByLocation(Transaction transaction, String location) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_BY_LOCATION);
+			prepareStatement.setString(1, "%" + location.toUpperCase() + "%");
+			resultSet = prepareStatement.executeQuery();
+
+			List<CompanyDto> result = new ArrayList<CompanyDto>();
+			while (resultSet.next()) {
+				CompanyDto temp = makeCompanyDto(resultSet);
+				result.add(temp);
+				comCache.put(temp);
+			}
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	public CompanyDto searchCompanyByNameExact(Transaction transaction, String name) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+
+		CompanyDto temp = comCache.search(name);
+		if (temp != null) {
+			return temp;
+		}
+
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_BY_NAME_EXACT);
+			prepareStatement.setString(1, name);
+			resultSet = prepareStatement.executeQuery();
+
+			CompanyDto result = null;
+			while (resultSet.next()) {
+				result = makeCompanyDto(resultSet);
+				comCache.put(result);
+			}
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String SEARCH_BY_NAME_EXACT = "select seq, name, com_size, industry, com_type, year_founded, location, phone, remark, contact_status from t_clientcompany where upper(name)=?";
 }

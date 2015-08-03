@@ -344,7 +344,7 @@ def serv_impl_new_method(temp):
 			arg_element = [t.strip() for t in args[1:-1].split(',')].remove('')
 		except ValueError:
 			pass
-		arg_name = ['transaction'] + ([t.split(' ')[1] for t in arg_element] if len(arg_element) > 0 else [])
+		arg_name = ['transaction'] + ([t.split(' ')[1] for t in arg_element] if (arg_element is not None and len(arg_element) > 0) else [])
 		return_stmt = ''
 		return_obj = ''
 		if return_type != 'void':

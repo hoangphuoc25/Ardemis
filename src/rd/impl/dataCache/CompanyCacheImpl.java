@@ -3,6 +3,7 @@ package rd.impl.dataCache;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.ejb.Stateful;
@@ -25,7 +26,10 @@ public class CompanyCacheImpl implements CompanyCache, Serializable {
 
 	@Override
 	public CompanyDto getCompany(int seq) throws IOException {
-		return companyMap.get(seq);
+		if (companyMap.containsKey(seq))
+			return companyMap.get(seq);
+		else
+			return null;
 	}
 
 	@Override
@@ -36,5 +40,18 @@ public class CompanyCacheImpl implements CompanyCache, Serializable {
 	@Override
 	public void remove(int seq) {
 		companyMap.remove(seq);
+	}
+
+	@Override
+	public CompanyDto search(String name) {
+	    Iterator it = companyMap.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pair = (Map.Entry)it.next();
+        	CompanyDto dto = (CompanyDto) pair.getValue();
+        	if (dto.getName().equalsIgnoreCase(name.toLowerCase())) {
+        		return dto;
+        	}
+	    }
+	    return null;
 	}
 }

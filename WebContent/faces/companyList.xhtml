@@ -52,10 +52,10 @@
 	          <span class="icon-bar"></span>
 	          <span class="icon-bar"></span>
 	        </a>
-	        <a class="brand" href="#">Ardemis</a>
+	        <a class="brand" href="#{sessionController.dashboardLink}">Ardemis</a>
 	        <div class="nav-collapse collapse navbar-responsive-collapse">
 	          <ul class="nav">
-	            <li class="active"><a href="#">Home</a></li>
+	            <li class="active"><a href="#">Customers</a></li>
 	            <li><a href="#{sessionController.dashboardLink()}">Dashboard</a></li>
 	            <li><h:commandLink action="#{listingController.toEmployeePage}" value="Employee Page" /></li>
 	            <li class="dropdown">
@@ -86,7 +86,6 @@
 				</div>
 			</div>
 		</div>
-
 
 		<p:selectOneMenu value="#{sessionController.currency}">
 			<f:selectItem itemValue="0" itemLabel="Select " />
@@ -135,6 +134,8 @@
 					rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager') or facesContext.externalContext.isUserInRole('support')}"/>
 				<p:spacer width="10" />
 				<a href="editCompany.jsf?seq=#{comp.seq}" style="color: blue;">Edit</a>
+				<p:spacer width="10" />
+				<p:commandButton value="View detail" actionListener="#{salespersonController.startViewingComp(comp)}" update=":form01" />
 			</p:column>
 		</p:dataTable>
 
@@ -142,7 +143,7 @@
 			<h:outputText value="Showing" />
 			<p:selectOneMenu value="#{salespersonController.showingMode}">
 				<f:selectItem itemLabel="All Company" itemValue="all" />
-				<f:selectItem itemLabel="New Company" itemValue="new" />
+				<f:selectItem itemLabel="Uncontacted Company" itemValue="new" />
 				<f:selectItem itemLabel="Contacted Company" itemValue="contacted" />
 				<p:ajax event="change" listener="#{salespersonController.updateCompanyList}" update=":form01" />
 			</p:selectOneMenu>
@@ -150,14 +151,24 @@
 		<br/>
 
 		<p:panelGrid columns="3">
-			<h:outputText value="Search" />
+			<h:outputText value="Company Name" />
 			<p:inputText binding="#{a}"/>
 			<p:commandButton actionListener="#{salespersonController.search(a.value)}" value="Search" update=":form01" />
 
 			<h:outputText value="Purchased product" />
 			<p:autoComplete minQueryLength="3" maxResults="10" forceSelection="true" completeMethod="#{salespersonController.suggestProductList}" value="#{salespersonController.purchasedProduct}" />
 			<p:commandButton value="Search" actionListener="#{salespersonController.searchCompanyByProduct}" update=":form01" />
+
+			<h:outputText value="Industry" />
+			<p:inputText binding="#{b}"/>
+			<p:commandButton actionListener="#{salespersonController.searchIndustry(b.value)}" value="Search" update=":form01" />
+
+			<h:outputText value="Location" />
+			<p:inputText binding="#{c}"/>
+			<p:commandButton actionListener="#{salespersonController.searchLocation(c.value)}" value="Search" update=":form01" />
 		</p:panelGrid>
+
+		<p:commandButton value="Clear search" actionListener="#{salespersonController.clearSearch}" update=":form01:table1" />
 
 		<p:dialog id="custDialog" closable="false" widgetVar="custDialog_w" rendered="#{salespersonController.addMode}" visible="#{salespersonController.addMode}"
 				modal="true" resizable="false" draggable="true" header="Customer detail">
@@ -168,7 +179,15 @@
 				<p:message for="comName" />
 
 				<h:outputText value="Company size" />
-				<p:inputText id="comSize" value="#{salespersonController.newCust.size}" />
+				<p:selectOneMenu id="comSize" value="#{salespersonController.newCust.size}">
+					<f:selectItem itemLabel="Unknown" itemValue="" />
+					<f:selectItem itemLabel="1-10 employees" itemValue="10-50 employees" />
+					<f:selectItem itemLabel="10-50 employees" itemValue="10-50 employees" />
+					<f:selectItem itemLabel="50-100 employees" itemValue="50-100 employees" />
+					<f:selectItem itemLabel="100-500 employees" itemValue="100-500 employees" />
+					<f:selectItem itemLabel="500-5000 employees" itemValue="500-5000 employees" />
+					<f:selectItem itemLabel="> 5000 employees" itemValue="> 5000 employees" />
+				</p:selectOneMenu>
 				<p:message for="comSize" />
 
 				<h:outputText value="Industry*" />
@@ -176,7 +195,11 @@
 				<p:message for="comInd" />
 
 				<h:outputText value="Type" />
-				<p:inputText id="comType" value="#{salespersonController.newCust.type}" />
+				<p:selectOneMenu id="comType" value="#{salespersonController.newCust.type}" >
+					<f:selectItem itemLabel="Unknown" itemValue="" />
+					<f:selectItem itemLabel="Private" itemValue="Private" />
+					<f:selectItem itemLabel="Public Sector" itemValue="Public Sector" />
+				</p:selectOneMenu>
 				<p:message for="comType" />
 
 				<h:outputText value="Year founded" />
@@ -203,14 +226,65 @@
 			</p:panelGrid>
 
 			<p:commandButton value="Apply" ajax="true" actionListener="#{salespersonController.addNewCompany}" update=":form01"
-				oncomplete="if (args &amp;&amp; !args.validationFailed) custDialog_w.hide()" />
-
+					oncomplete="if (args &amp;&amp; !args.validationFailed) custDialog_w.hide()" />
 			<p:commandButton id="cancelBtn" value="Cancel" ajax="true" actionListener="#{salespersonController.cancel}" update="@all" immediate="true" />
-
-			</p:dialog>
-
+		</p:dialog>
 
 
+
+
+		<p:dialog id="compDialog" closable="false" visible="#{salespersonController.viewDetailMode}"
+				widgetVar="compDialog_w" modal="true" resizable="false" draggable="true" header="Company Detail">
+
+			<p:commandButton value="Close" actionListener="#{salespersonController.cancelViewDetailMode}" update=":form01:compDialog" />
+			<h3 style="font-family: Helvetica;">Call records</h3>
+			<p:dataTable id="tbl2" rowIndexVar="row" value="#{salespersonController.callResults}" var="cr"
+					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+					rows="15">
+				<p:column headerText="Call time">
+					<h:outputText value="#{cr.callTime}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Detail">
+					<h:outputText value="#{cr.detail}" />
+				</p:column>
+				<p:column headerText="Caller">
+					<h:outputText value="#{cr.salesperson.name}" />
+				</p:column>
+				<p:column headerText="Product">
+					<h:outputText value="#{cr.product.name}" />
+				</p:column>
+				<p:column headerText="Rating">
+					<h:outputText value="#{cr.rating}" />
+				</p:column>
+			</p:dataTable>
+
+			<a href="../faces/callReport.jsf?custSeq=#{salespersonController.selectedComp.seq}" style="color: blue; font-family: Helvetica;">Add a call report</a>
+
+			<h3 style="font-family: Helvetica;">Past purchases</h3>
+			<p:dataTable id="historyTbl" rowIndexVar="row" value="#{salespersonController.purchases}" var="invoice"
+					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+					rows="15">
+				<p:column headerText="Company">
+					<h:outputText value="#{invoice.customer.name}" />
+				</p:column>
+
+				<p:column headerText="Purchase date">
+					<h:outputText value="#{invoice.purchaseDate}">
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</h:outputText>
+				</p:column>
+
+				<p:column headerText="Amount">
+					<h:outputText value="#{invoice.amount}" />
+				</p:column>
+
+				<p:column headerText="Products">
+					<h:outputText value="#{salespersonController.productPurchased(invoice)}" escape="false" />
+				</p:column>
+			</p:dataTable>
+		</p:dialog>
 
 
 	</h:form>

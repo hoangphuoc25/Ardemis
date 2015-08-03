@@ -115,11 +115,14 @@
 					<p:commandButton value="View Schedule" actionListener="#{managerController.updateEmpId(sale)}" update=":form01:schedule" />
 					<p:spacer width="7px" />
 					<p:commandButton value="Assign task" actionListener="#{managerController.startAssign(sale)}" update=":form01" />
+					<p:spacer width="7px" />
+					<p:commandButton value="View Sale Activity" actionListener="#{managerController.viewActivity(sale)}" update=":form01" />
 				</p:column>
 			</p:dataTable>
 		</p:fieldset>
 
 
+		<p:commandButton value="Create promotion" actionListener="#{managerController.startCreatePromotion}" update=":form01:promotionArea" />
 		<br/>
 		<p:fieldset legend="Employee Schedule">
 			<p:outputPanel id="schedule">
@@ -219,6 +222,68 @@
 					<p:calendar value="#{managerController.currentTarget.toDate}" pattern="dd/MM/yyyy" />
 				</p:panelGrid>
 				<p:commandButton value="Assign" actionListener="#{managerController.assignSaleTarget}" update=":form01" />
+				<p:commandButton value="Cancel" actionListener="#{managerController.cancelAssignTask}" update=":form01" />
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:outputPanel id="promotionArea">
+			<p:dialog id="promoDialog" closable="false" visible="#{managerController.addPromoMode}"
+					widgetVar="promoDialog_w" modal="true" resizable="false" draggable="true" header="Add promotion">
+				<p:panelGrid columns="2">
+					<h:outputText value="Start date" />
+					<p:calendar value="#{managerController.newPromo.startDate}" />
+
+					<h:outputText value="End date" />
+					<p:calendar value="#{managerController.newPromo.endDate}" />
+
+					<h:outputText value="Products" />
+					<p:outputPanel id="p1">
+						<p:autoComplete minQueryLength="3" maxResults="10" value="#{managerController.prodSearch}" completeMethod="#{managerController.suggestProd}" >
+							<p:ajax listener="#{managerController.select}" event="itemSelect" update="p1" />
+						</p:autoComplete>
+						<p:dataTable id="tb1" rowIndexVar="row" value="#{managerController.selectedProducts}" var="prod">
+							<p:column headerText="Select">
+								<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{prod.selected}" />
+							</p:column>
+							<p:column headerText="Name">
+								<h:outputText value="#{prod.name}" />
+							</p:column>
+						</p:dataTable>
+						<p:commandButton value="Delete" actionListener="#{managerController.deleteSelected}" update=":form01" />
+					</p:outputPanel>
+					<h:outputText value="Discount" />
+					<p:inputText value="#{managerController.newPromo.discount}" />
+				</p:panelGrid>
+				<p:commandButton value="Create" actionListener="#{managerController.createPromo}" update=":form01" />
+				<p:commandButton value="Cancel" actionListener="#{managerController.cancelCreatePromo}" update=":form01" />
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:outputPanel id="activityArea">
+
+			<p:dialog id="activityDialog" closable="false" visible="#{managerController.viewActivityMode}"
+					widgetVar="activityDialog_w" modal="true" resizable="false" draggable="true" header="All sale activities">
+				<p:commandButton value="Close" actionListener="#{managerController.cancelViewActivity}" update=":form01" />
+				<p:panelGrid columns="2">
+					<p:dataTable id="tbl1" rowIndexVar="row" value="#{managerController.allAct}" var="act"
+							paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+							rows="15">
+						<p:column headerText="Customer">
+							<h:outputText value="#{act.customer.name}" />
+						</p:column>
+						<p:column headerText="Start Date">
+							<h:outputText value="#{act.startDate}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Status">
+							<h:outputText value="#{act.status}" />
+						</p:column>
+						<p:column headerText="Remark">
+							<h:outputText value="#{act.remark}" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
 			</p:dialog>
 		</p:outputPanel>
 	</h:form>
