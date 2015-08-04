@@ -2,6 +2,7 @@ package rd.impl.service;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -38,7 +39,8 @@ public class MeetingServiceImpl implements MeetingService, Serializable {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		try {
 			transaction.begin();
-			List<MeetingDto> result = meetingDao.getMeetingByUser(transaction, id);
+			List<MeetingDto> result = meetingDao.getMeetingByUser(transaction,
+					id);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {
@@ -109,11 +111,26 @@ public class MeetingServiceImpl implements MeetingService, Serializable {
 			throw e;
 		}
 	}
+
 	public List<MeetingDto> getMeetingToday(String username) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		try{
+		try {
 			transaction.begin();
 			List<MeetingDto> result = meetingDao.getMeetingToday(transaction);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+
+	public List<MeetingDto> getMeetingByDayAndUser(String userId, Date date)
+			throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try {
+			transaction.begin();
+			List<MeetingDto> result = meetingDao.getMeetingByDayAndUser(transaction, userId, date);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {

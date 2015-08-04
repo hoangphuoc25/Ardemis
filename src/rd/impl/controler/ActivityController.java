@@ -186,7 +186,7 @@ public class ActivityController implements Serializable {
 			}
 		}
 		editMode = false;
-		sessionManager.addGlobalMessageInfo("Sale activity update", null);
+		sessionManager.addGlobalMessageInfo("Sale activity updated", null);
 	}
 
 	public boolean isAddInvoiceMode() {

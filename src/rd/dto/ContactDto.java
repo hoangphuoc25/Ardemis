@@ -1,4 +1,5 @@
 package rd.dto;
+
 public class ContactDto {
 	private int seq;
 	private String name;
@@ -9,10 +10,12 @@ public class ContactDto {
 	private String language;
 
 	public ContactDto() {
-		// TODO Auto-generated constructor stub
+		this.language = "English";
+		this.gender = "Male";
 	}
 
-	public ContactDto(int seq, String name, String gender, String phone, String email, CompanyDto company, String language) {
+	public ContactDto(int seq, String name, String gender, String phone,
+			String email, CompanyDto company, String language) {
 		this.seq = seq;
 		this.name = name;
 		this.company = company;
@@ -25,6 +28,7 @@ public class ContactDto {
 	public int getSeq() {
 		return seq;
 	}
+
 	public void setSeq(int seq) {
 		this.seq = seq;
 	}
@@ -32,6 +36,7 @@ public class ContactDto {
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -39,6 +44,7 @@ public class ContactDto {
 	public CompanyDto getCompany() {
 		return company;
 	}
+
 	public void setCompany(CompanyDto company) {
 		this.company = company;
 	}
@@ -46,6 +52,7 @@ public class ContactDto {
 	public String getPhone() {
 		return phone;
 	}
+
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
@@ -53,6 +60,7 @@ public class ContactDto {
 	public String getEmail() {
 		return email;
 	}
+
 	public void setEmail(String email) {
 		this.email = email;
 	}
@@ -60,12 +68,15 @@ public class ContactDto {
 	public String getGender() {
 		return gender;
 	}
+
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
+
 	public String getLanguage() {
 		return language;
 	}
+
 	public void setLanguage(String language) {
 		this.language = language;
 	}

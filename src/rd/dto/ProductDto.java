@@ -1,5 +1,7 @@
 package rd.dto;
 
+import java.util.List;
+
 public class ProductDto {
 	private int seq;
 	private String name;
@@ -7,6 +9,7 @@ public class ProductDto {
 	private String target;
 	private double price;
 	private boolean selected = false;
+	private List<CategoryDto> category;
 
 	public ProductDto(int seq, String name, String summary, String target, double price2) {
 		this.seq = seq;
@@ -14,6 +17,15 @@ public class ProductDto {
 		this.summary = summary;
 		this.target = target;
 		this.price = price2;
+	}
+
+	public ProductDto(int seq, String name, String summary, String target, double price2, List<CategoryDto> category) {
+		this.seq = seq;
+		this.name = name;
+		this.summary = summary;
+		this.target = target;
+		this.price = price2;
+		this.category = category;
 	}
 
 	public ProductDto() {
@@ -25,6 +37,7 @@ public class ProductDto {
 		this.summary = selectedProd.summary;
 		this.target = selectedProd.target;
 		this.price = selectedProd.price;
+		this.category = selectedProd.category;
 	}
 
 	public int getSeq() {
@@ -73,5 +86,13 @@ public class ProductDto {
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
+	}
+
+	public List<CategoryDto> getCategory() {
+		return category;
+	}
+
+	public void setCategory(List<CategoryDto> category) {
+		this.category = category;
 	}
 }

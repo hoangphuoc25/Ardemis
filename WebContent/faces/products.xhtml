@@ -51,6 +51,7 @@
 		</h:panelGrid>
 
 		<h:messages infoStyle="color: green;" fatalStyle="color: red;" errorStyle="color: red;" />
+		<p:growl autoUpdate="true" />
 
 		<p:outputPanel rendered="#{productController.seq == 0}" >
 		<h3 style="font-family: Helvetica">All products</h3>
@@ -61,7 +62,7 @@
 				<p:column headerText="Name">
 					<h:outputText value="#{prod.name}" />
 				</p:column>
-				<p:column headerText="Summary" style="max-width: 650px;">
+				<p:column headerText="Summary" style="width: 650px;">
 					<h:outputText value="#{prod.summary}" />
 				</p:column>
 				<p:column headerText="Target">
@@ -76,9 +77,11 @@
 					<p:commandLink value="Edit" style="color: blue" actionListener="#{productController.showDialog(prod)}" update=":form01" />
 					<p:spacer width="10px" />
 					<a href="#{productController.catalogLink(prod)}" target="_blank" style="color: blue;">Catalog</a>
+					<p:spacer width="10px" />
+					<p:commandButton value="FAQs" actionListener="#{productController.startViewFaq(prod)}" update=":form01" />
 				</p:column>
 			</p:dataTable>
-			<p:commandButton value="Add new Product" actionListener="#{productController.startAdd}" oncomplete="prodDialog_w.show()" update="form01"
+			<p:commandButton value="Add new Product" actionListener="#{productController.startAdd}" update="form01"
 					rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager') or facesContext.externalContext.isUserInRole('support') }"/>
 		</p:fieldset>
 
@@ -158,12 +161,12 @@
 		</p:outputPanel>
 
 
-		<p:dialog id="prodDialog" closable="false" rendered="#{productController.addMode or productController.viewMode or productController.editMode}" visible="true"
+		<p:dialog id="prodDialog" closable="false" visible="#{productController.addMode or productController.viewMode or productController.editMode}"
 				widgetVar="prodDialog_w" modal="true" resizable="false" draggable="true" header="Product Detail" style="max-width: 500px;">
 			<h:messages infoStyle="color: green;" fatalStyle="color: red;" errorStyle="color: red;" />
 			<p:panelGrid columns="2">
 				<h:outputText value="Name" />
-				<p:inputText value="#{productController.newProd.name}" validator="#{productController.validateName}" rendered="#{productController.addMode or productController.editMode}" />
+				<p:inputText value="#{productController.newProd.name}" rendered="#{productController.addMode or productController.editMode}" />
 				<h:outputText value="#{productController.newProd.name}" rendered="#{productController.viewMode}" />
 
 				<h:outputText value="Summary" />
@@ -177,6 +180,25 @@
 				<h:outputText value="Price" />
 				<p:inputText value="#{productController.newProd.price}" required="true" rendered="#{productController.addMode or productController.editMode}" />
 				<h:outputText value="#{productController.newProd.price}" rendered="#{productController.viewMode}" />
+
+				<h:outputText value="Category" />
+				<p:outputPanel id="p2" rendered="#{productController.addMode or productController.editMode}">
+					<p:autoComplete value="#{productController.newCategory}" forceSelection="true" minQueryLength="3" maxResults="10" completeMethod="#{productController.suggestCategory}">
+						<p:ajax listener="#{productController.categorySelect}" event="itemSelect" update="p2" />
+					</p:autoComplete>
+					<p:dataTable id="catTable" rowIndexVar="row" value="#{productController.catList}" var="cat"
+							paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+							rows="15">
+						<p:column headerText="Select">
+							<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{cat.selected}" />
+						</p:column>
+						<p:column headerText="Category">
+							<h:outputText value="#{cat.category}" />
+						</p:column>
+					</p:dataTable>
+					<p:commandButton value="Delete selected" actionListener="#{productController.deleteSelectedCat}" update="p2" />
+				</p:outputPanel>
+				<p:dataList value="#{productController.newProd.category}" var="cat" rendered="#{productController.viewMode}">#{cat.category}</p:dataList>
 
 				<p:selectBooleanCheckbox value="#{productController.notifyOther}" rendered="#{productController.addMode or productController.editMode}" />
 				<h:outputText value="Notify other salesperson" rendered="#{productController.addMode or productController.editMode}" />
@@ -246,6 +268,40 @@
 				<p:commandButton value="Cancel" actionListener="#{productController.detailCancel}" oncomplete="detailDialog_w.hide()" update=":form01" />
 			</p:scrollPanel>
 		</p:dialog>
+
+		<p:outputPanel id="faqArea">
+			<p:dialog id="faqDialog" closable="false" visible="#{productController.viewFaqMode}" style="max-width: 700px; max-height: 600px;"
+					widgetVar="faqDialog_w" modal="true" resizable="false" draggable="true" header="Frequently asked questions">
+				<p:dataTable id="tbl5" rowIndexVar="row" value="#{productController.faq}" var="f"
+						paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+						rows="15" >
+					<p:column headerText="Question" width="250px">
+						<h:outputText value="#{f.question}" />
+					</p:column>
+					<p:column headerText="Question" width="350px">
+						<h:outputText value="#{f.answer}" />
+					</p:column>
+				</p:dataTable>
+				<p:commandButton value="Add new question" actionListener="#{productController.startAddNewFaq}" update=":form01:faqArea"/>
+				<p:commandButton value="Cancel" actionListener="#{productController.cancelViewFaq}" update=":form01:faqArea" />
+			</p:dialog>
+
+			<p:dialog id="addFaqDialog" closable="false" visible="#{productController.addFaqMode}"
+					widgetVar="addFaqDialog_w" modal="true" resizable="false" draggable="true" header="Add new question and answer">
+				<p:panelGrid columns="2">
+					<h:outputText value="Product" />
+					<h:outputText value="#{productController.newFaq.product.name}" />
+
+					<h:outputText value="Question" />
+					<p:inputTextarea value="#{productController.newFaq.question}" />
+
+					<h:outputText value="Answer" />
+					<p:inputTextarea value="#{productController.newFaq.answer}" />
+				</p:panelGrid>
+				<p:commandButton value="Add" actionListener="#{productController.addFaq}" update=":form01:faqArea"/>
+				<p:commandButton value="Cancel" actionListener="#{productController.cancelAddFaq}" update=":form01:faqArea" />
+			</p:dialog>
+		</p:outputPanel>
 
 	</h:form>
 </h:body>

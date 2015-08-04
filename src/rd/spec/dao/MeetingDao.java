@@ -1,6 +1,7 @@
 package rd.spec.dao;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import rd.dto.MeetingDto;
@@ -14,4 +15,5 @@ public interface MeetingDao {
 	public int getSeq(Transaction transaction) throws IOException;
 	public List<MeetingDto> getMeetingToday(Transaction transaction) throws IOException;
 	public List<MeetingDto> getMeetingToday(Transaction transaction, String username) throws IOException;
+	public List<MeetingDto> getMeetingByDayAndUser(Transaction transaction, String userId, Date date) throws IOException;
 }

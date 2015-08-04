@@ -139,10 +139,8 @@ public class CategoryDaoImpl implements CategoryDao {
 		try {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(DELETE_PRODUCT_CATEGORY);
-			prepareStatement.setString(, );
+			prepareStatement.setInt(1, prod.getSeq());
 			resultSet = prepareStatement.executeQuery();
-			while (resultSet.next()) {
-			}
 
 		} catch (SQLException e) {
 			throw new IOException(e);
@@ -172,9 +170,12 @@ public class CategoryDaoImpl implements CategoryDao {
 		try {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(GET_CATEGORY_BY_PRODUCT);
-			prepareStatement.setString(, );
+			prepareStatement.setInt(1, seq);
 			resultSet = prepareStatement.executeQuery();
+
+			List<CategoryDto> result = new ArrayList<CategoryDto>();
 			while (resultSet.next()) {
+				result.add(makeCategoryDto(transaction, resultSet));
 			}
 			return result;
 		} catch (SQLException e) {
@@ -205,11 +206,14 @@ public class CategoryDaoImpl implements CategoryDao {
 		try {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(GET_ALL);
-			prepareStatement.setString(, );
 			resultSet = prepareStatement.executeQuery();
+
+			List<CategoryDto> result = new ArrayList<CategoryDto>();
 			while (resultSet.next()) {
+				result.add(makeCategoryDto(transaction, resultSet));
 			}
 			return result;
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {
@@ -230,10 +234,53 @@ public class CategoryDaoImpl implements CategoryDao {
 		}
 	}
 
-	private static String GET_ALL = "select category from t_category";
-	private static String GET_CATEGORY_BY_PRODUCT = "select category from t_product_category where product_seq=?";
-	private static String GET_PRODUCT_BY_CATEGORY = "select distinct product_seq from t_product_category where category=?";
-	private static String ADD_CATEGORY = "insert into t_category (category) values (?)";
-	private static String ADD_PRODUCT_CATEGORY = "insert into t_product_category (product_seq, category) values (?, ?)";
-	private static String DELETE_PRODUCT_CATEGORY = "delete from t_product_cateogry where product_seq=?";
+	private CategoryDto makeCategoryDto(Transaction transaction, ResultSet resultSet) throws SQLException {
+		return new CategoryDto(resultSet.getString(1));
+	}
+
+	private static String GET_ALL 					= "select category from t_category";
+	private static String GET_CATEGORY_BY_PRODUCT 	= "select category from t_prod_category where product_seq=?";
+	private static String GET_PRODUCT_BY_CATEGORY 	= "select distinct product_seq from t_product_category where category=?";
+	private static String ADD_CATEGORY 				= "insert into t_category (category) values (?)";
+	private static String ADD_PRODUCT_CATEGORY 		= "insert into t_product_category (product_seq, category) values (?, ?)";
+	private static String DELETE_PRODUCT_CATEGORY 	= "delete from t_product_cateogry where product_seq=?";
+	private static String SEARCH_CATEGORY = "select category from t_category where lower(category) like ?";
+
+	public List<CategoryDto> searchCategory(Transaction transaction, String name) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_CATEGORY);
+			prepareStatement.setString(1, "%" + name + "%");
+			resultSet = prepareStatement.executeQuery();
+
+			List<CategoryDto> temp = new ArrayList<CategoryDto>();
+			while (resultSet.next()) {
+				temp.add(makeCategoryDto(transaction, resultSet));
+			}
+			return temp;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
 }

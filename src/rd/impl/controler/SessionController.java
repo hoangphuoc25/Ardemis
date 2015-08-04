@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -16,10 +15,11 @@ import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.primefaces.component.menuitem.MenuItem;
-import org.primefaces.component.submenu.Submenu;
-import org.primefaces.model.DefaultMenuModel;
-import org.primefaces.model.MenuModel;
+import org.primefaces.model.menu.DefaultMenuItem;
+import org.primefaces.model.menu.DefaultMenuModel;
+import org.primefaces.model.menu.DefaultSubMenu;
+import org.primefaces.model.menu.MenuElement;
+import org.primefaces.model.menu.MenuModel;
 
 import rd.spec.manager.SessionManager;
 import rd.spec.service.UserService;
@@ -100,21 +100,21 @@ public class SessionController implements Serializable {
 	public MenuModel getModel() {
 		if (model == null) {
 			model = new DefaultMenuModel();
-	        Submenu submenu = new Submenu();
-	        submenu.setLabel("Dynamic Submenu 1");
-	        MenuItem item = new MenuItem();
-	        item.setValue("Dynamic Menuitem 1.1");
+	        DefaultSubMenu DefaultSubMenu = new DefaultSubMenu();
+	        DefaultSubMenu.setLabel("Dynamic DefaultSubMenu 1");
+	        DefaultMenuItem item = new DefaultMenuItem();
+	        item.setValue("Dynamic DefaultMenuItem 1.1");
 	        item.setUrl("../products/AutoCAD.jsf");
-	        submenu.getChildren().add(item);
-	        model.addSubmenu(submenu);
+	        DefaultSubMenu.addElement(item);
+	        model.addElement(DefaultSubMenu);
 
-	        Submenu submenu2 = new Submenu();
-	        submenu2.setLabel("Dynamic Submenu 2");
-	        MenuItem item2 = new MenuItem();
-	        item2.setValue("Dynamic Menuitem 1.1");
+	        DefaultSubMenu DefaultSubMenu2 = new DefaultSubMenu();
+	        DefaultSubMenu2.setLabel("Dynamic DefaultSubMenu 2");
+	        DefaultMenuItem item2 = new DefaultMenuItem();
+	        item2.setValue("Dynamic DefaultMenuItem 1.1");
 	        item2.setUrl("../products/AutoCAD.jsf");
-	        submenu2.getChildren().add(item2);
-	        model.addSubmenu(submenu2);
+	        DefaultSubMenu2.addElement(item2);
+	        model.addElement(DefaultSubMenu2);
 		}
 		return model;
 	}
@@ -123,16 +123,16 @@ public class SessionController implements Serializable {
 		this.model = model;
 	}
 
-	public void addMenuItem(String label, String url) {
-		MenuItem item = new MenuItem();
+	public void addDefaultMenuItem(String label, String url) {
+		DefaultMenuItem item = new DefaultMenuItem();
         item.setValue(label);
         item.setUrl("../products/" + url);
 
-		List<UIComponent> current = model.getContents();
-		Submenu menu1 = (Submenu) current.get(0);
+		List<MenuElement> current = model.getElements();
+		DefaultSubMenu menu1 = (DefaultSubMenu) current.get(0);
 
-		menu1.getChildren().add(item);
-		System.out.println("addmenuitem called");
+		menu1.addElement(item);
+		System.out.println("addDefaultMenuItem called");
 	}
 
 	public Map<Integer, Double> getRates() {

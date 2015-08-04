@@ -11,9 +11,11 @@ public class CompanyDto {
 	private String remark;
 	private String phone;
 	private String contactStatus;
+	private UserDto assignee;
+	private String address;
 
 	public CompanyDto(int seq, String name, String size, String industry, String type,
-			int yearFounded, String location, String phone, String remark, String contactStatus) {
+			int yearFounded, String location, String phone, String remark, String contactStatus, UserDto assignee, String address) {
 		this.name = name;
 		this.seq = seq;
 		this.size = size;
@@ -24,6 +26,8 @@ public class CompanyDto {
 		this.remark = remark;
 		this.phone = phone;
 		this.contactStatus = contactStatus;
+		this.setAssignee(assignee);
+		this.setAddress(address);
 	}
 
 	public CompanyDto() {
@@ -108,5 +112,21 @@ public class CompanyDto {
 
 	public void setContactStatus(String contactStatus) {
 		this.contactStatus = contactStatus;
+	}
+
+	public UserDto getAssignee() {
+		return assignee;
+	}
+
+	public void setAssignee(UserDto assignee) {
+		this.assignee = assignee;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 }

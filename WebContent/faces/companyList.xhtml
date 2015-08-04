@@ -93,12 +93,14 @@
 			<p:ajax listener="#{salespersonController.reload}" update="form01"/>
 		</p:selectOneMenu>
 
+		<p:growl autoUpdate="true" />
 		<h:messages infoClass="alert alert-success" errorClass="alert alert-error" fatalClass="alert alert-block" />
 		<br/>
 		<p:commandButton value="Add new customer" actionListener="#{salespersonController.startAdd}" oncomplete="custDialog_w.show()" update=":form01"/>
+		<p:panelGrid id="forautowidth" columns="1">
 		<p:dataTable id="table1" rowIndexVar="row" value="#{salespersonController.customerList}" var="comp"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-				rows="15" rowKey="#{comp.seq}">
+				rows="15" rowKey="#{comp.seq}" tableStyle="width: auto;">
 
 			<p:column headerText="Name">
 				<h:outputText value="#{comp.name}" />
@@ -124,20 +126,26 @@
 			<p:column headerText="Remark">
 				<h:outputText value="#{comp.remark}" />
 			</p:column>
+			<p:column headerText="Contact status">
+				<h:outputText value="#{comp.contactStatus}" />
+			</p:column>
 
 			<p:column headerText="Link">
 				<a href="callReport.jsf?custSeq=#{comp.seq}" style="color: blue;">Add call report</a>
-				<p:spacer width="10" />
+				<p:spacer width="7" />
 				<a href="history.jsf?seq=#{comp.seq}" style="color: blue;">Detail</a>
-				<p:spacer width="10" />
+				<p:spacer width="7" />
 				<h:commandButton value="Delete" actionListener="#{salespersonController.remove(comp)}" update="form01"
 					rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager') or facesContext.externalContext.isUserInRole('support')}"/>
-				<p:spacer width="10" />
+				<p:spacer width="7" />
 				<a href="editCompany.jsf?seq=#{comp.seq}" style="color: blue;">Edit</a>
-				<p:spacer width="10" />
+				<p:spacer width="7" />
 				<p:commandButton value="View detail" actionListener="#{salespersonController.startViewingComp(comp)}" update=":form01" />
+				<p:spacer width="7" />
+				<p:commandButton value="Add contact" actionListener="#{salespersonController.startAddContact(comp)}" update=":form01:contactArea" />
 			</p:column>
 		</p:dataTable>
+		</p:panelGrid>
 
 		<h:panelGrid columns="2">
 			<h:outputText value="Showing" />
@@ -220,6 +228,10 @@
 				<p:inputText id="comRemark" value="#{salespersonController.newCust.remark}" />
 				<p:message for="comRemark" />
 
+				<h:outputText value="Address" />
+				<p:inputText id="comAddress" value="#{salespersonController.newCust.address}" />
+				<p:message for="comAdress" />
+
 				<h:outputText value="* = required fields" />
 				<h:outputText value="" />
 				<h:outputText value="" />
@@ -286,7 +298,33 @@
 			</p:dataTable>
 		</p:dialog>
 
+		<p:outputPanel id="contactArea">
+			<p:dialog id="contactDialog" closable="false" visible="#{salespersonController.addContactMode}"
+					widgetVar="contactDialog_w" modal="true" resizable="false" draggable="true" header="">
+				<p:panelGrid columns="2">
+					<h:outputText value="Company name" />
+					<h:outputText value="#{salespersonController.newContact.company.name}" />
 
+					<h:outputText value="Contact name" />
+					<p:inputText value="#{salespersonController.newContact.name}" />
+
+					<h:outputText value="Contact number" />
+					<p:inputText value="#{salespersonController.newContact.phone}" />
+
+					<h:outputText value="Email" />
+					<p:inputText value="#{salespersonController.newContact.email}" />
+
+					<h:outputText value="Gender" />
+					<p:selectOneRadio value="#{salespersonController.newContact.gender}">
+						<f:selectItem itemLabel="Male" itemValue="Male" />
+						<f:selectItem itemLabel="Female" itemValue="Female" />
+					</p:selectOneRadio>
+				</p:panelGrid>
+
+				<p:commandButton value="Add" actionListener="#{salespersonController.addNewContact}" update=":form01:contactArea" />
+				<p:commandButton value="Cancel" actionListener="#{salespersonController.cancelAddNewContact}" update=":form01:contactArea" />
+			</p:dialog>
+		</p:outputPanel>
 	</h:form>
 </h:body>
 </html>

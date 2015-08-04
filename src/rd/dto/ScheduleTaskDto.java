@@ -8,6 +8,7 @@ public class ScheduleTaskDto {
 	private CompanyDto customer;
 	private Date time;
 	private String username;
+	private ContactDto contact;
 
 	public String getCategory() {
 		return category;
@@ -42,13 +43,14 @@ public class ScheduleTaskDto {
 	}
 
 	public ScheduleTaskDto(int seq, String category, CompanyDto customer,
-			Date time, String username, String detail) {
+			Date time, String username, String detail, ContactDto contact) {
 		this.seq = seq;
 		this.category = category;
 		this.customer = customer;
 		this.time = time;
 		this.username = username;
 		this.detail = detail;
+		this.contact = contact;
 	}
 
 	public ScheduleTaskDto() {
@@ -68,6 +70,14 @@ public class ScheduleTaskDto {
 
 	public void setDetail(String detail) {
 		this.detail = detail;
+	}
+
+	public ContactDto getContact() {
+		return contact;
+	}
+
+	public void setContact(ContactDto contact) {
+		this.contact = contact;
 	}
 
 	private String detail;

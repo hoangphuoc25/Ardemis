@@ -18,4 +18,5 @@ public interface CompanyService {
 	public List<CompanyDto> searchByIndustry(String industry) throws IOException;
 	public List<CompanyDto> searchByLocation(String location) throws IOException;
 	public CompanyDto searchCompanyByNameExact(String name) throws IOException;
+	public List<CompanyDto> getCompanyByContactStatusAndUser(String status, String user) throws IOException;
 }

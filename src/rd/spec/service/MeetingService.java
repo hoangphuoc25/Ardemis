@@ -1,6 +1,7 @@
 package rd.spec.service;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import rd.dto.MeetingDto;
@@ -14,4 +15,5 @@ public interface MeetingService {
 	public int getSeq() throws IOException;
 	public List<MeetingDto> getMeetingToday() throws IOException;
 	public List<MeetingDto> getMeetingToday(String username) throws IOException;
+	public List<MeetingDto> getMeetingByDayAndUser(String userId, Date date) throws IOException;
 }

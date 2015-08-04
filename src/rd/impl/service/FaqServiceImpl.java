@@ -6,29 +6,63 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import rd.dto.CategoryDto;
-import rd.dto.ProductDto;
-import rd.spec.dao.CategoryDao;
+import rd.dto.FaqDto;
+import rd.spec.dao.FaqDao;
 import rd.spec.dao.Transaction;
-import rd.spec.service.CategoryService;
+import rd.spec.service.FaqService;
 
-public class CategoryServiceImpl implements CategoryService, Serializable {
+public class FaqServiceImpl implements FaqService, Serializable {
 	private static final long serialVersionUID = 4822474486634242542L;
 	private Transaction transaction;
-	private CategoryDao categoryDao;
+	private FaqDao faqDao;
 
 	@Inject
-	public CategoryServiceImpl(Transaction transaction, CategoryDao categoryDao) {
-		this.categoryDao = categoryDao;
+	public FaqServiceImpl(Transaction transaction, FaqDao faqDao) {
 		this.transaction = transaction;
+		this.faqDao = faqDao;
 	}
 
-	public List<ProductDto> getProductByCategory(String cat) throws IOException {
+	public void addFaq(FaqDto faq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		try {
 			transaction.begin();
-			List<ProductDto> result = categoryDao
-					.getProductByCategory(transaction, cat);
+			faqDao.addFaq(transaction, faq);
+			transaction.commit();
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+
+	public void updateFaq(FaqDto faq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try {
+			transaction.begin();
+			faqDao.updateFaq(transaction, faq);
+			transaction.commit();
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+
+	public void deleteFaq(FaqDto faq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try {
+			transaction.begin();
+			faqDao.deleteFaq(transaction, faq);
+			transaction.commit();
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+
+	public List<FaqDto> getAll() throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try {
+			transaction.begin();
+			List<FaqDto> result = faqDao.getAll(transaction);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {
@@ -37,48 +71,11 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
 		}
 	}
 
-	public void addCategory(String category) throws IOException {
+	public List<FaqDto> getByProduct(int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		try {
 			transaction.begin();
-			categoryDao.addCategory(transaction, category);
-			transaction.commit();
-		} catch (IOException e) {
-			transaction.rollback();
-			throw e;
-		}
-	}
-
-	public void addProductCategory(ProductDto product) throws IOException {
-		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		try {
-			transaction.begin();
-			categoryDao.addProductCategory(transaction, product);
-			transaction.commit();
-		} catch (IOException e) {
-			transaction.rollback();
-			throw e;
-		}
-	}
-
-	public void deleteProductCategory(ProductDto prod) throws IOException {
-		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		try {
-			transaction.begin();
-			categoryDao.deleteProductCategory(transaction, prod);
-			transaction.commit();
-		} catch (IOException e) {
-			transaction.rollback();
-			throw e;
-		}
-	}
-
-	public List<CategoryDto> getCategoryByProduct(int seq) throws IOException {
-		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		try {
-			transaction.begin();
-			List<CategoryDto> result = categoryDao
-					.getCategoryByProduct(transaction, seq);
+			List<FaqDto> result = faqDao.getByProduct(transaction, seq);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {
@@ -87,11 +84,11 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
 		}
 	}
 
-	public List<CategoryDto> getAll() throws IOException {
+	public int getSeq() throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		try {
 			transaction.begin();
-			List<CategoryDto> result = categoryDao.getAll(transaction);
+			int result = faqDao.getSeq(transaction);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {
@@ -99,11 +96,12 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
 			throw e;
 		}
 	}
-	public List<CategoryDto> searchCategory(String name) throws IOException {
+
+	public FaqDto getById(int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		try{
+		try {
 			transaction.begin();
-			List<CategoryDto> result = categoryDao.searchCategory(transaction, name);
+			FaqDto result = faqDao.getById(transaction, seq);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {

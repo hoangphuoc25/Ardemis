@@ -3,6 +3,7 @@ package rd.impl.controler;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +19,8 @@ import javax.inject.Named;
 
 import org.primefaces.context.RequestContext;
 
+import rd.dto.CategoryDto;
+import rd.dto.FaqDto;
 import rd.dto.FeedbackDto;
 import rd.dto.InvoiceDto;
 import rd.dto.NoteDto;
@@ -25,6 +28,8 @@ import rd.dto.ProductDto;
 import rd.dto.PromotionDto;
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.CategoryService;
+import rd.spec.service.FaqService;
 import rd.spec.service.FeedbackService;
 import rd.spec.service.InvoiceService;
 import rd.spec.service.NoteService;
@@ -92,7 +97,7 @@ public class ProductController implements Serializable {
 		this.addMode = addMode;
 	}
 
-	public void startAdd() {
+	public void startAdd() throws IOException {
 		// reload();
 		newProd = new ProductDto();
 		addMode = true;
@@ -132,7 +137,9 @@ public class ProductController implements Serializable {
 		int seq = productService.getSeq();
 		newProd.setName(newProd.getName().trim());
 		newProd.setSeq(seq);
+		newProd.setCategory(catList);
 		productService.addProduct(newProd);
+
 		products.add(newProd);
 		addMode = false;
 
@@ -146,8 +153,10 @@ public class ProductController implements Serializable {
 			}
 		}
 		sessionManager.addGlobalMessageInfo("New product added", null);
-		RequestContext context = RequestContext.getCurrentInstance();
-		context.execute("prodDialog_w.hide();");
+		catList = new ArrayList<CategoryDto>();
+
+//		RequestContext context = RequestContext.getCurrentInstance();
+//		context.execute("prodDialog_w.hide();");
 	}
 
 	public void search() throws IOException {
@@ -162,13 +171,15 @@ public class ProductController implements Serializable {
 		this.editMode = editMode;
 	}
 
-	public void showDialog(ProductDto prod) {
+	public void showDialog(ProductDto prod) throws IOException {
 		// reload();
 		addMode = false;
 		editMode = false;
 		viewMode = true;
 		selectedProd = new ProductDto(prod);
+		List<CategoryDto> prodCat = catService.getCategoryByProduct(prod.getSeq());
 		newProd = new ProductDto(selectedProd);
+		newProd.setCategory(prodCat);
 	}
 
 	public boolean isViewMode() {
@@ -204,7 +215,8 @@ public class ProductController implements Serializable {
 			addMode = false;
 			editMode = false;
 			viewMode = false;
-			sessionManager.addGlobalMessageInfo("Info updated successfully", null);
+			newProd.setCategory(catList);
+
 			productService.updateProduct(newProd);
 			for (int i = 0; i < products.size(); i++) {
 				if (products.get(i).getSeq() == newProd.getSeq()) {
@@ -212,8 +224,11 @@ public class ProductController implements Serializable {
 					break;
 				}
 			}
-			RequestContext context = RequestContext.getCurrentInstance();
-			context.execute("prodDialog_w.hide();");
+
+			sessionManager.addGlobalMessageInfo("Info updated successfully", null);
+			catList = new ArrayList<CategoryDto>();
+//			RequestContext context = RequestContext.getCurrentInstance();
+//			context.execute("prodDialog_w.hide();");
 		}
 	}
 
@@ -236,16 +251,16 @@ public class ProductController implements Serializable {
 		editMode = false;
 		viewMode = false;
 		sessionManager.addGlobalMessageInfo("Product removed successully.", null);
-		RequestContext context = RequestContext.getCurrentInstance();
-		context.execute("prodDialog_w.hide();");
+//		RequestContext context = RequestContext.getCurrentInstance();
+//		context.execute("prodDialog_w.hide();");
 	}
 
 	public void cancel() {
 		addMode = false;
 		editMode = false;
 		viewMode = false;
-		RequestContext context = RequestContext.getCurrentInstance();
-		context.execute("prodDialog_w.hide();");
+//		RequestContext context = RequestContext.getCurrentInstance();
+//		context.execute("prodDialog_w.hide();");
 	}
 
 	public int getSeq() {
@@ -555,5 +570,130 @@ public class ProductController implements Serializable {
 
 	public void clearProdSearch() throws IOException {
 		products = productService.getAll();
+	}
+
+	public boolean isAddFaqMode() {
+		return addFaqMode;
+	}
+
+	public void setAddFaqMode(boolean addFaqMode) {
+		this.addFaqMode = addFaqMode;
+	}
+
+	public FaqDto getNewFaq() {
+		return newFaq;
+	}
+
+	public void setNewFaq(FaqDto newFaq) {
+		this.newFaq = newFaq;
+	}
+
+	private boolean addFaqMode = false;
+	private FaqDto newFaq = new FaqDto();
+	private boolean viewFaqMode = false;
+
+	public void startAddFaq(ProductDto prod) {
+		newFaq.setProduct(prod);
+		addFaqMode = true;
+	}
+
+	public void cancelAddFaq() {
+		newFaq = new FaqDto();
+		addFaqMode = false;
+	}
+
+	@Inject FaqService faqService;
+	public void addFaq() throws IOException {
+		faqService.addFaq(newFaq);
+		faq.add(newFaq);
+
+		addFaqMode = false;
+		newFaq = new FaqDto();
+
+		sessionManager.addGlobalMessageInfo("New FAQ added", null);
+	}
+
+	public boolean isViewFaqMode() {
+		return viewFaqMode;
+	}
+
+	public void setViewFaqMode(boolean viewFaqMode) {
+		this.viewFaqMode = viewFaqMode;
+	}
+
+	public void startAddNewFaq() {
+		addFaqMode = true;
+	}
+
+	public void cancelViewFaq() {
+		viewFaqMode = false;
+		addFaqMode = false;
+		newFaq = new FaqDto();
+	}
+
+	public List<FaqDto> getFaq() {
+		return faq;
+	}
+
+	public void setFaq(List<FaqDto> faq) {
+		this.faq = faq;
+	}
+
+	private List<FaqDto> faq = new ArrayList<FaqDto>();
+
+	public void startViewFaq(ProductDto prod) throws IOException {
+		System.out.println("ProductController.startViewFaq()");
+		newFaq = new FaqDto();
+		newFaq.setProduct(prod);
+		System.out.println(prod.getSeq());
+		viewFaqMode = true;
+		faq = faqService.getByProduct(prod.getSeq());
+	}
+
+	private List<CategoryDto> catList = new ArrayList<CategoryDto>();
+	private String newCategory;
+
+	@Inject CategoryService catService;
+
+	public List<String> suggestCategory(String partial) throws IOException {
+		System.out.println("ProductController.suggestCategory()");
+		List<CategoryDto> temp = catService.searchCategory(partial);
+		List<String> result = new ArrayList<String>();
+		for (CategoryDto dto: temp) {
+			result.add(dto.getCategory());
+		}
+		return result;
+	}
+
+	public void categorySelect() {
+		catList.add(new CategoryDto(newCategory));
+		newCategory = "";
+	}
+
+	public void deleteSelectedCat() {
+		System.out.println("ProductController.deleteSelectedCat()");
+		for (int i = getCatList().size() - 1; i >=0; i--) {
+			System.out.println(catList.get(i).getCategory() + " " + catList.get(i).isSelected());
+			if (getCatList().get(i).isSelected()) {
+				System.out.println(catList.get(i).getCategory());
+				getCatList().remove(i);
+			}
+		}
+	}
+
+	public List<CategoryDto> getCatList() {
+		return catList;
+	}
+
+	public void setCatList(List<CategoryDto> catList) {
+		this.catList = catList;
+	}
+
+	public String getNewCategory() {
+		return newCategory;
+	}
+
+	public void setNewCategory(String newCategory) {
+		this.newCategory = newCategory;
 	}
 }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import rd.dto.CategoryDto;
 import rd.dto.ProductDto;
 import rd.spec.dao.ProductDao;
 import rd.spec.dao.Transaction;
@@ -108,6 +109,42 @@ public class ProductServiceImpl implements ProductService, Serializable {
 		try{
 			transaction.begin();
 			ProductDto result = productDao.getByName(transaction, name);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<CategoryDto> getCategoryByProduct(int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<CategoryDto> result = productDao.getCategoryByProduct(transaction, seq);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<ProductDto> searchByCategories(List<String> categories) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ProductDto> result = productDao.searchByCategories(transaction, categories);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<ProductDto> searchByProductDesc(String keyword) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ProductDto> result = productDao.searchByProductDesc(transaction, keyword);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {

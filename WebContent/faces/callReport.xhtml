@@ -9,6 +9,7 @@
 	  <f:metadata>
 	  	<f:event listener="#{callReportController.reload}" type="preRenderView"></f:event>
 	  	<f:viewParam name="custSeq" value="#{callReportController.custSeq}"></f:viewParam>
+  		<f:viewParam name="back" value="#{callReportController.back}"></f:viewParam>
 	  </f:metadata>
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -36,45 +37,169 @@
 			<p:menuitem value="LOG OUT" style="float: right" action="#{scheduleController.logout}" immediate="true" update="form01" />
 		</p:menubar>
 
+		<p:growl autoUpdate="true" />
 		<h:messages />
-		<h3 style="font-family: Helvetica">Add new call report</h3>
-		<p:panelGrid columns="2">
-			<h:outputText value="Company Name" />
-			<p:autoComplete minQueryLength="3" maxResults="10" completeMethod="#{callReportController.suggestCompany}" value="#{callReportController.companyName}" forceSelection="true" >
-			</p:autoComplete>
+		<div class="ui-grid ui-grid-responsive">
+		    <div class="ui-grid-row">
+		        <div class="ui-grid-col-4">
+					<h3 style="font-family: Helvetica">Add new call report</h3>
 
-			<h:outputText value="Call time" />
-			<p:calendar value="#{callReportController.callTime}" pattern="MM/dd/yyyy HH:mm" />
+					<p:panelGrid columns="2">
+					</p:panelGrid>
+					<p:panelGrid id="panel" columns="2">
+						<h:outputText value="Company Name"/>
+						<p:autoComplete minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestCompany}" value="#{callReportController.companyName}" forceSelection="true" >
+						</p:autoComplete>
 
-			<h:outputText value="Detail" />
-			<p:inputTextarea value="#{callReportController.callDetail}" />
+						<h:outputText value="Call time"/>
+						<p:calendar value="#{callReportController.callTime}" pattern="MM/dd/yyyy HH:mm" />
 
-			<h:outputText value="Action" />
-			<p:selectOneMenu value="#{callReportController.rating}" >
-				<f:selectItems value="#{callReportController.ratings}" />
-			</p:selectOneMenu>
+						<h:outputText value="Call detail" />
+						<p:inputTextarea value="#{callReportController.callDetail}" />
 
-			<h:outputText value="Product" />
-			<p:autoComplete minQueryLength="3" maxResults="10" value="#{callReportController.productName}" completeMethod="#{callReportController.suggestProd}" forceSelection="true" />
+						<h:outputText value="Action" />
+						<p:selectOneMenu value="#{callReportController.rating}" >
+							<f:selectItems value="#{callReportController.ratings}" />
+							<p:ajax update="panel" />
+						</p:selectOneMenu>
 
-			<h:outputText value="Call back after" />
-			<p:outputPanel>
-				<p:panelGrid columns="2">
-					<p:inputText value="#{callReportController.callBackNo}" />
-					<p:selectOneMenu value="#{callReportController.callBackUnit}">
-						<f:selectItems value="#{callReportController.callBackUnits}" />
-					</p:selectOneMenu>
-				</p:panelGrid>
-			</p:outputPanel>
+						<h:outputText value="Product" />
+						<p:autoComplete minQueryLength="3" maxResults="10" value="#{callReportController.productName}" completeMethod="#{searchController.suggestProduct}" forceSelection="true" />
 
-			<h:outputText value="Call back again on"/>
-			<p:calendar value="#{callReportController.callBackAgainTime}" pattern="dd/MM/yyyy HH:mm" />
+						<h:outputText value="Call back after" rendered="#{callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later'}"/>
+						<p:outputPanel rendered="#{callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later'}">
+							<p:panelGrid columns="2">
+								<p:inputText value="#{callReportController.callBackNo}" />
+								<p:selectOneMenu value="#{callReportController.callBackUnit}">
+									<f:selectItems value="#{callReportController.callBackUnits}" />
+								</p:selectOneMenu>
+							</p:panelGrid>
+						</p:outputPanel>
 
-		</p:panelGrid>
-		<p:commandButton value="Submit" actionListener="#{callReportController.addNewReport}" update="form01" />
-		<br/>
+						<h:outputText value="Call back again on" rendered="#{callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later'}"/>
+						<p:calendar value="#{callReportController.callBackAgainTime}" pattern="dd/MM/yyyy HH:mm" rendered="#{callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later'}" />
 
-		<p:commandButton value="Add new company" actionListener="#{callReportController.startAdd}" update=":form01"/>
+						<h:outputText value="Meeting location" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
+						<p:outputPanel id="p4" rendered="#{callReportController.rating == 'Follow-up meeting'}" >
+							<p:selectOneRadio value="#{callReportController.meetingLocationMode}">
+							 	<f:selectItem itemLabel="At customer office" itemValue="true" />
+					            <f:selectItem itemLabel="Other" itemValue="false" />
+					            <p:ajax update="p4" />
+							</p:selectOneRadio>
+							<p:inputTextarea value="#{callReportController.newMeeting.location}" rendered="#{!callReportController.meetingLocationMode}" />
+						</p:outputPanel>
+
+						<h:outputText value="Meeting detail" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
+						<p:inputTextarea value="#{callReportController.newMeeting.detail}" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
+
+						<h:outputText value="Meeting start" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
+						<p:calendar value="#{callReportController.newMeeting.from}" rendered="#{callReportController.rating == 'Follow-up meeting'}" pattern="dd/MM/yyyy HH:mm" />
+
+						<h:outputText value="Meeting end" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
+						<p:calendar value="#{callReportController.newMeeting.to}" rendered="#{callReportController.rating == 'Follow-up meeting'}" pattern="dd/MM/yyyy HH:mm" />
+
+
+					</p:panelGrid>
+					<p:selectBooleanCheckbox value="#{callReportController.appendToActivity}" itemLabel="Append this call report to the sale activity log"/>
+					<br/>
+					<p:commandButton value="Submit" actionListener="#{callReportController.addNewReport}" update="form01" />
+					<br/>
+				<p:commandButton value="Add new company" actionListener="#{callReportController.startAdd}" update=":form01"/>
+				<br/>
+				<p:commandButton value="Add new contact" actionListener="#{callReportController.startAddNewContact}" update=":form01:contactArea"/>
+
+				</div>
+		        <div class="ui-grid-col-8">
+		        	<p:outputPanel id="p1">
+		        		<h3>Product search</h3>
+			        	<p:panelGrid columns="3">
+			        		<h:outputText value="Product name" />
+			        		<p:autoComplete value="#{callReportController.prodSearch}" minQueryLength="3" maxResults="10" forceSelection="true" completeMethod="#{searchController.suggestProduct}">
+			        			<p:ajax listener="#{callReportController.select}" event="itemSelect" update="p1" />
+			        		</p:autoComplete>
+		        		</p:panelGrid>
+		        		<p:dataTable id="prodTable" rowIndexVar="row" value="#{callReportController.searchProdList}" var="prod"
+								paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+								rows="15">
+							<p:column headerText="Name">
+								<h:outputText value="#{prod.name}" />
+							</p:column>
+							<p:column headerText="Price">
+								<h:outputText value="#{prod.price}" />
+							</p:column>
+							<p:column headerText="Action">
+								<p:commandButton value="FAQs" actionListener="#{callReportController.startViewFaq(prod)}" update=":form01:faqArea"/>
+							</p:column>
+						</p:dataTable>
+					</p:outputPanel>
+
+					<p:outputPanel id="p2">
+						<h3>Search my schedule</h3>
+		        		<p:panelGrid columns="3">
+		        			<h:outputText value="Search my schedule on" />
+		        			<p:calendar value="#{callReportController.scheduleSearch}" pattern="dd/MM/yyyy" />
+		        			<p:commandButton value="Search" actionListener="#{callReportController.searchSchedule}" update="p2"/>
+		        		</p:panelGrid>
+		        		<p:dataTable id="scheduleTable" rowIndexVar="row" value="#{callReportController.mySchedule}" var="sch"
+								paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+								rows="15">
+							<p:column headerText="From">
+								<h:outputText value="#{sch.from}">
+									<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="To">
+								<h:outputText value="#{sch.to}">
+									<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="Detail">
+								<h:outputText value="#{sch.detail}" />
+							</p:column>
+						</p:dataTable>
+	        		</p:outputPanel>
+
+	        		<p:outputPanel id="p3">
+	        			<h3>Advanced product search</h3>
+	        			<p:panelGrid columns="3">
+		        			<h:outputText value="Search in product description" />
+		        			<p:inputText value="#{callReportController.prodDescSearch}" />
+		        			<p:commandButton value="Search" actionListener="#{callReportController.searchProdByDesc}" update="p3"/>
+
+		        			<h:outputText value="Category" />
+		        			<p:outputPanel id="p31">
+			        			<p:autoComplete value="#{callReportController.cat}" minQueryLength="3" forceSelection="true" maxResults="10" completeMethod="#{searchController.suggestCategory}">
+			        				<p:ajax listener="#{callReportController.addCat}" event="itemSelect" update="p31" />
+			        			</p:autoComplete>
+			        			<p:dataTable id="tbl1" rowIndexVar="row" value="#{callReportController.searchCatList}" var="cat" tableStyle="max-width: 500px">
+									<p:column headerText="">
+										<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{cat.selected}" />
+									</p:column>
+									<p:column headerText="Category">
+										<h:outputText value="#{cat.category}" />
+									</p:column>
+								</p:dataTable>
+								<p:commandButton value="Delete selected" actionListener="#{callReportController.deleteSelectedCat}" update="p31" />
+		        			</p:outputPanel>
+		        			<p:commandButton value="Search" actionListener="#{callReportController.searchByCat}" update="p3" />
+		        		</p:panelGrid>
+
+						<p:fieldset legend="Search result">
+			        		<p:dataTable id="tbl2" rowIndexVar="row" value="#{callReportController.prodSearchList}" var="prod"
+									paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+									rows="15">
+								<p:column headerText="Name">
+									<h:outputText value="#{prod.name}" />
+								</p:column>
+								<p:column headerText="Price">
+									<h:outputText value="#{prod.price}" />
+								</p:column>
+							</p:dataTable>
+						</p:fieldset>
+	        		</p:outputPanel>
+		        </div>
+		    </div>
+		</div>
 
 		<p:dialog id="custDialog" closable="false" widgetVar="custDialog_w" visible="#{callReportController.addMode}" rendered="#{callReportController.addMode}"
 				modal="true" resizable="false" draggable="true" header="Customer detail">
@@ -114,6 +239,10 @@
 				<p:inputText id="comRemark" value="#{callReportController.newCust.remark}" />
 				<p:message for="comRemark" />
 
+				<h:outputText value="Assign to" />
+				<p:autoComplete value="#{callReportController.assignee}" forceSelection="true" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestUser}" required="true" />
+				<p:message for="assignTo" />
+
 				<h:outputText value="* = required fields" />
 				<h:outputText value="" />
 				<h:outputText value="" />
@@ -122,6 +251,52 @@
 				oncomplete="if (args &amp;&amp; !args.validationFailed) custDialog_w.hide()" />
 			<p:commandButton id="cancelBtn" value="Cancel" ajax="true" actionListener="#{callReportController.cancel}" update="@all" immediate="true" />
 		</p:dialog>
+
+		<p:outputPanel id="faqArea">
+			<p:dialog id="faqDialog" closable="false" visible="#{callReportController.viewFaqMode}"
+					widgetVar="faqDialog_w" modal="true" resizable="false" draggable="true" header="Frequently asked question"
+					style="max-width: 800px; max-height: 600px;">
+				<p:dataTable id="faqTable" rowIndexVar="row" value="#{callReportController.prodFaq}" var="faq"
+						paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+						rows="15">
+					<p:column headerText="Question">
+						<h:outputText value="#{faq.question}" />
+					</p:column>
+					<p:column headerText="Answer">
+						<h:outputText value="#{faq.answer}" />
+					</p:column>
+				</p:dataTable>
+				<p:commandButton value="Close" actionListener="#{callReportController.cancelViewFaq}" update=":form01:faqArea"/>
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:outputPanel id="contactArea">
+			<p:dialog id="contactDialog" closable="false" visible="#{callReportController.addContactMode}"
+					widgetVar="contactDialog_w" modal="true" resizable="false" draggable="true" header="">
+				<p:panelGrid columns="2">
+					<h:outputText value="Company Name"/>
+					<p:autoComplete minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestCompany}" value="#{callReportController.contactCompName}" forceSelection="true"  />
+
+					<h:outputText value="Contact name" />
+					<p:inputText value="#{callReportController.newContact.name}" />
+
+					<h:outputText value="Contact number" />
+					<p:inputText value="#{callReportController.newContact.phone}" />
+
+					<h:outputText value="Email" />
+					<p:inputText value="#{callReportController.newContact.email}" />
+
+					<h:outputText value="Gender" />
+					<p:selectOneRadio value="#{callReportController.newContact.gender}">
+						<f:selectItem itemLabel="Male" itemValue="Male" />
+						<f:selectItem itemLabel="Female" itemValue="Female" />
+					</p:selectOneRadio>
+				</p:panelGrid>
+
+				<p:commandButton value="Add" actionListener="#{callReportController.addNewContact}" update=":form01:contactArea" />
+				<p:commandButton value="Cancel" actionListener="#{callReportController.cancelAddNewContact}" update=":form01:contactArea" />
+			</p:dialog>
+		</p:outputPanel>
 	</h:form>
 </h:body>
 </html>

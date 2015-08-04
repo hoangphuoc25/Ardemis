@@ -25,13 +25,7 @@ import rd.spec.dao.ProductDao;
 import rd.spec.dao.Transaction;
 import rd.spec.dao.UserDao;
 
-public class InvoiceDaoImpl implements InvoiceDao, Serializable {
-
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
-
+public class InvoiceDaoImpl implements InvoiceDao {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private ProductDao productDao;

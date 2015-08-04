@@ -9,6 +9,8 @@ public class MeetingDto {
 	private String detail;
 	private CompanyDto customer;
 	private UserDto salesperson;
+	private String location;
+	private ContactDto contact;
 
 	public Date getFrom() {
 		return from;
@@ -42,13 +44,15 @@ public class MeetingDto {
 		this.customer = customer;
 	}
 
-	public MeetingDto(int seq, Date from, Date to, String detail, CompanyDto customer, UserDto sale) {
+	public MeetingDto(int seq, Date from, Date to, String detail, CompanyDto customer, UserDto sale, String location, ContactDto contact) {
 		this.seq = seq;
 		this.from = from;
 		this.to = to;
 		this.detail = detail;
 		this.customer = customer;
 		this.salesperson = sale;
+		this.location = location;
+		this.contact = contact;
 	}
 
 	public MeetingDto() {
@@ -68,5 +72,21 @@ public class MeetingDto {
 
 	public void setSalesperson(UserDto salesperson) {
 		this.salesperson = salesperson;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public ContactDto getContact() {
+		return contact;
+	}
+
+	public void setContact(ContactDto contact) {
+		this.contact = contact;
 	}
 }

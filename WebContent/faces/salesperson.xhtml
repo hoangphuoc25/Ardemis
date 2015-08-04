@@ -84,6 +84,8 @@
 			<p:menuitem value="LOG OUT" style="float: right" action="#{scheduleController.logout}" immediate="true" update="form01" />
 		</p:menubar>
 
+
+		<p:growl autoUpdate="true" />
 		<h:messages infoClass="alert alert-info" fatalClass="alert alert-danger" errorClass="alert alert-danger" warnClass="alert alert-warning"/>
 		<br/>
 		<p:outputPanel id="firstMessage">
@@ -136,6 +138,9 @@
 				<p:column headerText="Customer">
 					<h:outputText value="#{event.customer.name}" />
 				</p:column>
+				<p:column headerText="Location">
+					<h:outputText value="#{event.location}" />
+				</p:column>
 				<p:column headerText="Action">
 					<p:commandButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01" />
 					<a href="editEvent.jsf?seq=#{event.seq}">Edit</a>
@@ -184,19 +189,27 @@
 			<p:commandButton value="Add new task" actionListener="#{scheduleController.startAddTask}" update=":form01"/>
 		</p:panel>
 
-    	<h4 style="font-family: Helvetica;">Add new meeting</h4>
    		<p:dialog id="newMeetingDialog" closable="false" visible="#{scheduleController.addMeetingMode}"
 				widgetVar="newMeetingDialog_w" modal="true" resizable="false" draggable="true" header="">
 			<p:messages />
 			<p:panelGrid columns="2">
 				<h:outputText value="From" />
-				<p:calendar value="#{scheduleController.from}" pattern="MM/dd/yyyy HH:mm" />
+				<p:calendar value="#{scheduleController.newMeeting.from}" pattern="MM/dd/yyyy HH:mm" />
 				<h:outputText value="To" />
-				<p:calendar value="#{scheduleController.to}" pattern="MM/dd/yyyy HH:mm" />
+				<p:calendar value="#{scheduleController.newMeeting.to}" pattern="MM/dd/yyyy HH:mm" />
 				<h:outputText value="Title" />
-				<p:inputText value="#{scheduleController.title}" />
+				<p:inputText value="#{scheduleController.newMeeting.detail}" />
 				<h:outputText value="Company" />
 				<p:autoComplete forceSelection="true" value="#{scheduleController.companyName}" minQueryLength="3" maxResults="10" completeMethod="#{scheduleController.suggestCompany}" />
+				<h:outputText value="Meeting location" />
+				<p:outputPanel id="p1">
+					<p:selectOneRadio id="console" value="#{scheduleController.meetingAtCustomer}">
+						<f:selectItem itemLabel="Customer office" itemValue="true" />
+			            <f:selectItem itemLabel="Other" itemValue="false" />
+			            <p:ajax update="p1" />
+					</p:selectOneRadio>
+					<p:inputTextarea value="#{scheduleController.newMeeting.location}" rendered="#{!scheduleController.meetingAtCustomer}"/>
+				</p:outputPanel>
 			</p:panelGrid>
 			<p:commandButton value="Add" actionListener="#{scheduleController.addNewEvent}" update=":form01" />
 			<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelAddMeeting}" update=":form01" />

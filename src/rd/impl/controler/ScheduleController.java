@@ -113,15 +113,17 @@ public class ScheduleController implements Serializable {
 
 	public void addNewEvent() throws IOException {
 		// reload();
-		if (to.getTime() < from.getTime()) {
+		if (newMeeting.getTo().getTime() < newMeeting.getFrom().getTime()) {
 			sessionManager.addGlobalMessageFatal("Invalid date info", null);
 			return;
 		}
-		System.out.println("ScheduleController.addNewEvent()");
-		System.out.println(companyName);
 		CompanyDto comp = compService.getById(Integer.parseInt(companyName.split("[()]")[1]));
-		System.out.println(Integer.parseInt(companyName.split("[()]")[1]));
-		MeetingDto newMeeting = new MeetingDto(meetingService.getSeq(), from, to, title, comp, sessionManager.getLoginUser());
+		newMeeting.setCustomer(comp);
+		newMeeting.setSalesperson(sessionManager.getLoginUser());
+		if (isMeetingAtCustomer()) {
+			newMeeting.setLocation(comp.getAddress());
+		}
+
 		meetingService.addMeeting(newMeeting);
 
 		if (isToday(newMeeting)) {
@@ -609,4 +611,23 @@ public class ScheduleController implements Serializable {
 	public void setContactNumber(String contactNumber) {
 		this.contactNumber = contactNumber;
 	}
+
+	public boolean isMeetingAtCustomer() {
+		return meetingAtCustomer;
+	}
+
+	public void setMeetingAtCustomer(boolean meetingAtCustomer) {
+		this.meetingAtCustomer = meetingAtCustomer;
+	}
+
+	public MeetingDto getNewMeeting() {
+		return newMeeting;
+	}
+
+	public void setNewMeeting(MeetingDto newMeeting) {
+		this.newMeeting = newMeeting;
+	}
+
+	private boolean meetingAtCustomer = true;
+	private MeetingDto newMeeting = new MeetingDto();
 }

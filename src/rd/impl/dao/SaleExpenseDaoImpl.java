@@ -22,12 +22,7 @@ import rd.spec.dao.SaleExpenseDao;
 import rd.spec.dao.Transaction;
 import rd.spec.dao.UserDao;
 
-public class SaleExpenseDaoImpl implements SaleExpenseDao, Serializable {
-
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
+public class SaleExpenseDaoImpl implements SaleExpenseDao {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private UserDao userDao;

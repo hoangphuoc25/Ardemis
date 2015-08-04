@@ -3,6 +3,7 @@ package rd.spec.service;
 import java.io.IOException;
 import java.util.List;
 
+import rd.dto.CategoryDto;
 import rd.dto.ProductDto;
 
 public interface ProductService {
@@ -14,4 +15,7 @@ public interface ProductService {
 	public List<ProductDto> getAll() throws IOException;
 	public int getSeq() throws IOException;
 	public ProductDto getByName(String name) throws IOException;
+	public List<CategoryDto> getCategoryByProduct(int seq) throws IOException;
+	public List<ProductDto> searchByCategories(List<String> categories) throws IOException;
+	public List<ProductDto> searchByProductDesc(String keyword) throws IOException;
 }

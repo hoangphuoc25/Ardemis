@@ -20,12 +20,14 @@ import org.slf4j.LoggerFactory;
 
 import rd.dto.CallReportDto;
 import rd.dto.CompanyDto;
+import rd.dto.ContactDto;
 import rd.dto.InvoiceDto;
 import rd.dto.ProductDto;
 import rd.dto.TeamDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.CallReportService;
 import rd.spec.service.CompanyService;
+import rd.spec.service.ContactService;
 import rd.spec.service.InvoiceService;
 import rd.spec.service.ProductService;
 import rd.spec.service.TeamService;
@@ -238,6 +240,8 @@ public class SalespersonController implements Serializable {
 	public void updateCompanyList() throws IOException {
 		if (showingMode.equals("all"))
 			customerList = comService.getAll();
+		else if (showingMode.equalsIgnoreCase("new"))
+			customerList = comService.getCompanyByContactStatusAndUser(showingMode, sessionManager.getLoginUser().getId());
 		else
 			customerList = comService.getCompanyByContactStatus(showingMode);
 		purchasedProduct = "";
@@ -357,6 +361,44 @@ public class SalespersonController implements Serializable {
 		viewDetailMode = false;
 		callResults = new ArrayList<CallReportDto>();
 		purchases = new ArrayList<InvoiceDto>();
+	}
+
+	public boolean isAddContactMode() {
+		return addContactMode;
+	}
+
+	public void setAddContactMode(boolean addContactMode) {
+		this.addContactMode = addContactMode;
+	}
+
+	private boolean addContactMode = false;
+	private ContactDto newContact = new ContactDto();
+
+	@Inject ContactService contactService;
+
+	public void addNewContact() throws IOException {
+		newContact.setSeq(contactService.getSeq());
+		contactService.addContact(newContact);
+		addContactMode = false;
+		newContact = new ContactDto();
+	}
+
+	public void cancelAddNewContact() {
+		addContactMode = false;
+		setNewContact(new ContactDto());
+	}
+
+	public ContactDto getNewContact() {
+		return newContact;
+	}
+
+	public void setNewContact(ContactDto newContact) {
+		this.newContact = newContact;
+	}
+
+	public void startAddContact(CompanyDto comp) {
+		newContact.setCompany(comp);
+		addContactMode = true;
 	}
 }
 
