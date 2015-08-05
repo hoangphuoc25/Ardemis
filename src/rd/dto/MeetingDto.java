@@ -44,12 +44,11 @@ public class MeetingDto {
 		this.customer = customer;
 	}
 
-	public MeetingDto(int seq, Date from, Date to, String detail, CompanyDto customer, UserDto sale, String location, ContactDto contact) {
+	public MeetingDto(int seq, Date from, Date to, String detail, ContactDto contact, UserDto sale, String location) {
 		this.seq = seq;
 		this.from = from;
 		this.to = to;
 		this.detail = detail;
-		this.customer = customer;
 		this.salesperson = sale;
 		this.location = location;
 		this.contact = contact;

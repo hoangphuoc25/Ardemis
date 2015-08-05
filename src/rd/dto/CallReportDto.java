@@ -4,17 +4,13 @@ import java.util.Date;
 
 public class CallReportDto {
 	private int seq;
-	private CompanyDto customer;
-
-	public CompanyDto getCustomer() {
-		return this.customer;
-	}
-
-	public void setCustomer(CompanyDto customer) {
-		this.customer = customer;
-	}
-
+	private ContactDto contact;
+	private UserDto salesperson;
+	private ProductDto product;
+	private int callBack;
+	private String rating;
 	private Date callTime;
+	private String detail;
 
 	public Date getCallTime() {
 		return this.callTime;
@@ -24,8 +20,6 @@ public class CallReportDto {
 		this.callTime = callTime;
 	}
 
-	private String detail;
-
 	public String getDetail() {
 		return this.detail;
 	}
@@ -34,18 +28,19 @@ public class CallReportDto {
 		this.detail = detail;
 	}
 
-	public CallReportDto(int seq, CompanyDto customer, Date callTime, String detail, String rating, UserDto user, ProductDto product, int callBack) {
+	public CallReportDto(int seq, ContactDto contact, Date callTime,
+			String detail, String rating, UserDto user, int callBack) {
 		this.seq = seq;
-		this.customer = customer;
+		this.contact = contact;
 		this.callTime = callTime;
 		this.detail = detail;
 		this.rating = rating;
 		this.salesperson = user;
-		this.product = product;
 		this.callBack = callBack;
 	}
 
-	public CallReportDto() {}
+	public CallReportDto() {
+	}
 
 	public int getSeq() {
 		return seq;
@@ -54,10 +49,11 @@ public class CallReportDto {
 	public void setSeq(int seq) {
 		this.seq = seq;
 	}
-	private String rating;
+
 	public String getRating() {
 		return this.rating;
 	}
+
 	public void setRating(String rating) {
 		this.rating = rating;
 	}
@@ -86,7 +82,11 @@ public class CallReportDto {
 		this.callBack = callBack;
 	}
 
-	private UserDto salesperson;
-	private ProductDto product;
-	private int callBack;
+	public ContactDto getContact() {
+		return contact;
+	}
+
+	public void setContact(ContactDto contact) {
+		this.contact = contact;
+	}
 }

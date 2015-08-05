@@ -1,7 +1,13 @@
 package rd.impl.controler;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -17,9 +23,16 @@ import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.primefaces.context.RequestContext;
+import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.UploadedFile;
 
 import rd.dto.CategoryDto;
+import rd.dto.ContactDto;
 import rd.dto.FaqDto;
 import rd.dto.FeedbackDto;
 import rd.dto.InvoiceDto;
@@ -607,8 +620,11 @@ public class ProductController implements Serializable {
 		faqService.addFaq(newFaq);
 		faq.add(newFaq);
 
+		ProductDto temp = newFaq.getProduct();
+
 		addFaqMode = false;
 		newFaq = new FaqDto();
+		newFaq.setProduct(temp);
 
 		sessionManager.addGlobalMessageInfo("New FAQ added", null);
 	}
@@ -648,6 +664,7 @@ public class ProductController implements Serializable {
 		System.out.println(prod.getSeq());
 		viewFaqMode = true;
 		faq = faqService.getByProduct(prod.getSeq());
+		faqProd = prod;
 	}
 
 	private List<CategoryDto> catList = new ArrayList<CategoryDto>();
@@ -695,5 +712,66 @@ public class ProductController implements Serializable {
 
 	public void setNewCategory(String newCategory) {
 		this.newCategory = newCategory;
+	}
+
+	private ProductDto faqProd;
+
+	public void handleFileUpload(FileUploadEvent event) {
+		try {
+	    	UploadedFile file = event.getFile();
+	        String path = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/");
+	        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMddHHmmss");
+	        String name = fmt.format(new Date()) + sessionManager.getLoginUser().getId() + event.getFile().getFileName();
+	        File f = new File(path + name);
+	        InputStream is = event.getFile().getInputstream();
+	        OutputStream out = new FileOutputStream(f);
+	        byte buf[] = new byte[1024];
+	        int len;
+	        while ((len = is.read(buf)) > 0)
+	            out.write(buf, 0, len);
+	        is.close();
+	        out.close();
+
+	        String errorMsg = readEmpListFromExcel(path + name);
+	        if (errorMsg.isEmpty())
+	        	sessionManager.addGlobalMessageInfo("Records added successfully", null);
+	        else
+	        	sessionManager.addGlobalMessageInfo(errorMsg, null);
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    }
+
+	private String readEmpListFromExcel(String fullName) throws IOException {
+		String msg = "";
+		HSSFWorkbook wb = new HSSFWorkbook(new FileInputStream(fullName));
+
+		HSSFSheet sheet = wb.getSheetAt(0);
+		int rows = sheet.getPhysicalNumberOfRows();
+		for (int r = 0; r < rows - 1; r++) {
+			HSSFRow row = sheet.getRow(r + 1);
+			if (row == null) {
+				continue;
+			}
+
+			try {
+				String q = row.getCell(0).getStringCellValue();
+				String a = row.getCell(1).getStringCellValue();
+				FaqDto faqDto = new FaqDto(faqService.getSeq(), faqProd, q, a);
+				faqService.addFaq(faqDto);
+				faq.add(faqDto);
+			} catch (Exception e) {
+				msg += e.getMessage();
+			}
+		}
+		return msg;
+	}
+
+	public ProductDto getFaqProd() {
+		return faqProd;
+	}
+
+	public void setFaqProd(ProductDto faqProd) {
+		this.faqProd = faqProd;
 	}
 }

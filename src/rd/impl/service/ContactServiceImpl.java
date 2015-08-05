@@ -107,4 +107,40 @@ public class ContactServiceImpl implements ContactService, Serializable {
 			throw e;
 		}
 	}
+	public List<ContactDto> getAll() throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ContactDto> result = contactDao.getAll(transaction);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<ContactDto> getByStatusAndUser(String status, String userId) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ContactDto> result = contactDao.getByStatusAndUser(transaction, status, userId);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<ContactDto> getByStatus(String status) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ContactDto> result = contactDao.getByStatus(transaction, status);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

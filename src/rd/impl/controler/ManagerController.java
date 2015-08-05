@@ -34,6 +34,7 @@ import org.primefaces.model.StreamedContent;
 
 import rd.dto.ActivityDto;
 import rd.dto.CompanyDto;
+import rd.dto.ContactDto;
 import rd.dto.MeetingDto;
 import rd.dto.NoteDto;
 import rd.dto.ProductDto;
@@ -44,6 +45,7 @@ import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.ActivityService;
 import rd.spec.service.CompanyService;
+import rd.spec.service.ContactService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.NoteService;
 import rd.spec.service.ProductService;
@@ -590,5 +592,61 @@ public class ManagerController implements Serializable {
 	public void cancelViewActivity() {
 		allAct = new ArrayList<ActivityDto>();
 		viewActivityMode = false;
+	}
+
+	public boolean isAssignToOtherMode() {
+		return assignToOtherMode;
+	}
+
+	public void setAssignToOtherMode(boolean assignToOtherMode) {
+		this.assignToOtherMode = assignToOtherMode;
+	}
+
+	private boolean assignToOtherMode;
+	private ActivityDto selectedAct;
+	private String otherSalesperson;
+	private List<ActivityDto> allDeal;
+
+	@Inject ContactService contactService;
+
+	public void startAssignToOther(ActivityDto act) {
+		selectedAct = act;
+		assignToOtherMode = true;
+		otherSalesperson = act.getSalesperson().getName() + "(" + act.getSalesperson().getId() + ")";
+	}
+	public void assignToOther() throws NumberFormatException, IOException {
+		UserDto newSale = userService.findUserById(otherSalesperson.split("[()]")[1]);
+		selectedAct.setSalesperson(newSale);
+		assignToOtherMode = false;
+	}
+	public void cancelAssignToOther() {
+		assignToOtherMode = false;
+	}
+
+	public ActivityDto getSelectedAct() {
+		return selectedAct;
+	}
+
+	public void setSelectedAct(ActivityDto selectedAct) {
+		this.selectedAct = selectedAct;
+	}
+
+	public String getOtherSalesperson() {
+		return otherSalesperson;
+	}
+
+	public void setOtherSalesperson(String otherSalesperson) {
+		this.otherSalesperson = otherSalesperson;
+	}
+
+	public List<ActivityDto> getAllDeal() throws IOException {
+		if (allDeal == null) {
+			allDeal = actService.getActiveDeal();
+		}
+		return allDeal;
+	}
+
+	public void setAllDeal(List<ActivityDto> allDeal) {
+		this.allDeal = allDeal;
 	}
 }

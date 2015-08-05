@@ -1,14 +1,17 @@
 package rd.dto;
 
 import java.util.Date;
+import java.util.List;
 
 public class ActivityDto {
 	private int seq;
-	private CompanyDto customer;
+	private ContactDto contact;
 	private Date startDate;
 	private String status;
 	private String remark;
 	private UserDto salesperson;
+	private CompanyDto customer;
+	private List<ProductDto> products;
 
 	public int getSeq() {
 		return seq;
@@ -50,13 +53,14 @@ public class ActivityDto {
 		this.remark = remark;
 	}
 
-	public ActivityDto(int seq, CompanyDto customer, Date startDate, String status, String remark, UserDto salesperson) {
+	public ActivityDto(int seq, ContactDto contact, Date startDate, String status, String remark, UserDto salesperson, List<ProductDto> products) {
 		this.seq = seq;
-		this.customer = customer;
+		this.contact = contact;
 		this.startDate = startDate;
 		this.status = status;
 		this.remark = remark;
 		this.setSalesperson(salesperson);
+		this.products = products;
 	}
 
 	public ActivityDto() {
@@ -69,5 +73,21 @@ public class ActivityDto {
 
 	public void setSalesperson(UserDto salesperson) {
 		this.salesperson = salesperson;
+	}
+
+	public ContactDto getContact() {
+		return contact;
+	}
+
+	public void setContact(ContactDto contact) {
+		this.contact = contact;
+	}
+
+	public List<ProductDto> getProducts() {
+		return products;
+	}
+
+	public void setProducts(List<ProductDto> products) {
+		this.products = products;
 	}
 }

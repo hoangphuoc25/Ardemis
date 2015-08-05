@@ -8,14 +8,16 @@ public class SaleTargetDto {
 	private Date toDate;
 	private UserDto sale;
 	private int current;
+	private String unit;
 
 	public SaleTargetDto(UserDto sale, int target, Date fromDate, Date toDate,
-			int current) {
+			int current, String unit) {
 		this.target = target;
 		this.fromDate = fromDate;
 		this.toDate = toDate;
 		this.sale = sale;
 		this.current = current;
+		this.unit = unit;
 	}
 
 	public int getTarget() {
@@ -59,5 +61,13 @@ public class SaleTargetDto {
 
 	public void setCurrent(int current) {
 		this.current = current;
+	}
+
+	public String getUnit() {
+		return unit;
+	}
+
+	public void setUnit(String unit) {
+		this.unit = unit;
 	}
 }

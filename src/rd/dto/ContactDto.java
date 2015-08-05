@@ -3,19 +3,23 @@ package rd.dto;
 public class ContactDto {
 	private int seq;
 	private String name;
-	private CompanyDto company;
+	private String company;
 	private String phone;
 	private String email;
 	private String gender;
 	private String language;
+	private String address;
+	private UserDto assignee;
+	private String contactStatus;
 
 	public ContactDto() {
 		this.language = "English";
 		this.gender = "Male";
+		setContactStatus("new");
 	}
 
 	public ContactDto(int seq, String name, String gender, String phone,
-			String email, CompanyDto company, String language) {
+			String email, String company, String language, String address, UserDto assignee, String contactStatus) {
 		this.seq = seq;
 		this.name = name;
 		this.company = company;
@@ -23,6 +27,9 @@ public class ContactDto {
 		this.email = email;
 		this.gender = gender;
 		this.language = language;
+		this.address = address;
+		this.assignee = assignee;
+		this.setContactStatus(contactStatus);
 	}
 
 	public int getSeq() {
@@ -39,14 +46,6 @@ public class ContactDto {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public CompanyDto getCompany() {
-		return company;
-	}
-
-	public void setCompany(CompanyDto company) {
-		this.company = company;
 	}
 
 	public String getPhone() {
@@ -79,5 +78,37 @@ public class ContactDto {
 
 	public void setLanguage(String language) {
 		this.language = language;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getCompany() {
+		return company;
+	}
+
+	public void setCompany(String company) {
+		this.company = company;
+	}
+
+	public UserDto getAssignee() {
+		return assignee;
+	}
+
+	public void setAssignee(UserDto assignee) {
+		this.assignee = assignee;
+	}
+
+	public String getContactStatus() {
+		return contactStatus;
+	}
+
+	public void setContactStatus(String contactStatus) {
+		this.contactStatus = contactStatus;
 	}
 }

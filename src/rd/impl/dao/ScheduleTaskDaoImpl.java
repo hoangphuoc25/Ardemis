@@ -16,9 +16,9 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import rd.dto.CompanyDto;
+import rd.dto.ContactDto;
 import rd.dto.ScheduleTaskDto;
-import rd.spec.dao.CompanyDao;
+import rd.spec.dao.ContactDao;
 import rd.spec.dao.ScheduleTaskDao;
 import rd.spec.dao.Transaction;
 
@@ -26,19 +26,19 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private static String GET_SEQ = "select max(seq)+1 from t_event";
-	private static String ADD_EVENT = "insert into t_event (seq, category, customer_seq, time, username, detail) values (?, ?, ?, ?, ?, ?) ";
-	private static String UPDATE_EVENT = "update t_event set category=?, customer_seq=?, time=?, username=?, detail=? where seq=?";
+	private static String ADD_EVENT = "insert into t_event (seq, category, contact_seq, time, username, detail) values (?, ?, ?, ?, ?, ?) ";
+	private static String UPDATE_EVENT = "update t_event set category=?, contact_seq=?, time=?, username=?, detail=? where seq=?";
 	private static String DELETE_EVENT = "delete from t_event where seq=?";
-	private static String GET_BY_ID = "select seq, category, customer_seq, time, username, detail from t_event where seq=?";
-	private static String GET_BY_USER = "select seq, category, customer_seq, time, username, detail from t_event where username=? order by time asc";
-	private static String GET_BY_USER_TODAY = "select seq, category, customer_seq, time, username, detail from t_event where username=? and time>=? and time<? order by time asc";
-	private static String GET_BY_COMPANY = "select seq, category, customer_seq, time, username, detail from t_event where customer_seq=?";
+	private static String GET_BY_ID = "select seq, category, contact_seq, time, username, detail from t_event where seq=?";
+	private static String GET_BY_USER = "select seq, category, contact_seq, time, username, detail from t_event where username=? order by time asc";
+	private static String GET_BY_USER_TODAY = "select seq, category, contact_seq, time, username, detail from t_event where username=? and time>=? and time<? order by time asc";
+	private static String GET_BY_COMPANY = "select seq, category, contact_seq, time, username, detail from t_event where contact_seq=?";
 
-	private CompanyDao compDao;
+	private ContactDao contactDao;
 
 	@Inject
-	public ScheduleTaskDaoImpl(CompanyDao compDao) {
-		this.compDao = compDao;
+	public ScheduleTaskDaoImpl(ContactDao contactDao) {
+		this.contactDao = contactDao;
 	}
 
 	public int getSeq(Transaction transaction) throws IOException {
@@ -87,7 +87,7 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 			prepareStatement = connection.prepareStatement(ADD_EVENT);
 			prepareStatement.setInt(1, getSeq(transaction));
 			prepareStatement.setString(2, evt.getCategory());
-			prepareStatement.setInt(3, evt.getCustomer().getSeq());
+			prepareStatement.setInt(3, evt.getContact().getSeq());
 			prepareStatement.setTimestamp(4, new java.sql.Timestamp(evt.getTime().getTime()));
 			prepareStatement.setString(5, evt.getUsername());
 			prepareStatement.setString(6, evt.getDetail());
@@ -123,7 +123,7 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(UPDATE_EVENT);
 			prepareStatement.setString(1, evt.getCategory());
-			prepareStatement.setInt(2, evt.getCustomer().getSeq());
+			prepareStatement.setInt(2, evt.getContact().getSeq());
 			prepareStatement.setTimestamp(3, new java.sql.Timestamp(evt.getTime().getTime()));
 			prepareStatement.setString(4, evt.getUsername());
 			prepareStatement.setString(5, evt.getDetail());
@@ -312,12 +312,13 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 	private ScheduleTaskDto makeScheduleTaskDto(Transaction transaction, ResultSet resultSet) throws SQLException, IOException {
 		int seq = resultSet.getInt(1);
 		String category = resultSet.getString(2);
-		CompanyDto comp = compDao.getById(transaction, resultSet.getInt(3));
+		// CompanyDto comp = compDao.getById(transaction, resultSet.getInt(3));
+		ContactDto contact = contactDao.getContactById(transaction, resultSet.getInt(3));
 		Date time = new Date(resultSet.getTimestamp(4).getTime());
 		String username = resultSet.getString(5);
 		String detail = resultSet.getString(6);
 
-		return new ScheduleTaskDto(seq, category, comp, time, username, detail);
+		return new ScheduleTaskDto(seq, category, time, username, detail, contact);
 	}
 	public List<ScheduleTaskDto> getByCompany(Transaction transaction, int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -354,5 +355,13 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 				}
 			}
 		}
+	}
+
+	public ContactDao getContactDao() {
+		return contactDao;
+	}
+
+	public void setContactDao(ContactDao contactDao) {
+		this.contactDao = contactDao;
 	}
 }

@@ -10,18 +10,19 @@ public class InvoiceDto {
 	private double amount;
 	private List<ProductDto> products;
 	private UserDto salesperson;
+	private ContactDto contact;
 
-	public InvoiceDto(int seq, CompanyDto company, Date purchaseDate, double amount, List<ProductDto> products) {
+	public InvoiceDto(int seq, ContactDto contact, Date purchaseDate, double amount, List<ProductDto> products) {
 		this.seq = seq;
-		this.customer = company;
+		this.contact = contact;
 		this.purchaseDate = purchaseDate;
 		this.amount = amount;
 		this.products = products;
 	}
 
-	public InvoiceDto(int seq, CompanyDto company, Date purchaseDate, double amount, List<ProductDto> products, UserDto salesperson) {
+	public InvoiceDto(int seq, ContactDto contact, Date purchaseDate, double amount, List<ProductDto> products, UserDto salesperson) {
 		this.seq = seq;
-		this.customer = company;
+		this.contact = contact;
 		this.purchaseDate = purchaseDate;
 		this.amount = amount;
 		this.products = products;
@@ -79,5 +80,13 @@ public class InvoiceDto {
 
 	public void setSalesperson(UserDto salesperson) {
 		this.salesperson = salesperson;
+	}
+
+	public ContactDto getContact() {
+		return contact;
+	}
+
+	public void setContact(ContactDto contact) {
+		this.contact = contact;
 	}
 }

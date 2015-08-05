@@ -1,8 +1,15 @@
 package rd.impl.controler;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.enterprise.context.Conversation;
@@ -14,7 +21,13 @@ import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.primefaces.context.RequestContext;
+import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.UploadedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +36,7 @@ import rd.dto.CompanyDto;
 import rd.dto.ContactDto;
 import rd.dto.InvoiceDto;
 import rd.dto.ProductDto;
+import rd.dto.SaleExpenseDto;
 import rd.dto.TeamDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.CallReportService;
@@ -373,32 +387,163 @@ public class SalespersonController implements Serializable {
 
 	private boolean addContactMode = false;
 	private ContactDto newContact = new ContactDto();
+	private List<ContactDto> contactList;
 
 	@Inject ContactService contactService;
-
-	public void addNewContact() throws IOException {
-		newContact.setSeq(contactService.getSeq());
-		contactService.addContact(newContact);
-		addContactMode = false;
-		newContact = new ContactDto();
-	}
-
-	public void cancelAddNewContact() {
-		addContactMode = false;
-		setNewContact(new ContactDto());
-	}
 
 	public ContactDto getNewContact() {
 		return newContact;
 	}
-
 	public void setNewContact(ContactDto newContact) {
 		this.newContact = newContact;
 	}
 
 	public void startAddContact(CompanyDto comp) {
-		newContact.setCompany(comp);
+		newContact.setCompany(comp.getName());
 		addContactMode = true;
+	}
+
+	public void startAddContact() throws IOException {
+		addContactMode = true;
+		newContact.setAssignee(sessionManager.getLoginUser());
+	}
+	public void addNewContact() throws IOException {
+		newContact.setSeq(contactService.getSeq());
+		contactService.addContact(newContact);
+		contactList.add(newContact);
+		addContactMode = false;
+		newContact = new ContactDto();
+		sessionManager.addGlobalMessageInfo("New contact added", null);
+	}
+	public void cancelAddNewContact() {
+		addContactMode = false;
+		setNewContact(new ContactDto());
+	}
+
+	public void searchContactByName(String name) throws IOException {
+		contactList = contactService.searchContactByName(name);
+	}
+
+	public List<ContactDto> getContactList() throws IOException {
+		if (contactList == null && (status == null || status.isEmpty())) {
+			contactList = contactService.getAll();
+		} else if (contactList == null && !status.isEmpty()) {
+			contactList = contactService.getByStatusAndUser(status, sessionManager.getLoginUser().getId());
+			showingMode = status;
+		}
+		return contactList;
+	}
+	public void setContactList(List<ContactDto> contactList) {
+		this.contactList = contactList;
+	}
+
+	public boolean isEditContactMode() {
+		return editContactMode;
+	}
+	public void setEditContactMode(boolean editContactMode) {
+		this.editContactMode = editContactMode;
+	}
+
+	private boolean editContactMode;
+
+	public void startEditContact(ContactDto contact) {
+		newContact = contact;
+		editContactMode = true;
+	}
+	public void editContact() throws IOException {
+		contactService.updateContact(newContact);
+		editContactMode = false;
+		sessionManager.addGlobalMessageInfo("Info updated.", null);
+	}
+	public void cancelEditContact() {
+		newContact = new ContactDto();
+		editContactMode = false;
+	}
+
+	public void updateContactList() throws IOException {
+		if (showingMode.equals("all"))
+			contactList = contactService.getAll();
+		else if (showingMode.equalsIgnoreCase("new"))
+			contactList = contactService.getByStatusAndUser(showingMode, sessionManager.getLoginUser().getId());
+		else
+			contactList = contactService.getByStatus(showingMode);
+		purchasedProduct = "";
+	}
+
+	public void deleteContact(ContactDto contact) throws IOException {
+		for (int i = contactList.size() - 1; i >= 0; i--) {
+			if (contactList.get(i).getSeq() == contact.getSeq()) {
+				contactList.remove(i);
+				break;
+			}
+		}
+		contactService.deleteContact(contact.getSeq());
+	}
+
+	public String callReportLink(ContactDto cont) {
+		return "callReport.jsf?contactSeq=" + cont.getSeq() + "&back=true";
+	}
+
+	public void handleFileUpload(FileUploadEvent event) {
+		try {
+	    	UploadedFile file = event.getFile();
+	        String path = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/");
+	        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMddHHmmss");
+	        String name = fmt.format(new Date()) + sessionManager.getLoginUser().getId() +
+	        		event.getFile().getFileName();
+	        File f = new File(path + name);
+	        InputStream is = event.getFile().getInputstream();
+	        OutputStream out = new FileOutputStream(f);
+	        byte buf[] = new byte[1024];
+	        int len;
+	        while ((len = is.read(buf)) > 0)
+	            out.write(buf, 0, len);
+	        is.close();
+	        out.close();
+
+	        String errorMsg = readEmpListFromExcel(path + name);
+	        if (errorMsg.isEmpty())
+	        	sessionManager.addGlobalMessageInfo("Records added successfully", null);
+	        else
+	        	sessionManager.addGlobalMessageInfo(errorMsg, null);
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    }
+
+	private String readEmpListFromExcel(String fullName) throws IOException {
+		HSSFWorkbook wb = new HSSFWorkbook(new FileInputStream(fullName));
+
+		HSSFSheet sheet = wb.getSheetAt(0);
+		int rows = sheet.getPhysicalNumberOfRows();
+		for (int r = 0; r < rows - 1; r++) {
+			HSSFRow row = sheet.getRow(r + 1);
+			if (row == null) {
+				continue;
+			}
+
+			String name = "";
+			if (row.getCell(0).getCellType() == HSSFCell.CELL_TYPE_NUMERIC) {
+				name = String.valueOf(row.getCell(0).getNumericCellValue());
+			} else if (row.getCell(0).getCellType() == HSSFCell.CELL_TYPE_STRING) {
+				name = row.getCell(0).getStringCellValue();
+			}
+			String company = row.getCell(1).getStringCellValue();
+			String phone = "";
+			if (row.getCell(2).getCellType() == HSSFCell.CELL_TYPE_NUMERIC) {
+				phone = String.valueOf(row.getCell(2).getNumericCellValue());
+			} else if (row.getCell(2).getCellType() == HSSFCell.CELL_TYPE_STRING) {
+				phone = row.getCell(2).getStringCellValue();
+			}
+
+			String email = row.getCell(3).getStringCellValue();
+			String gender = row.getCell(4).getStringCellValue();
+			String address = row.getCell(4).getStringCellValue();
+
+			ContactDto contact = new ContactDto(contactService.getSeq(), name, gender, phone, email, company, "English", address, sessionManager.getLoginUser(), "new");
+			contactService.addContact(contact);
+		}
+		return "";
 	}
 }
 

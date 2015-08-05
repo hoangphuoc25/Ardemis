@@ -10,4 +10,11 @@ public interface FeedbackService {
 	public FeedbackDto getById(int seq) throws IOException;
 	public void addFeedback(FeedbackDto fb) throws IOException;
 	public int getSeq() throws IOException;
+	public double getAverageFeature(int seq) throws IOException;
+	public double getAverageThirdPartySupport(int seq) throws IOException;
+	public double getAveragePerformance(int seq) throws IOException;
+	public double getAverageUserEx(int seq) throws IOException;
+	public double getAverageUserIn(int seq) throws IOException;
+	public double getAverageUsability(int seq) throws IOException;
+	public double getAverageStability(int seq) throws IOException;
 }

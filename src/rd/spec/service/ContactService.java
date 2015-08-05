@@ -18,4 +18,7 @@ public interface ContactService {
 	public List<ContactDto> getByCompany(CompanyDto company) throws IOException;
 	public int getSeq() throws IOException;
 	public List<ContactDto> searchContactByName(String partial) throws IOException;
+	public List<ContactDto> getAll() throws IOException;
+	public List<ContactDto> getByStatusAndUser(String status, String userId) throws IOException;
+	public List<ContactDto> getByStatus(String status) throws IOException;
 }

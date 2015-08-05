@@ -13,4 +13,5 @@ public interface ActivityService {
 	public void deleteActivity(ActivityDto act) throws IOException;
 	public int getSeq() throws IOException;
 	public List<ActivityDto> findByStatus(String status, String username) throws IOException;
+	public List<ActivityDto> getActiveDeal() throws IOException;
 }

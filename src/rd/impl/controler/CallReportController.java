@@ -18,6 +18,7 @@ import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import rd.dto.ActivityDto;
 import rd.dto.CallReportDto;
 import rd.dto.CategoryDto;
 import rd.dto.CompanyDto;
@@ -28,6 +29,7 @@ import rd.dto.ProductDto;
 import rd.dto.ScheduleTaskDto;
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.ActivityService;
 import rd.spec.service.CallReportService;
 import rd.spec.service.CategoryService;
 import rd.spec.service.CompanyService;
@@ -113,6 +115,8 @@ public class CallReportController implements Serializable {
 		return result;
 	}
 
+	@Inject ActivityService actService;
+
 	public void addNewReport() throws IOException {
 		if (rating.equalsIgnoreCase("follow-up call") || rating.equalsIgnoreCase("call again later")) {
 			if (callBackAgainTime != null && (callBackAgainTime.getTime() < (new Date()).getTime())) {
@@ -128,22 +132,14 @@ public class CallReportController implements Serializable {
 			}
 		}
 
-		if (productName.isEmpty()) {
-			sessionManager.addGlobalMessageFatal("Product name can't be empty", null);
-			return;
-		}
-		if (companyName.isEmpty()) {
-			sessionManager.addGlobalMessageFatal("Company name can't be empty", null);
-			return;
-		}
-
 		System.out.println(callTime);
-		int compSeq = Integer.parseInt(companyName.split("[()]")[1]);
-		CompanyDto customer = compService.getById(compSeq);
-		int prodSeq = Integer.parseInt(productName.split("[()]")[1]);
-		ProductDto prod = prodService.getProductById(prodSeq);
+		ContactDto targetContact = contactService.getContactById(Integer.parseInt(contactName.split("[()]")[1]));
+//		int compSeq = Integer.parseInt(companyName.split("[()]")[1]);
+//		CompanyDto customer = compService.getById(compSeq);
+//		int prodSeq = Integer.parseInt(productName.split("[()]")[1]);
+//		ProductDto prod = prodService.getProductById(prodSeq);
 		int seq = crService.getSeq();
-		CallReportDto cr = new CallReportDto(seq, customer, callTime, callDetail, rating, sessionManager.getLoginUser(), prod, callBackNo);
+		CallReportDto cr = new CallReportDto(seq, targetContact, callTime, callDetail, rating, sessionManager.getLoginUser(), callBackNo);
 
 		crService.addReport(cr);
 
@@ -164,22 +160,28 @@ public class CallReportController implements Serializable {
 				category = "Follow-up call";
 
 			int stSeq = stService.getSeq();
-			ScheduleTaskDto task = new ScheduleTaskDto(stSeq, category, customer, temp, sessionManager.getLoginUser().getId(), callDetail, null);
+			ScheduleTaskDto task = new ScheduleTaskDto(stSeq, category, temp, sessionManager.getLoginUser().getId(), callDetail, targetContact);
 			stService.addEvent(task);
 		}
 
 		if (cr.getRating().equalsIgnoreCase("follow-up meeting")) {
-			if (meetingLocationMode) {
-				newMeeting.setLocation(customer.getAddress());
+			if (meetingLocationMode.equalsIgnoreCase("true")) {
+				newMeeting.setLocation(targetContact.getAddress());
 			}
-			newMeeting.setCustomer(customer);
+			newMeeting.setContact(targetContact);
 			newMeeting.setSalesperson(sessionManager.getLoginUser());
 			meetingService.addMeeting(newMeeting);
+			sessionManager.addGlobalMessageInfo("New meeting added", null);
+
+			int actSeq = actService.getSeq();
+			ActivityDto act = new ActivityDto(actSeq, targetContact, new Date(), "Contacted", "", sessionManager.getLoginUser(), selectedProdList);
+			actService.addActivity(act);
+			sessionManager.addGlobalMessageInfo("New deal activity added", null);
 		}
 
-		if (customer.getContactStatus().equalsIgnoreCase("new")) {
-			customer.setContactStatus("contacted");
-			compService.updateCompany(customer);
+		if (targetContact.getContactStatus().equalsIgnoreCase("new")) {
+			targetContact.setContactStatus("contacted");
+			contactService.updateContact(targetContact);
 		}
 
 		callTime = new Date();
@@ -190,15 +192,22 @@ public class CallReportController implements Serializable {
 		callBackNo = 0;
 		callBackUnit = "day";
 		callBackAgainTime = null;
-		prod = new ProductDto();
+		// prod = new ProductDto();
 
 		sessionManager.addGlobalMessageInfo("New call report added", null);
 
+
 		if (isBack()) {
 			ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-			ec.redirect("companyList.jsf");
+			ec.redirect("contactList.jsf?status=new");
+		}
+
+		if (isBackMain()) {
+			ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+			ec.redirect(sessionController.dashboardLink());
 		}
 	}
+	@Inject SessionController sessionController;
 
 	public String getRating() {
 		return rating;
@@ -211,6 +220,7 @@ public class CallReportController implements Serializable {
 	public List<String> getRatings() {
 		if (ratings == null || ratings.size() == 0) {
 			ratings = new ArrayList<String>();
+			ratings.add("Select");
 			ratings.add("Follow-up call");
 			ratings.add("Follow-up meeting");
 			ratings.add("Contact again later");
@@ -450,7 +460,7 @@ public class CallReportController implements Serializable {
 	}
 
 	public String getAssignee() throws IOException {
-		if (assignee.isEmpty()) {
+		if (assignee == null || assignee.isEmpty()) {
 			assignee = sessionManager.getLoginUser().getName() + "(" + sessionManager.getLoginUser().getId() + ")";
 		}
 		return assignee;
@@ -562,11 +572,14 @@ public class CallReportController implements Serializable {
 		this.addActivityMode = addActivityMode;
 	}
 
-	public boolean isMeetingLocationMode() {
+	public String getMeetingLocationMode() {
+		if (meetingLocationMode == null || meetingLocationMode.isEmpty()) {
+			meetingLocationMode = "true";
+		}
 		return meetingLocationMode;
 	}
 
-	public void setMeetingLocationMode(boolean meetingLocationMode) {
+	public void setMeetingLocationMode(String meetingLocationMode) {
 		this.meetingLocationMode = meetingLocationMode;
 	}
 
@@ -587,7 +600,7 @@ public class CallReportController implements Serializable {
 	}
 
 	private boolean addActivityMode;
-	private boolean meetingLocationMode = true;
+	private String meetingLocationMode = "true";
 	private String meetingLocation;
 	private String meetingPurpose;
 	private boolean appendToActivity;
@@ -637,14 +650,14 @@ public class CallReportController implements Serializable {
 	}
 
 	public void addNewContact() throws NumberFormatException, IOException {
-		CompanyDto cust = compService.getById(Integer.parseInt(contactCompName.split("[()]")[1]));
 		addContactMode = false;
-		newContact.setCompany(cust);
 		newContact.setSeq(contactService.getSeq());
+		newContact.setAssignee(sessionManager.getLoginUser());
 		contactService.addContact(newContact);
 
-		setNewContact(new ContactDto());
+		contactName = newContact.getName() + " - " + newContact.getCompany() + "(" + newContact.getSeq() + ")";
 		sessionManager.addGlobalMessageInfo("New contact added", null);
+		setNewContact(new ContactDto());
 	}
 
 	public ContactDto getNewContact() {
@@ -662,4 +675,150 @@ public class CallReportController implements Serializable {
 	public void setContactCompName(String contactCompName) {
 		this.contactCompName = contactCompName;
 	}
+
+	public int getContactSeq() {
+		return contactSeq;
+	}
+
+	public void setContactSeq(int contactSeq) {
+		this.contactSeq = contactSeq;
+	}
+
+	public String getContactName() throws IOException {
+		if ((contactName == null || contactName.isEmpty()) && contactSeq != 0) {
+			ContactDto current = contactService.getContactById(contactSeq);
+			if (current.getGender().equalsIgnoreCase("male"))
+				contactName = "Mr. ";
+			else
+				contactName = "Ms. ";
+			contactName += current.getName() + " - " + current.getCompany() + "(" + current.getSeq() + ")";
+		}
+		return contactName;
+	}
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
+	}
+
+	public boolean isViewDetailMode() {
+		return viewDetailMode;
+	}
+
+	public void setViewDetailMode(boolean viewDetailMode) {
+		this.viewDetailMode = viewDetailMode;
+	}
+
+	public ProductDto getSelectedProd() {
+		return selectedProd;
+	}
+
+	public void setSelectedProd(ProductDto selectedProd) {
+		this.selectedProd = selectedProd;
+	}
+
+	private int contactSeq;
+	private String contactName;
+	private boolean viewDetailMode;
+	private ProductDto selectedProd;
+
+	public void startViewDetail(ProductDto prod) {
+		System.out.println(prod.getName());
+		System.out.println(prod.getPrice());
+		selectedProd = new ProductDto(prod);
+		viewDetailMode = true;
+	}
+	public void cancelViewDetail() {
+		selectedProd = new ProductDto();
+		viewDetailMode = false;
+	}
+
+	public String getSearchProd() {
+		return searchProd;
+	}
+
+	public void setSearchProd(String searchProd) {
+		this.searchProd = searchProd;
+	}
+
+	public List<ProductDto> getSelectedProdList() {
+		if (selectedProdList == null) {
+			selectedProdList = new ArrayList<ProductDto>();
+		}
+		return selectedProdList;
+	}
+
+	public void setSelectedProdList(List<ProductDto> selectedProdList) {
+		this.selectedProdList = selectedProdList;
+	}
+
+	private String searchProd;
+	private List<ProductDto> selectedProdList;
+	private boolean addProdMode;
+
+	public void addProdToList() throws NumberFormatException, IOException {
+		ProductDto temp = prodService.getProductById(Integer.parseInt(searchProd.split("[()]")[1]));
+		searchProd = "";
+		for (ProductDto pr: selectedProdList) {
+			if (pr.getSeq() == temp.getSeq()) {
+				return;
+			}
+		}
+		selectedProdList.add(temp);
+	}
+	public void startAddProducts() {
+		addProdMode = true;
+//		selectedProdList = new ArrayList<ProductDto>();
+	}
+	public void confirmProductList() {
+		addProdMode = false;
+	}
+	public void cancelAddProd() {
+		addProdMode = false;
+		selectedProdList = null;
+	}
+
+	public boolean isAddProdMode() {
+		return addProdMode;
+	}
+
+	public void setAddProdMode(boolean addProdMode) {
+		this.addProdMode = addProdMode;
+	}
+
+	public void deleteSelectedProduct() {
+		for (int i = selectedProdList.size() - 1; i >= 0; i--) {
+			if (selectedProdList.get(i).isSelected()) {
+				selectedProdList.remove(i);
+			}
+		}
+	}
+
+	private boolean addMeetingDetailMode;
+
+	public void startAddNewMeeting() {
+		setAddMeetingDetailMode(true);
+		System.out.println("CallReportController.startAddNewMeeting()");
+	}
+	public void cancelAddNewMeeting() {
+		setAddMeetingDetailMode(false);
+		System.out.println("CallReportController.cancelAddNewMeeting()");
+	}
+
+	public boolean isAddMeetingDetailMode() {
+		return addMeetingDetailMode;
+	}
+
+	public void setAddMeetingDetailMode(boolean addMeetingDetailMode) {
+		this.addMeetingDetailMode = addMeetingDetailMode;
+	}
+
+	public boolean isBackMain() {
+		return backMain;
+	}
+
+	public void setBackMain(boolean backMain) {
+		this.backMain = backMain;
+	}
+
+	private boolean backMain;
 }

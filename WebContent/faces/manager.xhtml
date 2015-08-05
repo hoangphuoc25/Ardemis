@@ -74,7 +74,7 @@
 				<h:outputText value="#{event.detail}" />
 			</p:column>
 			<p:column headerText="Customer">
-				<h:outputText value="#{event.customer.name}" />
+				<h:outputText value="#{event.contact.name}" />
 			</p:column>
 			<p:column headerText="Salesperson">
 				<h:outputText value="#{event.salesperson.name}" />
@@ -131,6 +131,25 @@
 					rendered="#{not empty managerController.empId}" />
 			</p:outputPanel>
 		</p:fieldset>
+
+		<h3>Current deals</h3>
+		<p:dataTable id="tbl4" rowIndexVar="row" value="#{managerController.allDeal}" var="deal"
+				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+				rows="15">
+			<p:column headerText="Contact">
+				<h:outputText value="#{deal.contact.name}" />
+			</p:column>
+			<p:column headerText="Company">
+				<h:outputText value="#{deal.contact.company}" />
+			</p:column>
+			<p:column headerText="Salesperson">
+				<h:outputText value="#{deal.salesperson.name}" />
+			</p:column>
+			<p:column>
+				<p:commandButton value="Assign to other salesperson" actionListener="#{managerController.startAssignToOther(deal)}" update=":form01:assignOtherArea"/>
+			</p:column>
+
+		</p:dataTable>
 
 		<p:dialog id="assignDialog" closable="false" visible="#{managerController.assignMode}"
 				widgetVar="assignDialog_w" modal="true" resizable="false" draggable="true" header="Assign new company">
@@ -261,7 +280,6 @@
 		</p:outputPanel>
 
 		<p:outputPanel id="activityArea">
-
 			<p:dialog id="activityDialog" closable="false" visible="#{managerController.viewActivityMode}"
 					widgetVar="activityDialog_w" modal="true" resizable="false" draggable="true" header="All sale activities">
 				<p:commandButton value="Close" actionListener="#{managerController.cancelViewActivity}" update=":form01" />
@@ -270,7 +288,7 @@
 							paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 							rows="15">
 						<p:column headerText="Customer">
-							<h:outputText value="#{act.customer.name}" />
+							<h:outputText value="#{act.contact.name}" />
 						</p:column>
 						<p:column headerText="Start Date">
 							<h:outputText value="#{act.startDate}">
@@ -285,6 +303,19 @@
 						</p:column>
 					</p:dataTable>
 				</p:panelGrid>
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:outputPanel id="assignOtherArea">
+			<p:dialog id="assignOtherDialog" closable="false" visible="#{managerController.assignToOtherMode}"
+					widgetVar="assignOtherDialog_w" modal="true" resizable="false" draggable="true" header="Assign deal">
+				<p:panelGrid columns="2">
+					<h:outputText value="Salesperson name" />
+					<p:autoComplete forceSelection="true" value="#{managerController.otherSalesperson}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestUser}" />
+				</p:panelGrid>
+
+				<p:commandButton value="Confirm" actionListener="#{managerController.assignToOther}" update=":form01" />
+				<p:commandButton value="Cancel" actionListener="#{managerController.cancelAssignToOther}" update=":form01" />
 			</p:dialog>
 		</p:outputPanel>
 	</h:form>

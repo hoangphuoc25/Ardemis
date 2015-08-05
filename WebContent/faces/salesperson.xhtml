@@ -100,8 +100,8 @@
 				<h:outputText value="Your current sale record" />
 				<h:outputText value="#{scheduleController.std.current} (#{scheduleController.percentage} %)" />
 				<p:menuButton value="Actions">
-					<p:menuitem value="See all sale activities" url="activity.jsf" />
-					<p:menuitem value="Find company" url="companyList.jsf" target="_blank" />
+					<p:menuitem value="See all active deals" url="activity.jsf" />
+					<p:menuitem value="Find new customer" url="contactList.jsf" target="_blank" />
 				</p:menuButton>
 				<h:outputText value="From" />
 				<h:outputText value="#{scheduleController.std.fromDate}">
@@ -136,7 +136,7 @@
 					<h:outputText value="#{event.detail}" />
 				</p:column>
 				<p:column headerText="Customer">
-					<h:outputText value="#{event.customer.name}" />
+					<h:outputText value="#{event.contact.name}" />
 				</p:column>
 				<p:column headerText="Location">
 					<h:outputText value="#{event.location}" />
@@ -165,9 +165,9 @@
 					<h:outputText value="#{task.category}" />
 				</p:column>
 				<p:column headerText="Customer">
-					<h:outputText value="#{task.customer.name}" />
+					<h:outputText value="#{task.contact.name}" />
 					<br/>
-					<h:outputText value="Contact no: #{task.customer.phone}" />
+					<h:outputText value="Contact no: #{task.contact.phone}" />
 
 				</p:column>
 				<p:column headerText="Time">
@@ -181,8 +181,7 @@
 				<p:column headerText="Action">
 					<p:commandButton value="Delete" actionListener="#{scheduleController.deleteTask(task)}" update=":form01:tasks" />
 					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditTask(task)}" update=":form01" />
-					<p:commandButton value="Create new sale activity" actionListener="#{scheduleController.startAddNewAct(task)}" update=":form01" />
-					<a href="callReport.jsf?custSeq=#{task.customer.seq}" style="color: blue;">Add a follow-up call record</a>
+					<a href="callReport.jsf?contactSeq=#{task.contact.seq}&amp;backMain=true" style="color: blue;">Call record</a>
 				</p:column>
 			</p:dataTable>
 			<br/>
@@ -199,8 +198,8 @@
 				<p:calendar value="#{scheduleController.newMeeting.to}" pattern="MM/dd/yyyy HH:mm" />
 				<h:outputText value="Title" />
 				<p:inputText value="#{scheduleController.newMeeting.detail}" />
-				<h:outputText value="Company" />
-				<p:autoComplete forceSelection="true" value="#{scheduleController.companyName}" minQueryLength="3" maxResults="10" completeMethod="#{scheduleController.suggestCompany}" />
+				<h:outputText value="Customer" />
+				<p:autoComplete forceSelection="true" value="#{scheduleController.contactName}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestContact}" />
 				<h:outputText value="Meeting location" />
 				<p:outputPanel id="p1">
 					<p:selectOneRadio id="console" value="#{scheduleController.meetingAtCustomer}">
@@ -264,7 +263,7 @@
 				<p:calendar value="#{scheduleController.newTask.time}" pattern="dd/MM/yyy HH:mm" />
 
 				<h:outputText value="Customer" />
-				<p:autoComplete forceSelection="true" value="#{scheduleController.companyName_2}" minQueryLength="3" maxResults="10" completeMethod="#{scheduleController.suggestCompany}" />
+				<p:autoComplete forceSelection="true" value="#{scheduleController.contactName_2}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestContact}" />
 
 				<h:outputText value="Detail" />
 				<p:inputTextarea value="#{scheduleController.newTask.detail}" />
@@ -281,7 +280,7 @@
 				<p:inputText value="#{scheduleController.editingTask.category}" />
 
 				<h:outputText value="Customer" />
-				<h:outputText value="#{scheduleController.editingTask.customer.name}" />
+				<h:outputText value="#{scheduleController.editingTask.contact.name}" />
 
 				<h:outputText value="Time" />
 				<p:calendar value="#{scheduleController.editingTask.time}" pattern="dd/MM/yyyy HH:mm" />
@@ -297,7 +296,7 @@
 				widgetVar="newActDialog_w" modal="true" resizable="false" draggable="true" header="Add new activity">
 			<p:panelGrid columns="2">
 				<h:outputText value="Customer" />
-				<h:outputText value="#{scheduleController.newAct.customer.name}" />
+				<h:outputText value="#{scheduleController.newAct.contact.name}" />
 
 				<h:outputText value="Start date" />
 				<p:calendar value="#{scheduleController.newAct.startDate}" pattern="dd/MM/yyyy" />

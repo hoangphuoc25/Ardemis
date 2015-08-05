@@ -10,4 +10,11 @@ public interface FeedbackDao {
 	public FeedbackDto getById(Transaction transaction, int seq) throws IOException;
 	public void addFeedback(Transaction transaction, FeedbackDto fb) throws IOException;
 	public int getSeq(Transaction transaction) throws IOException;
+	public double getAverageFeature(Transaction transaction, int seq) throws IOException;
+	public double getAverageThirdPartySupport(Transaction transaction, int seq) throws IOException;
+	public double getAveragePerformance(Transaction transaction, int seq) throws IOException;
+	public double getAverageUserEx(Transaction transaction, int seq) throws IOException;
+	public double getAverageUserIn(Transaction transaction, int seq) throws IOException;
+	public double getAverageUsability(Transaction transaction, int seq) throws IOException;
+	public double getAverageStability(Transaction transaction, int seq) throws IOException;
 }

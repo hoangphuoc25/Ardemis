@@ -1,7 +1,6 @@
 package rd.impl.dao;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,9 +15,10 @@ import org.slf4j.LoggerFactory;
 
 import rd.dto.CompanyDto;
 import rd.dto.ContactDto;
-import rd.spec.dao.CompanyDao;
+import rd.dto.UserDto;
 import rd.spec.dao.ContactDao;
 import rd.spec.dao.Transaction;
+import rd.spec.dao.UserDao;
 
 public class ContactDaoImpl implements ContactDao {
 
@@ -26,18 +26,20 @@ public class ContactDaoImpl implements ContactDao {
 
 	private static final String GET_SEQ 			= "select max(seq)+1 from t_contact";
 	private static final String DELETE_CONTACT 		= "delete from t_contact where seq=?";
-	private static final String UPDATE_CONTACT 		= "update t_contact set name=?, gender=?, phone=?, email=?, company_seq=?, language=? where seq=?";
-	private static final String GET_CONTACT_BY_ID 	= "select seq, name, gender, phone, email, company_seq, language from t_contact where seq=?";
-	private static final String ADD_CONTACT 		= "insert into t_contact (seq, name, gender, phone, email, company_seq, language) values (?, ?, ?, ?, ?, ?, ?)";
-	private static final String GET_BY_COMPANY 		= "select seq, name, gender, phone, email, company_seq, language from t_contact where company_seq=?";
-	private static final String SEARCH_CONTACT_BY_NAME 	= "select seq, name, gender, phone, email, company_seq, language from t_contact where lower(name) like %";
+	private static final String UPDATE_CONTACT 		= "update t_contact set name=?, gender=?, phone=?, email=?, company=?, language=?, address=?, salesperson=?, contact_status=? where seq=?";
+	private static final String GET_CONTACT_BY_ID 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where seq=?";
+	private static final String ADD_CONTACT 		= "insert into t_contact (seq, name, gender, phone, email, company, language, address, salesperson, contact_status) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	private static final String GET_BY_COMPANY 		= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where company=?";
+	private static final String SEARCH_CONTACT_BY_NAME 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(name) like ?";
+	private static final String GET_ALL 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact";
+	private static String GET_BY_STATUS_AND_USER 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where contact_status=? and salesperson=?";
+	private static String GET_BY_STATUS 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where contact_status=?";
 
-
-	private CompanyDao comDao;
+	private UserDao userDao;
 
 	@Inject
-	public ContactDaoImpl(CompanyDao comDao) {
-		this.comDao = comDao;
+	public ContactDaoImpl(UserDao userDao) {
+		this.userDao = userDao;
 	}
 
 	public void addContact(Transaction transaction, ContactDto contact)
@@ -54,8 +56,12 @@ public class ContactDaoImpl implements ContactDao {
 			prepareStatement.setString(3, contact.getGender());
 			prepareStatement.setString(4, contact.getPhone());
 			prepareStatement.setString(5, contact.getEmail());
-			prepareStatement.setInt(6, contact.getCompany().getSeq());
+			prepareStatement.setString(6, contact.getCompany());
 			prepareStatement.setString(7, contact.getLanguage());
+			prepareStatement.setString(8, contact.getAddress());
+			prepareStatement.setString(9, contact.getAssignee().getId());
+			prepareStatement.setString(10, contact.getContactStatus());
+
 			resultSet = prepareStatement.executeQuery();
 
 		} catch (SQLException e) {
@@ -163,9 +169,12 @@ public class ContactDaoImpl implements ContactDao {
 			prepareStatement.setString(2, contact.getGender());
 			prepareStatement.setString(3, contact.getPhone());
 			prepareStatement.setString(4, contact.getEmail());
-			prepareStatement.setInt(5, contact.getCompany().getSeq());
+			prepareStatement.setString(5, contact.getCompany());
 			prepareStatement.setString(6, contact.getLanguage());
-			prepareStatement.setInt(7, contact.getSeq());
+			prepareStatement.setString(7, contact.getAddress());
+			prepareStatement.setString(8, contact.getAssignee().getId());
+			prepareStatement.setString(9, contact.getContactStatus());
+			prepareStatement.setInt(10, contact.getSeq());
 
 			resultSet = prepareStatement.executeQuery();
 
@@ -263,11 +272,13 @@ public class ContactDaoImpl implements ContactDao {
 		String gender = resultSet.getString(3);
 		String phone = resultSet.getString(4);
 		String email = resultSet.getString(5);
-		CompanyDto company = comDao.getById(transaction, resultSet.getInt(6));
+		String company = resultSet.getString(6);
 		String language = resultSet.getString(7);
+		String address = resultSet.getString(8);
+		UserDto sale = userDao.findUser(transaction, resultSet.getString(9));
+		String contactStatus = resultSet.getString(10);
 
-		return new ContactDto(seq, name, gender, phone, email, company,
-				language);
+		return new ContactDto(seq, name, gender, phone, email, company, language, address, sale, contactStatus);
 	}
 	public List<ContactDto> searchContactByName(Transaction transaction, String partial) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -278,6 +289,115 @@ public class ContactDaoImpl implements ContactDao {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(SEARCH_CONTACT_BY_NAME);
 			prepareStatement.setString(1, "%" + partial.toLowerCase() + "%");
+			resultSet = prepareStatement.executeQuery();
+
+			List<ContactDto> result = new ArrayList<ContactDto>();
+			while (resultSet.next()) {
+				result.add(makeContactDto(transaction, resultSet));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	public List<ContactDto> getAll(Transaction transaction) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_ALL);
+			resultSet = prepareStatement.executeQuery();
+
+			List<ContactDto> result = new ArrayList<ContactDto>();
+			while (resultSet.next()) {
+				result.add(makeContactDto(transaction, resultSet));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	public List<ContactDto> getByStatusAndUser(Transaction transaction, String status, String userId) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_STATUS_AND_USER);
+			prepareStatement.setString(1, status);
+			prepareStatement.setString(2, userId);
+			resultSet = prepareStatement.executeQuery();
+
+			List<ContactDto> result = new ArrayList<ContactDto>();
+			while (resultSet.next()) {
+				result.add(makeContactDto(transaction, resultSet));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	public List<ContactDto> getByStatus(Transaction transaction, String status) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_STATUS);
+			prepareStatement.setString(1, status);
 			resultSet = prepareStatement.executeQuery();
 
 			List<ContactDto> result = new ArrayList<ContactDto>();

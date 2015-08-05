@@ -109,4 +109,16 @@ public class ActivityServiceImpl implements ActivityService, Serializable {
 			throw e;
 		}
 	}
+	public List<ActivityDto> getActiveDeal() throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ActivityDto> result = activityDao.getActiveDeal(transaction);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

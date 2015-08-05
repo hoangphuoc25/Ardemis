@@ -78,7 +78,7 @@
 					<p:spacer width="10px" />
 					<a href="#{productController.catalogLink(prod)}" target="_blank" style="color: blue;">Catalog</a>
 					<p:spacer width="10px" />
-					<p:commandButton value="FAQs" actionListener="#{productController.startViewFaq(prod)}" update=":form01" />
+					<p:commandButton value="FAQs" actionListener="#{productController.startViewFaq(prod)}" update=":form01:faqArea" />
 				</p:column>
 			</p:dataTable>
 			<p:commandButton value="Add new Product" actionListener="#{productController.startAdd}" update="form01"
@@ -124,6 +124,7 @@
 		<p:outputPanel id="promotionArea">
 			<p:dialog id="promoDialog" closable="false" visible="#{productController.addPromoMode}"
 					widgetVar="promoDialog_w" modal="true" resizable="false" draggable="true" header="Add promotion">
+				<p:growl />
 				<p:panelGrid columns="2">
 					<h:outputText value="Start date" />
 					<p:calendar value="#{productController.newPromo.startDate}" pattern="dd/MM/yyyy" />
@@ -164,6 +165,7 @@
 		<p:dialog id="prodDialog" closable="false" visible="#{productController.addMode or productController.viewMode or productController.editMode}"
 				widgetVar="prodDialog_w" modal="true" resizable="false" draggable="true" header="Product Detail" style="max-width: 500px;">
 			<h:messages infoStyle="color: green;" fatalStyle="color: red;" errorStyle="color: red;" />
+			<p:growl />
 			<p:panelGrid columns="2">
 				<h:outputText value="Name" />
 				<p:inputText value="#{productController.newProd.name}" rendered="#{productController.addMode or productController.editMode}" />
@@ -272,6 +274,7 @@
 		<p:outputPanel id="faqArea">
 			<p:dialog id="faqDialog" closable="false" visible="#{productController.viewFaqMode}" style="max-width: 700px; max-height: 600px;"
 					widgetVar="faqDialog_w" modal="true" resizable="false" draggable="true" header="Frequently asked questions">
+				<p:growl />
 				<p:dataTable id="tbl5" rowIndexVar="row" value="#{productController.faq}" var="f"
 						paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 						rows="15" >
@@ -282,12 +285,16 @@
 						<h:outputText value="#{f.answer}" />
 					</p:column>
 				</p:dataTable>
+				<h4>Import Q &amp; A</h4>
+				<p:fileUpload fileUploadListener="#{productController.handleFileUpload}" mode="advanced" dragDropSupport="false"
+						sizeLimit="1000000" fileLimit="1" allowTypes="/(\.|\/)(xls)$/" update=":form01:faqArea" />
 				<p:commandButton value="Add new question" actionListener="#{productController.startAddNewFaq}" update=":form01:faqArea"/>
 				<p:commandButton value="Cancel" actionListener="#{productController.cancelViewFaq}" update=":form01:faqArea" />
 			</p:dialog>
 
 			<p:dialog id="addFaqDialog" closable="false" visible="#{productController.addFaqMode}"
 					widgetVar="addFaqDialog_w" modal="true" resizable="false" draggable="true" header="Add new question and answer">
+				<p:growl />
 				<p:panelGrid columns="2">
 					<h:outputText value="Product" />
 					<h:outputText value="#{productController.newFaq.product.name}" />

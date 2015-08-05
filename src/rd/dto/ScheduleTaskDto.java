@@ -42,11 +42,9 @@ public class ScheduleTaskDto {
 		this.seq = seq;
 	}
 
-	public ScheduleTaskDto(int seq, String category, CompanyDto customer,
-			Date time, String username, String detail, ContactDto contact) {
+	public ScheduleTaskDto(int seq, String category, Date time, String username, String detail, ContactDto contact) {
 		this.seq = seq;
 		this.category = category;
-		this.customer = customer;
 		this.time = time;
 		this.username = username;
 		this.detail = detail;

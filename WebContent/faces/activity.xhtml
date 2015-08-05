@@ -40,7 +40,7 @@
 		<p:fieldset legend="New Activity">
 			<p:panelGrid columns="2">
 				<h:outputText value="Customer" />
-				<p:autoComplete value="#{activityController.compName}" minQueryLength="3" maxResults="10" completeMethod="#{activityController.suggestCompany}" forceSelection="true" />
+				<p:autoComplete value="#{activityController.contactName}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestContact}" forceSelection="true" />
 				<h:outputText value="Start Date" />
 				<p:calendar value="#{activityController.newAct.startDate}" pattern="dd/MM/yyyy" />
 				<h:outputText value="Status" />
@@ -69,7 +69,7 @@
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="15">
 				<p:column headerText="Customer">
-					<h:outputText value="#{act.customer.name}" />
+					<h:outputText value="#{act.contact.name}" />
 				</p:column>
 				<p:column headerText="Start Date">
 					<h:outputText value="#{act.startDate}">
@@ -113,12 +113,12 @@
 			<p:commandButton value="Cancel" actionListener="#{activityController.cancelEditAct}" update=":form01" />
 		</p:dialog>
 
-		<p:dialog id="purchaseDialog" closable="false" visible="#{activityController.addInvoiceMode}"
+		<p:dialog id="purchaseDialog" closable="false" visible="#{activityController.addInvoiceMode}" style="max-width: 500px;"
 				widgetVar="purchaseDialog_w" modal="true" resizable="false" draggable="true" header="Add new purchase">
 			<p:messages />
 			<p:panelGrid columns="2">
 				<h:outputText value="Company" />
-				<h:outputText value="#{activityController.selectedAct.customer.name}" />
+				<h:outputText value="#{activityController.selectedAct.contact.name}" />
 
 				<h:outputText value="Purchase date" />
 				<p:calendar value="#{activityController.newInvoice.purchaseDate}" />
@@ -164,7 +164,7 @@
 				<h:outputText value="Follow-up call" />
 
 				<h:outputText value="Customer" />
-				<h:outputText value="#{activityController.newTask.customer.name}" />
+				<h:outputText value="#{activityController.newTask.contact.name}" />
 
 				<h:outputText value="Time" />
 				<p:calendar value="#{activityController.newTask.time}" pattern="dd/MM/yyyy HH:mm" />

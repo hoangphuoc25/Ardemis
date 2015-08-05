@@ -21,6 +21,7 @@ import org.primefaces.model.ScheduleModel;
 
 import rd.dto.ActivityDto;
 import rd.dto.CompanyDto;
+import rd.dto.ContactDto;
 import rd.dto.MeetingDto;
 import rd.dto.NoteDto;
 import rd.dto.SaleTargetDto;
@@ -29,6 +30,7 @@ import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.ActivityService;
 import rd.spec.service.CompanyService;
+import rd.spec.service.ContactService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.NoteService;
 import rd.spec.service.SaleTargetService;
@@ -117,11 +119,13 @@ public class ScheduleController implements Serializable {
 			sessionManager.addGlobalMessageFatal("Invalid date info", null);
 			return;
 		}
-		CompanyDto comp = compService.getById(Integer.parseInt(companyName.split("[()]")[1]));
-		newMeeting.setCustomer(comp);
+//		CompanyDto comp = compService.getById(Integer.parseInt(companyName.split("[()]")[1]));
+//		newMeeting.setCustomer(comp);
+		ContactDto targetContact = contactService.getContactById(Integer.parseInt(contactName.split("[()]")[1]));
+		newMeeting.setContact(targetContact);
 		newMeeting.setSalesperson(sessionManager.getLoginUser());
 		if (isMeetingAtCustomer()) {
-			newMeeting.setLocation(comp.getAddress());
+			newMeeting.setLocation(targetContact.getAddress());
 		}
 
 		meetingService.addMeeting(newMeeting);
@@ -445,14 +449,16 @@ public class ScheduleController implements Serializable {
 		addTaskMode = false;
 	}
 
+	@Inject ContactService contactService;
+
 	public void addNewTask() throws NumberFormatException, IOException {
-		if (companyName_2 == null || companyName_2.isEmpty()) {
-			sessionManager.addGlobalMessageFatal("Company name invalid", null);
+		if (contactName_2 == null || contactName_2.isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Customer name invalid", null);
 			return;
 		}
 
-		CompanyDto comp = compService.getById(Integer.parseInt(companyName_2.split("[()]")[1]));
-		newTask.setCustomer(comp);
+		ContactDto cont = contactService.getContactById(Integer.parseInt(contactName_2.split("[()]")[1]));
+		newTask.setContact(cont);
 		newTask.setSeq(taskService.getSeq());
 		newTask.setUsername(sessionManager.getLoginUser().getId());
 
@@ -464,10 +470,8 @@ public class ScheduleController implements Serializable {
 		}
 
 		addTaskMode = false;
-		companyName_2 = "";
+		contactName_2 = "";
 		newTask = new ScheduleTaskDto();
-
-
 	}
 
 	private boolean isToday(ScheduleTaskDto newTask) {
@@ -536,12 +540,13 @@ public class ScheduleController implements Serializable {
 	private ActivityDto newAct;
 
 	public void startAddNewAct(ScheduleTaskDto task) throws IOException {
-		getNewAct().setCustomer(task.getCustomer());
+		// getNewAct().setCustomer(task.getCustomer());
+		newAct.setContact(task.getContact());
 		newAct.setStatus("Contacted");
 		addActivityMode = true;
 
 		firstMeeting = new MeetingDto();
-		firstMeeting.setCustomer(task.getCustomer());
+		firstMeeting.setContact(task.getContact());
 		firstMeeting.setSalesperson(sessionManager.getLoginUser());
 	}
 
@@ -628,6 +633,24 @@ public class ScheduleController implements Serializable {
 		this.newMeeting = newMeeting;
 	}
 
+	public String getContactName_2() {
+		return contactName_2;
+	}
+
+	public void setContactName_2(String contactName_2) {
+		this.contactName_2 = contactName_2;
+	}
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
+	}
+
 	private boolean meetingAtCustomer = true;
 	private MeetingDto newMeeting = new MeetingDto();
+	private String contactName_2;
+	private String contactName;
 }

@@ -1,6 +1,10 @@
 package rd.impl.controler;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,12 +14,17 @@ import java.util.List;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.UploadedFile;
 
 import rd.dto.ActivityDto;
 import rd.dto.CallReportDto;
 import rd.dto.CompanyDto;
+import rd.dto.ContactDto;
 import rd.dto.InvoiceDto;
 import rd.dto.MeetingDto;
 import rd.dto.ProductDto;
@@ -25,6 +34,7 @@ import rd.spec.manager.SessionManager;
 import rd.spec.service.ActivityService;
 import rd.spec.service.CallReportService;
 import rd.spec.service.CompanyService;
+import rd.spec.service.ContactService;
 import rd.spec.service.InvoiceService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.ProductService;
@@ -86,10 +96,10 @@ public class ActivityController implements Serializable {
 	public List<String> getStatusOptions() {
 		if (statusOptions == null) {
 			statusOptions = new ArrayList<String>();
-			statusOptions.add("Contacted");
+			statusOptions.add("Meeting");
 			statusOptions.add("Negotiating");
 			statusOptions.add("Completed");
-			statusOptions.add("Halted");
+			statusOptions.add("Failed");
 		}
 		return statusOptions;
 	}
@@ -125,8 +135,8 @@ public class ActivityController implements Serializable {
 	}
 
 	public void addActivity() throws IOException {
-		if (compName == null || compName.isEmpty()) {
-			sessionManager.addGlobalMessageFatal("Please enter company name", null);
+		if (contactName == null || contactName.isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Please enter contactname", null);
 			return;
 		}
 		if (newAct.getStartDate().getTime() > (new Date()).getTime()) {
@@ -137,13 +147,14 @@ public class ActivityController implements Serializable {
 		int seq = actService.getSeq();
 		newAct.setSeq(seq);
 		newAct.setSalesperson(sessionManager.getLoginUser());
-		CompanyDto comp = compService.getById(Integer.parseInt(compName.split("[()]")[1]));
-		newAct.setCustomer(comp);
+		ContactDto contact = contactService.getContactById(Integer.parseInt(contactName.split("[()]")[1]));
+		newAct.setContact(contact);
 		actService.addActivity(newAct);
 		allAct.add(newAct);
 		newAct = new ActivityDto();
-		sessionManager.addGlobalMessageFatal("New sale activity added", null);
+		sessionManager.addGlobalMessageInfo("New deal added", null);
 	}
+	@Inject ContactService contactService;
 
 	public boolean isEditMode() {
 		return editMode;
@@ -186,7 +197,7 @@ public class ActivityController implements Serializable {
 			}
 		}
 		editMode = false;
-		sessionManager.addGlobalMessageInfo("Sale activity updated", null);
+		sessionManager.addGlobalMessageInfo("Deal updated", null);
 	}
 
 	public boolean isAddInvoiceMode() {
@@ -220,7 +231,8 @@ public class ActivityController implements Serializable {
 		}
 		getNewInvoice().setSeq(invoiceService.getSeq());
 
-		getNewInvoice().setCustomer(selectedAct.getCustomer());
+		// getNewInvoice().setCustomer(selectedAct.getCustomer());
+		newInvoice.setContact(selectedAct.getContact());
 		double amount = 0;
 		for (ProductDto dto: getSelectedProducts()) {
 			amount += dto.getPrice();
@@ -229,13 +241,14 @@ public class ActivityController implements Serializable {
 		getNewInvoice().setAmount(amount);
 		newInvoice.setSalesperson(sessionManager.getLoginUser());
 		invoiceService.addInvoice(getNewInvoice());
+		sessionManager.addGlobalMessageInfo("New purchase record added", null);
 
 		getStd().setCurrent(getStd().getCurrent() + (int) Math.ceil(amount));
 		stService.updateSaleTarget(std);
+		sessionManager.addGlobalMessageInfo("Sale progress updated.", null);
 
-		sessionManager.addGlobalMessageInfo("New purchase record added", null);
-		setSearch("");
-		setSelectedProducts(new ArrayList<ProductDto>());
+		search = "";
+		selectedProducts = new ArrayList<ProductDto>();
 		newInvoice = new InvoiceDto();
 
 		selectedAct.setStatus("Completed");
@@ -344,9 +357,9 @@ public class ActivityController implements Serializable {
 	public List<String> getStatusOptionsEditBox() {
 		if (statusOptionsEditBox == null) {
 			statusOptionsEditBox = new ArrayList<String>();
-			statusOptionsEditBox.add("Contacted");
+			statusOptionsEditBox.add("Meeting");
 			statusOptionsEditBox.add("Negotiating");
-			statusOptionsEditBox.add("Halted");
+			statusOptionsEditBox.add("Failed");
 		}
 		return statusOptionsEditBox;
 	}
@@ -380,7 +393,8 @@ public class ActivityController implements Serializable {
 
 	public void startAddMeeting(ActivityDto act) throws IOException {
 		newMeeting = new MeetingDto();
-		newMeeting.setCustomer(act.getCustomer());
+		// newMeeting.setCustomer(act.getCustomer());
+		newMeeting.setContact(act.getContact());
 		newMeeting.setSalesperson(sessionManager.getLoginUser());
 		addMeetingMode = true;
 	}
@@ -440,7 +454,8 @@ public class ActivityController implements Serializable {
 
 	public void startAddTask(ActivityDto act) throws IOException {
 		addTaskMode = true;
-		newTask.setCustomer(act.getCustomer());
+		// newTask.setCustomer(act.getCustomer());
+		newTask.setContact(act.getContact());
 		newTask.setUsername(sessionManager.getLoginUser().getId());
 	}
 
@@ -456,6 +471,7 @@ public class ActivityController implements Serializable {
 	}
 
 	@Inject ScheduleTaskService taskService;
+
 	public void addTask() throws IOException {
 		taskService.addEvent(newTask);
 		newTask = new ScheduleTaskDto();
@@ -472,7 +488,6 @@ public class ActivityController implements Serializable {
 		addMeetingMode = false;
 		newMeeting = new MeetingDto();
 	}
-
 
 	private List<ScheduleTaskDto> relatedTask;
 	private List<CallReportDto> relatedCallRecords;
@@ -515,5 +530,15 @@ public class ActivityController implements Serializable {
 	public void setViewRelatedTask(boolean viewRelatedTask) {
 		this.viewRelatedTask = viewRelatedTask;
 	}
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
+	}
+
+	private String contactName;
 }
 

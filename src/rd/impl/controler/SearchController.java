@@ -86,7 +86,7 @@ public class SearchController implements Serializable {
 		return result;
 	}
 
-	public List<String> searchController(String partial) throws IOException {
+	public List<String> suggestContact(String partial) throws IOException {
 		List<ContactDto> temp = contactService.searchContactByName(partial);
 		List<String> result = new ArrayList<String>();
 		for (ContactDto dto: temp) {
