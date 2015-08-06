@@ -119,8 +119,10 @@ public class ScheduleController implements Serializable {
 			sessionManager.addGlobalMessageFatal("Invalid date info", null);
 			return;
 		}
-//		CompanyDto comp = compService.getById(Integer.parseInt(companyName.split("[()]")[1]));
-//		newMeeting.setCustomer(comp);
+		if (contactName == null || contactName.isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Customer name is required", null);
+			return;
+		}
 		ContactDto targetContact = contactService.getContactById(Integer.parseInt(contactName.split("[()]")[1]));
 		newMeeting.setContact(targetContact);
 		newMeeting.setSalesperson(sessionManager.getLoginUser());
@@ -334,6 +336,11 @@ public class ScheduleController implements Serializable {
 	public List<ScheduleTaskDto> getTasks() throws IOException {
 		if (tasks == null) {
 			tasks = taskService.getByUserToday(sessionManager.getLoginUser().getId());
+			for (ScheduleTaskDto t: tasks) {
+				if (t.getTime().getTime() < (new Date()).getTime() && t.getStatus().equalsIgnoreCase("pending")) {
+					t.setStatus("Overdue");
+				}
+			}
 		}
 		return tasks;
 	}
@@ -453,7 +460,15 @@ public class ScheduleController implements Serializable {
 
 	public void addNewTask() throws NumberFormatException, IOException {
 		if (contactName_2 == null || contactName_2.isEmpty()) {
-			sessionManager.addGlobalMessageFatal("Customer name invalid", null);
+			sessionManager.addGlobalMessageFatal("Customer name is required", null);
+			return;
+		}
+		if (newTask.getCategory() == null || newTask.getCategory().isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Action is required", null);
+			return;
+		}
+		if (newTask.getTime() == null) {
+			sessionManager.addGlobalMessageFatal("Time is required", null);
 			return;
 		}
 

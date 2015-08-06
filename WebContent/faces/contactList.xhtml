@@ -105,9 +105,9 @@
 		<h:panelGrid columns="2">
 			<h:outputText value="Showing" />
 			<p:selectOneMenu value="#{salespersonController.showingMode}">
-				<f:selectItem itemLabel="All Company" itemValue="all" />
-				<f:selectItem itemLabel="Uncontacted Company" itemValue="new" />
-				<f:selectItem itemLabel="Contacted Company" itemValue="contacted" />
+				<f:selectItem itemLabel="All customers" itemValue="all" />
+				<f:selectItem itemLabel="Uncontacted customers" itemValue="new" />
+				<f:selectItem itemLabel="Contacted customers" itemValue="contacted" />
 				<p:ajax event="change" listener="#{salespersonController.updateContactList}" update=":form01:panel1" />
 			</p:selectOneMenu>
 		</h:panelGrid>
@@ -125,12 +125,14 @@
 		<p:outputPanel id="contactArea">
 			<p:dialog id="contactDialog" closable="false" visible="#{salespersonController.addContactMode or salespersonController.editContactMode}"
 					widgetVar="contactDialog_w" modal="true" resizable="false" draggable="true" header="Contact Detail">
+				<p:messages autoUpdate="true" />
+				<p:growl autoUpdate="true" />
 				<p:panelGrid columns="2">
-					<h:outputText value="Company name" />
-					<p:inputText value="#{salespersonController.newContact.company}" />
-
-					<h:outputText value="Contact name" />
+					<h:outputText value="Customer name" />
 					<p:inputText value="#{salespersonController.newContact.name}" />
+
+					<h:outputText value="Company" />
+					<p:inputText value="#{salespersonController.newContact.company}" />
 
 					<h:outputText value="Contact number" />
 					<p:inputText value="#{salespersonController.newContact.phone}" />
@@ -146,6 +148,9 @@
 
 					<h:outputText value="Address" />
 					<p:inputTextarea value="#{salespersonController.newContact.address}" />
+
+					<h:outputText value="Assignee" />
+					<p:autoComplete value="#{salespersonController.assigneeName}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestUser}" forceSelection="true" />
 
 				</p:panelGrid>
 

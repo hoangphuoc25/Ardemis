@@ -15,7 +15,6 @@ import javax.inject.Named;
 
 import rd.spec.service.UserService;
 
-@Named
 public class EmailValidator implements Validator {
 
 	@Inject UserService userService;

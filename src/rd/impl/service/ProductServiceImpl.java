@@ -152,4 +152,16 @@ public class ProductServiceImpl implements ProductService, Serializable {
 			throw e;
 		}
 	}
+	public List<ProductDto> searchByPrice(int budget) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ProductDto> result = productDao.searchByPrice(transaction, budget);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

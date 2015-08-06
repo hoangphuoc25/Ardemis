@@ -18,4 +18,5 @@ public interface ProductService {
 	public List<CategoryDto> getCategoryByProduct(int seq) throws IOException;
 	public List<ProductDto> searchByCategories(List<String> categories) throws IOException;
 	public List<ProductDto> searchByProductDesc(String keyword) throws IOException;
+	public List<ProductDto> searchByPrice(int budget) throws IOException;
 }

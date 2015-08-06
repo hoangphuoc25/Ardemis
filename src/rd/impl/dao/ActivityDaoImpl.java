@@ -22,17 +22,20 @@ import rd.spec.dao.ActivityDao;
 import rd.spec.dao.ContactDao;
 import rd.spec.dao.Transaction;
 import rd.spec.dao.UserDao;
+import rd.spec.dataCache.ActivityCache;
 
 public class ActivityDaoImpl implements ActivityDao {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private ContactDao contactDao;
 	private UserDao userDao;
+	private ActivityCache actCache;
 
 	@Inject
-	public ActivityDaoImpl(ContactDao contactDao, UserDao userDao) {
+	public ActivityDaoImpl(ContactDao contactDao, UserDao userDao, ActivityCache actCache) {
 		this.contactDao = contactDao;
 		this.userDao = userDao;
+		this.actCache = actCache;
 	}
 
 	private static String ADD_ACTIVITY 		= "insert into t_activity (seq, contact_seq, start_date, status, remark, salesperson) values (?, ?, ?, ?, ?, ?)";
@@ -62,6 +65,8 @@ public class ActivityDaoImpl implements ActivityDao {
 			prepareStatement.setString(5, act.getRemark());
 			prepareStatement.setString(6, act.getSalesperson().getId());
 			resultSet = prepareStatement.executeQuery();
+
+			actCache.put(act);
 
 			for (ProductDto dto: act.getProducts()) {
 				prepareStatement = connection.prepareStatement(ADD_DEAL_PRODUCT);
@@ -93,6 +98,11 @@ public class ActivityDaoImpl implements ActivityDao {
 	public ActivityDto getById(Transaction transaction, int seq)
 			throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		ActivityDto act = actCache.get(seq);
+		if (act != null) {
+			return act;
+		}
+
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -103,8 +113,10 @@ public class ActivityDaoImpl implements ActivityDao {
 			resultSet = prepareStatement.executeQuery();
 
 			ActivityDto result = null;
-			while (resultSet.next()) {
+			if (resultSet.next()) {
 				result = makeActivityDto(transaction, resultSet);
+
+				actCache.put(result);
 			}
 			return result;
 
@@ -142,7 +154,9 @@ public class ActivityDaoImpl implements ActivityDao {
 
 			List<ActivityDto> result = new ArrayList<ActivityDto>();
 			while (resultSet.next()) {
-				result.add(makeActivityDto(transaction, resultSet));
+				ActivityDto act = makeActivityDto(transaction, resultSet);
+				result.add(act);
+				actCache.put(act);
 			}
 			return result;
 
@@ -185,6 +199,8 @@ public class ActivityDaoImpl implements ActivityDao {
 
 			resultSet = prepareStatement.executeQuery();
 
+			actCache.put(act);
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {
@@ -220,6 +236,8 @@ public class ActivityDaoImpl implements ActivityDao {
 			prepareStatement = connection.prepareStatement(DELETE_DEAL_PRODUCT);
 			prepareStatement.setInt(1, act.getSeq());
 			resultSet = prepareStatement.executeQuery();
+
+			actCache.remove(act.getSeq());
 
 		} catch (SQLException e) {
 			throw new IOException(e);
@@ -296,12 +314,14 @@ public class ActivityDaoImpl implements ActivityDao {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(FIND_BY_STATUS);
 			prepareStatement.setString(1, username);
-			prepareStatement.setString(2, status);
+			prepareStatement.setString(2, status.toLowerCase());
 			resultSet = prepareStatement.executeQuery();
 
 			List<ActivityDto> result = new ArrayList<ActivityDto>();
 			while (resultSet.next()) {
-				result.add(makeActivityDto(transaction, resultSet));
+				ActivityDto act = makeActivityDto(transaction, resultSet);
+				result.add(act);
+				actCache.put(act);
 			}
 			return result;
 
@@ -337,7 +357,9 @@ public class ActivityDaoImpl implements ActivityDao {
 
 			List<ActivityDto> result = new ArrayList<ActivityDto>();
 			while (resultSet.next()) {
-				result.add(makeActivityDto(transaction, resultSet));
+				ActivityDto act = makeActivityDto(transaction, resultSet);
+				result.add(act);
+				actCache.put(act);
 			}
 			return result;
 

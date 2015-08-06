@@ -8,8 +8,13 @@ public class ProductDto {
 	private String summary;
 	private String target;
 	private double price;
+	private double permanentPrice;
 	private boolean selected = false;
 	private List<CategoryDto> category;
+
+	private String type;
+	private int duration;
+	private int quantity;
 
 	public ProductDto(int seq, String name, String summary, String target, double price2) {
 		this.seq = seq;
@@ -19,13 +24,14 @@ public class ProductDto {
 		this.price = price2;
 	}
 
-	public ProductDto(int seq, String name, String summary, String target, double price2, List<CategoryDto> category) {
+	public ProductDto(int seq, String name, String summary, String target, double price2, List<CategoryDto> category, double permanentPrice) {
 		this.seq = seq;
 		this.name = name;
 		this.summary = summary;
 		this.target = target;
 		this.price = price2;
 		this.category = category;
+		this.permanentPrice = permanentPrice;
 	}
 
 	public ProductDto() {
@@ -94,5 +100,37 @@ public class ProductDto {
 
 	public void setCategory(List<CategoryDto> category) {
 		this.category = category;
+	}
+
+	public double getPermanentPrice() {
+		return permanentPrice;
+	}
+
+	public void setPermanentPrice(double permanentPrice) {
+		this.permanentPrice = permanentPrice;
+	}
+
+	public int getDuration() {
+		return duration;
+	}
+
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
 	}
 }

@@ -36,7 +36,7 @@
 				<p:menuitem value="Add new purchase" url="../faces/report.jsf" />
 			</p:submenu>
 			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
-			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Customers" url="../faces/contactList.jsf" />
 			<p:menuitem value="Notes" url="../faces/notes.jsf" />
 			<p:menuitem value="LOG OUT" style="float: right" action="#{productController.logout}" immediate="true" update="form01" />
 		</p:menubar>
@@ -139,7 +139,7 @@
 						</p:autoComplete>
 						<p:dataTable id="tb1" rowIndexVar="row" value="#{productController.selectedProducts}" var="prod">
 							<p:column headerText="Select">
-								<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{prod.selected}" />
+								<p:selectBooleanCheckbox value="#{prod.selected}" />
 							</p:column>
 							<p:column headerText="Name">
 								<h:outputText value="#{prod.name}" />
@@ -179,20 +179,22 @@
 				<p:inputTextarea value="#{productController.newProd.target}" rendered="#{productController.addMode or productController.editMode}"/>
 				<h:outputText value="#{productController.newProd.target}" rendered="#{productController.viewMode}" />
 
-				<h:outputText value="Price" />
+				<h:outputText value="Price per month" />
 				<p:inputText value="#{productController.newProd.price}" required="true" rendered="#{productController.addMode or productController.editMode}" />
 				<h:outputText value="#{productController.newProd.price}" rendered="#{productController.viewMode}" />
+
+				<h:outputText value="Package price" />
+				<p:inputText value="#{productController.newProd.permanentPrice}" required="true" rendered="#{productController.addMode or productController.editMode}" />
+				<h:outputText value="#{productController.newProd.permanentPrice}" rendered="#{productController.viewMode}" />
 
 				<h:outputText value="Category" />
 				<p:outputPanel id="p2" rendered="#{productController.addMode or productController.editMode}">
 					<p:autoComplete value="#{productController.newCategory}" forceSelection="true" minQueryLength="3" maxResults="10" completeMethod="#{productController.suggestCategory}">
 						<p:ajax listener="#{productController.categorySelect}" event="itemSelect" update="p2" />
 					</p:autoComplete>
-					<p:dataTable id="catTable" rowIndexVar="row" value="#{productController.catList}" var="cat"
-							paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-							rows="15">
+					<p:dataTable id="catTable" rowIndexVar="row" value="#{productController.catList}" var="cat">
 						<p:column headerText="Select">
-							<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{cat.selected}" />
+							<p:selectBooleanCheckbox value="#{cat.selected}" />
 						</p:column>
 						<p:column headerText="Category">
 							<h:outputText value="#{cat.category}" />
@@ -272,7 +274,7 @@
 		</p:dialog>
 
 		<p:outputPanel id="faqArea">
-			<p:dialog id="faqDialog" closable="false" visible="#{productController.viewFaqMode}" style="max-width: 700px; max-height: 600px;"
+			<p:dialog id="faqDialog" closable="false" visible="#{productController.viewFaqMode}" style="max-width: 700px; height: 600px;"
 					widgetVar="faqDialog_w" modal="true" resizable="false" draggable="true" header="Frequently asked questions">
 				<p:growl />
 				<p:dataTable id="tbl5" rowIndexVar="row" value="#{productController.faq}" var="f"

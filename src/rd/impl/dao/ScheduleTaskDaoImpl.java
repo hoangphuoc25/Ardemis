@@ -25,14 +25,16 @@ import rd.spec.dao.Transaction;
 public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private static String GET_SEQ = "select max(seq)+1 from t_event";
-	private static String ADD_EVENT = "insert into t_event (seq, category, contact_seq, time, username, detail) values (?, ?, ?, ?, ?, ?) ";
-	private static String UPDATE_EVENT = "update t_event set category=?, contact_seq=?, time=?, username=?, detail=? where seq=?";
-	private static String DELETE_EVENT = "delete from t_event where seq=?";
-	private static String GET_BY_ID = "select seq, category, contact_seq, time, username, detail from t_event where seq=?";
-	private static String GET_BY_USER = "select seq, category, contact_seq, time, username, detail from t_event where username=? order by time asc";
-	private static String GET_BY_USER_TODAY = "select seq, category, contact_seq, time, username, detail from t_event where username=? and time>=? and time<? order by time asc";
-	private static String GET_BY_COMPANY = "select seq, category, contact_seq, time, username, detail from t_event where contact_seq=?";
+	private static String GET_SEQ 		= "select max(seq)+1 from t_event";
+	private static String ADD_EVENT		= "insert into t_event (seq, category, contact_seq, time, username, detail, activity_seq, status) values (?, ?, ?, ?, ?, ?, ?, ?) ";
+	private static String UPDATE_EVENT 	= "update t_event set category=?, contact_seq=?, time=?, username=?, detail=?, activity_seq=?, status=? where seq=?";
+	private static String DELETE_EVENT 	= "delete from t_event where seq=?";
+	private static String GET_BY_ID 	= "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where seq=?";
+	private static String GET_BY_USER 	= "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where username=? order by time asc";
+	private static String GET_BY_USER_TODAY = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where username=? and time>=? and time<? order by time asc";
+	private static String GET_BY_COMPANY = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where contact_seq=?";
+	private static String GET_BY_CONTACT = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where contact_seq=?";
+	private static String GET_BY_DEAL 	 = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where activity_seq=?";
 
 	private ContactDao contactDao;
 
@@ -91,6 +93,8 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 			prepareStatement.setTimestamp(4, new java.sql.Timestamp(evt.getTime().getTime()));
 			prepareStatement.setString(5, evt.getUsername());
 			prepareStatement.setString(6, evt.getDetail());
+			prepareStatement.setInt(7, evt.getActId());
+			prepareStatement.setString(8, evt.getStatus());
 
 			resultSet = prepareStatement.executeQuery();
 
@@ -127,7 +131,9 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 			prepareStatement.setTimestamp(3, new java.sql.Timestamp(evt.getTime().getTime()));
 			prepareStatement.setString(4, evt.getUsername());
 			prepareStatement.setString(5, evt.getDetail());
-			prepareStatement.setInt(6, evt.getSeq());
+			prepareStatement.setInt(6, evt.getActId());
+			prepareStatement.setString(7, evt.getStatus());
+			prepareStatement.setInt(8, evt.getSeq());
 
 			resultSet = prepareStatement.executeQuery();
 
@@ -317,8 +323,10 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 		Date time = new Date(resultSet.getTimestamp(4).getTime());
 		String username = resultSet.getString(5);
 		String detail = resultSet.getString(6);
+		int actId = resultSet.getInt(7);
+		String status = resultSet.getString(8);
 
-		return new ScheduleTaskDto(seq, category, time, username, detail, contact);
+		return new ScheduleTaskDto(seq, category, time, username, detail, contact, actId, status);
 	}
 	public List<ScheduleTaskDto> getByCompany(Transaction transaction, int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -363,5 +371,80 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 
 	public void setContactDao(ContactDao contactDao) {
 		this.contactDao = contactDao;
+	}
+	public List<ScheduleTaskDto> getByContact(Transaction transaction, int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_CONTACT);
+			prepareStatement.setInt(1, seq);
+			resultSet = prepareStatement.executeQuery();
+
+
+			List<ScheduleTaskDto> result = new ArrayList<ScheduleTaskDto>();
+			while (resultSet.next()) {
+				result.add(makeScheduleTaskDto(transaction, resultSet));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	public List<ScheduleTaskDto> getByDeal(Transaction transaction, int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_DEAL);
+			prepareStatement.setInt(1, seq);
+			resultSet = prepareStatement.executeQuery();
+
+
+			List<ScheduleTaskDto> result = new ArrayList<ScheduleTaskDto>();
+			while (resultSet.next()) {
+				result.add(makeScheduleTaskDto(transaction, resultSet));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
 	}
 }

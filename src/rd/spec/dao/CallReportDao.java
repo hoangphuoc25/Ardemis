@@ -13,4 +13,6 @@ public interface CallReportDao {
 	public int getSeq(Transaction transaction) throws IOException;
 	public List<CallReportDto> getAll(Transaction transaction) throws IOException;
 	public List<CallReportDto> getByCompanyId(Transaction transaction, int seq) throws IOException;
+	public List<CallReportDto> getByContact(Transaction transaction, int seq) throws IOException;
+	public List<CallReportDto> getByDeal(Transaction transaction, int seq) throws IOException;
 }

@@ -11,6 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
@@ -38,6 +40,7 @@ import rd.dto.InvoiceDto;
 import rd.dto.ProductDto;
 import rd.dto.SaleExpenseDto;
 import rd.dto.TeamDto;
+import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.CallReportService;
 import rd.spec.service.CompanyService;
@@ -45,6 +48,7 @@ import rd.spec.service.ContactService;
 import rd.spec.service.InvoiceService;
 import rd.spec.service.ProductService;
 import rd.spec.service.TeamService;
+import rd.spec.service.UserService;
 import rd.utils.DatabaseUtil;
 
 @Named
@@ -62,6 +66,7 @@ public class SalespersonController implements Serializable {
 	@Inject SessionManager sessionManager;
 	@Inject InvoiceService invoiceService;
 	@Inject ProductService prodService;
+	@Inject UserService userService;
 
 	private List<TeamDto> teams;
 	private List<CompanyDto> customerList;
@@ -408,12 +413,26 @@ public class SalespersonController implements Serializable {
 		newContact.setAssignee(sessionManager.getLoginUser());
 	}
 	public void addNewContact() throws IOException {
+		if (newContact.getName() == null || newContact.getName().isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Customer name required", null);
+			return;
+		}
+		if (newContact.getPhone() == null || newContact.getPhone().isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Customer phone number required.", null);
+			return;
+		}
+		if (!validatePhone(newContact.getPhone())) {
+			sessionManager.addGlobalMessageFatal("Invalid phone number.", null);
+			return;
+		}
+		UserDto assignee = userService.findUserById(assigneeName.split("[()]")[1]);
+		newContact.setAssignee(assignee);
 		newContact.setSeq(contactService.getSeq());
 		contactService.addContact(newContact);
 		contactList.add(newContact);
 		addContactMode = false;
 		newContact = new ContactDto();
-		sessionManager.addGlobalMessageInfo("New contact added", null);
+		sessionManager.addGlobalMessageInfo("New customer added", null);
 	}
 	public void cancelAddNewContact() {
 		addContactMode = false;
@@ -451,9 +470,21 @@ public class SalespersonController implements Serializable {
 		editContactMode = true;
 	}
 	public void editContact() throws IOException {
+		if (newContact.getName() == null || newContact.getName().isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Customer name required", null);
+			return;
+		}
+		if (newContact.getPhone() == null || newContact.getPhone().isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Customer phone number required.", null);
+			return;
+		}
+		if (!validatePhone(newContact.getPhone())) {
+			sessionManager.addGlobalMessageFatal("Invalid phone number.", null);
+			return;
+		}
 		contactService.updateContact(newContact);
 		editContactMode = false;
-		sessionManager.addGlobalMessageInfo("Info updated.", null);
+		sessionManager.addGlobalMessageInfo("Customer info updated.", null);
 	}
 	public void cancelEditContact() {
 		newContact = new ContactDto();
@@ -512,6 +543,7 @@ public class SalespersonController implements Serializable {
     }
 
 	private String readEmpListFromExcel(String fullName) throws IOException {
+		String msg = "";
 		HSSFWorkbook wb = new HSSFWorkbook(new FileInputStream(fullName));
 
 		HSSFSheet sheet = wb.getSheetAt(0);
@@ -540,10 +572,41 @@ public class SalespersonController implements Serializable {
 			String gender = row.getCell(4).getStringCellValue();
 			String address = row.getCell(4).getStringCellValue();
 
+			if (name.isEmpty()) {
+				msg += "Row " + (r+2) + ": Name is required";
+				continue;
+			}
+			if (!validatePhone(phone)) {
+				msg += "Row " + (r+2) + ": Phone number is invalid.";
+				continue;
+			}
+
 			ContactDto contact = new ContactDto(contactService.getSeq(), name, gender, phone, email, company, "English", address, sessionManager.getLoginUser(), "new");
 			contactService.addContact(contact);
 		}
-		return "";
+		return msg;
 	}
+
+	private boolean validatePhone(String p) {
+		String phone = p.replace(" ", "");
+		String regex = "^\\+(?:[0-9] ?){6,14}[0-9]$";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(phone);
+		if (!matcher.matches()) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	public String getAssigneeName() {
+		return assigneeName;
+	}
+
+	public void setAssigneeName(String assigneeName) {
+		this.assigneeName = assigneeName;
+	}
+
+	private String assigneeName;
 }
 

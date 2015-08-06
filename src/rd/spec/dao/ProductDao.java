@@ -18,4 +18,5 @@ public interface ProductDao {
 	public List<CategoryDto> getCategoryByProduct(Transaction transaction, int seq) throws IOException;
 	public List<ProductDto> searchByCategories(Transaction transaction, List<String> categories) throws IOException;
 	public List<ProductDto> searchByProductDesc(Transaction transaction, String keyword) throws IOException;
+	public List<ProductDto> searchByPrice(Transaction transaction, int budget) throws IOException;
 }

@@ -13,7 +13,7 @@ import javax.inject.Named;
 
 import rd.dto.CompanyDto;
 import rd.spec.service.CompanyService;
-@Named
+
 public class CompanyValidator implements Validator {
 
 	@Inject CompanyService companyService;

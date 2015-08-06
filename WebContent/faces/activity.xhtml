@@ -25,7 +25,7 @@
 				<p:menuitem style="color: blue;" value="Stormworks" url="../products/Stormworks.jsf" />
 			</p:submenu>
 			<p:menuitem value="Products" url="../faces/products.jsf" />
-			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Customers" url="../faces/contactList.jsf" />
 			<p:menuitem value="Expense" url="../faces/expense.jsf" />
 			<p:submenu label="Reports">
 				<p:menuitem value="Call Report" url="../faces/calls.jsf" />
@@ -37,7 +37,7 @@
 
 		<h:messages />
 		<p:growl autoUpdate="true" />
-		<p:fieldset legend="New Activity">
+		<p:fieldset legend="New Deal">
 			<p:panelGrid columns="2">
 				<h:outputText value="Customer" />
 				<p:autoComplete value="#{activityController.contactName}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestContact}" forceSelection="true" />
@@ -47,24 +47,27 @@
 				<p:selectOneMenu value="#{activityController.newAct.status}">
 					<f:selectItems value="#{activityController.statusOptions}" />
 				</p:selectOneMenu>
-				<h:outputText value="Remark" />
+				<h:outputText value="Note" />
 				<p:inputTextarea value="#{activityController.newAct.remark}" />
 			</p:panelGrid>
 			<br/>
-			<p:commandButton value="Add new activity" actionListener="#{activityController.addActivity}" update=":form01"/>
+			<p:commandButton value="Add new deal" actionListener="#{activityController.addActivity}" update=":form01"/>
 		</p:fieldset>
 
 		<br/>
-		<p:selectOneMenu value="#{activityController.showingMode}">
-			<f:selectItem itemLabel="All activity" itemValue="all" />
-			<f:selectItem itemLabel="Contacted" itemValue="contacted" />
-			<f:selectItem itemLabel="Completed" itemValue="completed" />
-			<f:selectItem itemLabel="Negotiating" itemValue="negotiate" />
-			<f:selectItem itemLabel="Halted" itemValue="halted" />
-			<p:ajax event="change" listener="#{activityController.updateAllAct}" update=":form01" />
-		</p:selectOneMenu>
+		<h:panelGrid columns="2">
+			<h:outputText value="Showing"/>
+			<p:selectOneMenu value="#{activityController.showingMode}">
+				<f:selectItem itemLabel="All deals" itemValue="all" />
+				<f:selectItem itemLabel="Meeting" itemValue="Meeting" />
+				<f:selectItem itemLabel="Completed" itemValue="Completed" />
+				<f:selectItem itemLabel="Negotiating" itemValue="Negotiating" />
+				<f:selectItem itemLabel="Failed" itemValue="Failed" />
+				<p:ajax event="change" listener="#{activityController.updateAllAct}" update=":form01" />
+			</p:selectOneMenu>
+		</h:panelGrid>
 
-		<p:fieldset legend="All activity">
+		<p:fieldset legend="All deals">
 			<p:dataTable id="tbl1" rowIndexVar="row" value="#{activityController.allAct}" var="act"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="15">
@@ -79,7 +82,7 @@
 				<p:column headerText="Status">
 					<h:outputText value="#{act.status}" />
 				</p:column>
-				<p:column headerText="Remark">
+				<p:column headerText="Note">
 					<h:outputText value="#{act.remark}" />
 				</p:column>
 				<p:column headerText="Action">
@@ -87,7 +90,7 @@
 					<p:menuButton value="Actions">
 						<p:menuitem value="Update" actionListener="#{activityController.startEdit(act)}" update=":form01"/>
 						<p:menuitem value="Add new purchase" actionListener="#{activityController.startAddNewPurchase(act)}" update=":form01"
-							rendered="#{act.status != 'Halted' and act.status != 'Completed'}" />
+							rendered="#{act.status != 'Failed' and act.status != 'Completed'}" />
 						<p:menuitem value="Add meeting" actionListener="#{activityController.startAddMeeting(act)}" update=":form01" />
 						<p:menuitem value="Delete" actionListener="#{activityController.deleteActivity(act)}" update=":form01"
 							rendered="#{act.status == 'Contacted'}" />
@@ -106,14 +109,14 @@
 				<p:selectOneMenu value="#{activityController.selectedAct.status}">
 					<f:selectItems value="#{activityController.statusOptionsEditBox}" />
 				</p:selectOneMenu>
-				<h:outputText value="Remark" />
+				<h:outputText value="Note" />
 				<p:inputTextarea value="#{activityController.selectedAct.remark}" />
 			</p:panelGrid>
 			<p:commandButton value="Confirm" actionListener="#{activityController.editAct}" update=":form01" />
 			<p:commandButton value="Cancel" actionListener="#{activityController.cancelEditAct}" update=":form01" />
 		</p:dialog>
 
-		<p:dialog id="purchaseDialog" closable="false" visible="#{activityController.addInvoiceMode}" style="max-width: 500px;"
+		<p:dialog id="purchaseDialog" closable="false" visible="#{activityController.addInvoiceMode}" style="max-width: 800px;"
 				widgetVar="purchaseDialog_w" modal="true" resizable="false" draggable="true" header="Add new purchase">
 			<p:messages />
 			<p:panelGrid columns="2">
@@ -129,10 +132,22 @@
 					</p:autoComplete>
 					<p:dataTable id="tb1" rowIndexVar="row" value="#{activityController.selectedProducts}" var="prod">
 						<p:column headerText="Select">
-							<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{prod.selected}" />
+							<p:selectBooleanCheckbox value="#{prod.selected}" />
 						</p:column>
 						<p:column headerText="Name">
 							<h:outputText value="#{prod.name}" />
+						</p:column>
+						<p:column headerText="License duration">
+							<p:selectOneMenu value="#{prod.duration}">
+								<f:selectItem itemLabel="3 months" itemValue="3" />
+								<f:selectItem itemLabel="6 months" itemValue="6" />
+								<f:selectItem itemLabel="12 months" itemValue="12" />
+								<f:selectItem itemLabel="24 months" itemValue="24" />
+								<f:selectItem itemLabel="Permanent" itemValue="0" />
+							</p:selectOneMenu>
+						</p:column>
+						<p:column headerText="Quantity">
+							<p:spinner min="0" value="#{prod.quantity}" />
 						</p:column>
 					</p:dataTable>
 					<p:commandButton value="Delete" actionListener="#{activityController.deleteSelected}" update=":form01" />
@@ -161,7 +176,7 @@
 				widgetVar="newTaskDialog_w" modal="true" resizable="false" draggable="true" header="Add new task">
 			<p:panelGrid columns="2">
 				<h:outputText value="Action" />
-				<h:outputText value="Follow-up call" />
+				<p:inputText value="#{activityController.newTask.category}" />
 
 				<h:outputText value="Customer" />
 				<h:outputText value="#{activityController.newTask.contact.name}" />
@@ -169,13 +184,13 @@
 				<h:outputText value="Time" />
 				<p:calendar value="#{activityController.newTask.time}" pattern="dd/MM/yyyy HH:mm" />
 			</p:panelGrid>
-			<p:commandButton value="Add" actionListener="#{activityController.addTask}" update=":form01"/>
-			<p:commandButton value="Cancel" actionListener="#{activityController.cancelAddTask}" update=":form01"/>
+			<p:commandButton value="Add" actionListener="#{activityController.addTask}" update=":form01:newTaskDialog"/>
+			<p:commandButton value="Cancel" actionListener="#{activityController.cancelAddTask}" update=":form01:newTaskDialog"/>
 		</p:dialog>
 
 		<p:outputPanel id="relatedTaskArea">
 			<p:dialog id="relatedDialog" closable="false" visible="#{activityController.viewRelatedTask}"
-					widgetVar="relatedDialog_w" modal="true" resizable="false" draggable="true" header="Related calls" width="1000px" height="600px">
+					widgetVar="relatedDialog_w" modal="true" resizable="false" draggable="true" header="Related calls" style="max-width: 1000px; max-height: 600px">
 				<p:commandButton value="Close" actionListener="#{activityController.cancelViewRelatedTask}" update=":form01" />
 				<p:panelGrid columns="2">
 					<p:fieldset legend="Call records">
@@ -192,9 +207,6 @@
 							</p:column>
 							<p:column headerText="Action">
 								<h:outputText value="#{call.rating}" />
-							</p:column>
-							<p:column headerText="Product">
-								<h:outputText value="#{call.product.name}" />
 							</p:column>
 							<p:column headerText="Detail">
 								<h:outputText value="#{call.detail}" />

@@ -54,7 +54,7 @@
 				<p:menuitem value="Add new purchase" url="../faces/report.jsf" />
 			</p:submenu>
 			<p:menuitem value="Products" url="../faces/products.jsf" />
-			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Customers" url="../faces/contactList.jsf" />
 			<p:menuitem value="Notes" url="../faces/notes.jsf" />
 			<p:menuitem value="LOG OUT" style="float: right" action="#{managerController.logout}" immediate="true" update="form01" />
 		</p:menubar>
@@ -129,7 +129,7 @@
 		</p:panelGrid>
 		<p:commandButton value="Add new order" actionListener="#{reportController.addNewInvoice}" update="form01" />
 		<br/>
-		<a href="../faces/companyList.jsf" style="font-family: Arial; color: blue; text-decoration: none">Add new customer</a>
+		<a href="../faces/contactList.jsf" style="font-family: Arial; color: blue; text-decoration: none">Add new customer</a>
 	</h:form>
 </h:body>
 </html>

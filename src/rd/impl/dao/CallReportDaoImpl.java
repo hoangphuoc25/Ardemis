@@ -39,13 +39,15 @@ public class CallReportDaoImpl implements CallReportDao {
 		this.contactDao = contactDao;
 	}
 
-	private static String GET_ALL 				= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back from t_call_report order by call_time desc";
+	private static String GET_ALL 				= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq from t_call_report order by call_time desc";
 	private static String DELETE_CALL_REPORT 	= "delete from t_call_report where seq=?";
 	private static String GET_SEQ 				= "select max(seq)+1 from t_call_report";
-	private static String ADD_REPORT 			= "insert into t_call_report (seq, contact_seq, call_time, detail, rating, sale_id, call_back) values (?, ?, ?, ?, ?, ?, ?)";
-	private static String GET_BY_ID 			= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back from t_call_report where seq=?";
-	private static String UPDATE_CALL_REPORT 	= "update t_call_report set contact_seq=?, call_time=?, detail=?, rating=?, sale_id=?, call_back=? where seq=?";
-	private static String GET_BY_COMPANY_ID 	= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back from t_call_report where contact_seq=? order by call_time desc";
+	private static String ADD_REPORT 			= "insert into t_call_report (seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq) values (?, ?, ?, ?, ?, ?, ?, ?)";
+	private static String GET_BY_ID 			= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq from t_call_report where seq=?";
+	private static String UPDATE_CALL_REPORT 	= "update t_call_report set contact_seq=?, call_time=?, detail=?, rating=?, sale_id=?, call_back=?, activity_seq=? where seq=?";
+	private static String GET_BY_COMPANY_ID 	= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq from t_call_report where contact_seq=? order by call_time desc";
+	private static String GET_BY_CONTACT 		= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq from t_call_report where contact_seq=?";
+	private static String GET_BY_DEAL 			= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq from t_call_report where activity_seq=?";
 
 	public void addReport(Transaction transaction, CallReportDto report) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -62,6 +64,7 @@ public class CallReportDaoImpl implements CallReportDao {
 			prepareStatement.setString(5, report.getRating());
 			prepareStatement.setString(6, report.getSalesperson().getId());
 			prepareStatement.setInt(7, report.getCallBack());
+			prepareStatement.setInt(8, report.getActId());
 
 			resultSet = prepareStatement.executeQuery();
 
@@ -165,8 +168,9 @@ public class CallReportDaoImpl implements CallReportDao {
 		String rating = resultSet.getString(5);
 		UserDto salesman = userDao.findUser(transaction, resultSet.getString(6));
 		int callBack = resultSet.getInt(7);
+		int actId = resultSet.getInt(8);
 
-		return new CallReportDto(seq, contact, callTime, detail, rating, salesman, callBack);
+		return new CallReportDto(seq, contact, callTime, detail, rating, salesman, callBack, actId);
 	}
 
 	public void updateCallReport(Transaction transaction, CallReportDto report) throws IOException {
@@ -183,7 +187,8 @@ public class CallReportDaoImpl implements CallReportDao {
 			prepareStatement.setString(4, report.getRating());
 			prepareStatement.setString(5, report.getSalesperson().getId());
 			prepareStatement.setInt(6, report.getCallBack());
-			prepareStatement.setInt(7, report.getSeq());
+			prepareStatement.setInt(7, report.getActId());
+			prepareStatement.setInt(8, report.getSeq());
 
 			resultSet = prepareStatement.executeQuery();
 
@@ -288,6 +293,79 @@ public class CallReportDaoImpl implements CallReportDao {
 				result.add(makeCallReportDto(transaction, resultSet));
 			}
 			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	public List<CallReportDto> getByContact(Transaction transaction, int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_CONTACT);
+			prepareStatement.setInt(1, seq);
+			resultSet = prepareStatement.executeQuery();
+
+			List<CallReportDto> result = new ArrayList<CallReportDto>();
+			while (resultSet.next()) {
+				result.add(makeCallReportDto(transaction, resultSet));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	public List<CallReportDto> getByDeal(Transaction transaction, int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_DEAL);
+			prepareStatement.setInt(1, seq);
+			resultSet = prepareStatement.executeQuery();
+
+			List<CallReportDto> result = new ArrayList<CallReportDto>();
+			while (resultSet.next()) {
+				result.add(makeCallReportDto(transaction, resultSet));
+			}
+			return result;
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {

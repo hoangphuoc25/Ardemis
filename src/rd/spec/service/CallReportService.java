@@ -13,4 +13,6 @@ public interface CallReportService {
 	public int getSeq() throws IOException;
 	public List<CallReportDto> getAll() throws IOException;
 	public List<CallReportDto> getByCompanyId(int seq) throws IOException;
+	public List<CallReportDto> getByContact(int seq) throws IOException;
+	public List<CallReportDto> getByDeal(int seq) throws IOException;
 }

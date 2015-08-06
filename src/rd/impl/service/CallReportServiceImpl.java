@@ -109,4 +109,28 @@ public class CallReportServiceImpl implements CallReportService, Serializable {
 			throw e;
 		}
 	}
+	public List<CallReportDto> getByContact(int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<CallReportDto> result = callReportDao.getByContact(transaction, seq);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<CallReportDto> getByDeal(int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<CallReportDto> result = callReportDao.getByDeal(transaction, seq);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

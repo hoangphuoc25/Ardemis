@@ -24,6 +24,7 @@ import rd.dto.CategoryDto;
 import rd.dto.CompanyDto;
 import rd.dto.ContactDto;
 import rd.dto.FaqDto;
+import rd.dto.InvoiceDto;
 import rd.dto.MeetingDto;
 import rd.dto.ProductDto;
 import rd.dto.ScheduleTaskDto;
@@ -35,6 +36,7 @@ import rd.spec.service.CategoryService;
 import rd.spec.service.CompanyService;
 import rd.spec.service.ContactService;
 import rd.spec.service.FaqService;
+import rd.spec.service.InvoiceService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.ProductService;
 import rd.spec.service.ScheduleTaskService;
@@ -54,6 +56,7 @@ public class CallReportController implements Serializable {
 
 	@Inject MeetingService meetingService;
 	@Inject FaqService faqService;
+	@Inject InvoiceService invoiceService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -131,15 +134,11 @@ public class CallReportController implements Serializable {
 				callBackNo *= 30;
 			}
 		}
-
-		System.out.println(callTime);
 		ContactDto targetContact = contactService.getContactById(Integer.parseInt(contactName.split("[()]")[1]));
 //		int compSeq = Integer.parseInt(companyName.split("[()]")[1]);
 //		CompanyDto customer = compService.getById(compSeq);
-//		int prodSeq = Integer.parseInt(productName.split("[()]")[1]);
-//		ProductDto prod = prodService.getProductById(prodSeq);
 		int seq = crService.getSeq();
-		CallReportDto cr = new CallReportDto(seq, targetContact, callTime, callDetail, rating, sessionManager.getLoginUser(), callBackNo);
+		CallReportDto cr = new CallReportDto(seq, targetContact, callTime, callDetail, rating, sessionManager.getLoginUser(), callBackNo, dealId);
 
 		crService.addReport(cr);
 
@@ -160,23 +159,42 @@ public class CallReportController implements Serializable {
 				category = "Follow-up call";
 
 			int stSeq = stService.getSeq();
-			ScheduleTaskDto task = new ScheduleTaskDto(stSeq, category, temp, sessionManager.getLoginUser().getId(), callDetail, targetContact);
+			ScheduleTaskDto task = new ScheduleTaskDto(stSeq, category, temp, sessionManager.getLoginUser().getId(), callDetail, targetContact, dealId, "pending");
 			stService.addEvent(task);
 		}
 
 		if (cr.getRating().equalsIgnoreCase("follow-up meeting")) {
+			int actSeq = actService.getSeq();
+			ActivityDto act = new ActivityDto(actSeq, targetContact, new Date(), "Contacted", "Deal started", sessionManager.getLoginUser(), selectedProdList);
+			actService.addActivity(act);
+			sessionManager.addGlobalMessageInfo("New deal added", null);
+
 			if (meetingLocationMode.equalsIgnoreCase("true")) {
 				newMeeting.setLocation(targetContact.getAddress());
 			}
 			newMeeting.setContact(targetContact);
 			newMeeting.setSalesperson(sessionManager.getLoginUser());
+			newMeeting.setActId(actSeq);
 			meetingService.addMeeting(newMeeting);
 			sessionManager.addGlobalMessageInfo("New meeting added", null);
+		}
 
-			int actSeq = actService.getSeq();
-			ActivityDto act = new ActivityDto(actSeq, targetContact, new Date(), "Contacted", "", sessionManager.getLoginUser(), selectedProdList);
-			actService.addActivity(act);
-			sessionManager.addGlobalMessageInfo("New deal activity added", null);
+		if (rating.equalsIgnoreCase("close")) {
+			double amount = 0;
+			for (ProductDto dto: selectedProdList) {
+				if (dto.getDuration() == 0)
+					amount += dto.getPermanentPrice() * dto.getQuantity();
+				else
+					amount += dto.getPrice() * dto.getDuration() * dto.getQuantity();
+			}
+			InvoiceDto newPurchase = new InvoiceDto(invoiceService.getSeq(), targetContact, (new Date()), amount, selectedProdList, sessionManager.getLoginUser());
+			invoiceService.addInvoice(newPurchase);
+			sessionManager.addGlobalMessageInfo("New purchase record added", null);
+
+			ActivityDto act = actService.getById(dealId);
+			act.setStatus("Completed");
+			actService.updateActivity(act);
+			sessionManager.addGlobalMessageInfo("Deal updated", null);
 		}
 
 		if (targetContact.getContactStatus().equalsIgnoreCase("new")) {
@@ -196,6 +214,11 @@ public class CallReportController implements Serializable {
 
 		sessionManager.addGlobalMessageInfo("New call report added", null);
 
+		if (taskId != 0) {
+			ScheduleTaskDto t = stService.getById(taskId);
+			t.setStatus("Done");
+			stService.updateEvent(t);
+		}
 
 		if (isBack()) {
 			ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
@@ -517,15 +540,11 @@ public class CallReportController implements Serializable {
 	}
 
 	public void searchByCat() throws IOException {
-		List<String> temp = new ArrayList<String>();
-		for (CategoryDto cat: searchCatList) {
-			temp.add(cat.getCategory());
-		}
-		prodSearchList = prodService.searchByCategories(temp);
-		System.out.println(prodSearchList.size());
-		for (ProductDto dto: prodSearchList) {
-			System.out.println(dto.getName());
-		}
+//		List<String> temp = new ArrayList<String>();
+//		for (CategoryDto cat: searchCatList) {
+//			temp.add(cat.getCategory());
+//		}
+		prodSearchList = prodService.searchByCategories(selectedCats);
 	}
 
 	public String getProdDescSearch() {
@@ -650,14 +669,23 @@ public class CallReportController implements Serializable {
 	}
 
 	public void addNewContact() throws NumberFormatException, IOException {
-		addContactMode = false;
+		if (newContact.getName() == null || newContact.getName().isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Customer name required", null);
+			return;
+		}
+		if (newContact.getPhone() == null || newContact.getPhone().isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Customer phone number required.", null);
+			return;
+		}
+
 		newContact.setSeq(contactService.getSeq());
 		newContact.setAssignee(sessionManager.getLoginUser());
 		contactService.addContact(newContact);
 
 		contactName = newContact.getName() + " - " + newContact.getCompany() + "(" + newContact.getSeq() + ")";
-		sessionManager.addGlobalMessageInfo("New contact added", null);
+		sessionManager.addGlobalMessageInfo("New customer added", null);
 		setNewContact(new ContactDto());
+		addContactMode = false;
 	}
 
 	public ContactDto getNewContact() {
@@ -721,10 +749,16 @@ public class CallReportController implements Serializable {
 	private boolean viewDetailMode;
 	private ProductDto selectedProd;
 
-	public void startViewDetail(ProductDto prod) {
+	public void startViewDetail(ProductDto prod) throws IOException {
 		System.out.println(prod.getName());
 		System.out.println(prod.getPrice());
 		selectedProd = new ProductDto(prod);
+		List<CategoryDto> cat = prodService.getCategoryByProduct(prod.getSeq());
+		selectedProd.setCategory(cat);
+		System.out.println(cat.size());
+		for (CategoryDto c: cat) {
+			System.out.println(c.getCategory());
+		}
 		viewDetailMode = true;
 	}
 	public void cancelViewDetail() {
@@ -820,5 +854,78 @@ public class CallReportController implements Serializable {
 		this.backMain = backMain;
 	}
 
+	public int getDealId() {
+		return dealId;
+	}
+
+	public void setDealId(int dealId) {
+		this.dealId = dealId;
+	}
+
+	public List<String> getAllCat() throws IOException {
+		if (allCat == null) {
+			List<CategoryDto> temp = catService.getAll();
+			allCat = new ArrayList<String>();
+			for (CategoryDto dto: temp) {
+				allCat.add(dto.getCategory());
+			}
+		}
+		return allCat;
+	}
+
+	public void setAllCat(List<String> allCat) {
+		this.allCat = allCat;
+	}
+
+	public List<String> getSelectedCats() {
+		return selectedCats;
+	}
+
+	public void setSelectedCats(List<String> selectedCats) {
+		this.selectedCats = selectedCats;
+	}
+
 	private boolean backMain;
+	private int dealId;
+	private List<String> allCat;
+	private List<String> selectedCats;
+
+	public String catalogLink(ProductDto prod) {
+		if (prod.getName().equalsIgnoreCase("autocad")) {
+			return "../products/AutoCAD.jsf";
+		} else if (prod.getName().equalsIgnoreCase("revit")) {
+			return "../products/Revit.jsf";
+		} else if (prod.getName().equalsIgnoreCase("quickdesk")) {
+			return "../products/quickdesk.jsf";
+		} else {
+			return "../products/Stormworks.jsf";
+		}
+	}
+
+	public int getTaskId() {
+		return taskId;
+	}
+
+	public void setTaskId(int taskId) {
+		this.taskId = taskId;
+	}
+
+	private int taskId;
+	private int budget;
+
+	public void startAddPurchaseRecord() {
+		addProdMode = true;
+	}
+
+	public void searchByBudget() throws IOException {
+		prodSearchList = prodService.searchByPrice(budget);
+	}
+
+	public int getBudget() {
+		return budget;
+	}
+
+	public void setBudget(int budget) {
+		this.budget = budget;
+	}
 }

@@ -16,10 +16,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import rd.dto.CompanyDto;
 import rd.dto.ContactDto;
 import rd.dto.MeetingDto;
 import rd.dto.UserDto;
+import rd.spec.dao.ActivityDao;
 import rd.spec.dao.CompanyDao;
 import rd.spec.dao.ContactDao;
 import rd.spec.dao.MeetingDao;
@@ -32,6 +32,7 @@ public class MeetingDaoImpl implements MeetingDao {
 	@Inject UserDao userDao;
 	@Inject CompanyDao compDao;
 	@Inject ContactDao contactDao;
+	@Inject ActivityDao actDao;
 
 	public void addMeeting(Transaction transaction, MeetingDto meeting) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -48,6 +49,7 @@ public class MeetingDaoImpl implements MeetingDao {
 			prepareStatement.setString(5, meeting.getDetail());
 			prepareStatement.setString(6, meeting.getLocation());
 			prepareStatement.setInt(7, meeting.getContact().getSeq());
+			prepareStatement.setInt(8, meeting.getActId());
 
 			resultSet = prepareStatement.executeQuery();
 
@@ -121,7 +123,8 @@ public class MeetingDaoImpl implements MeetingDao {
 			prepareStatement.setString(4, meeting.getDetail());
 			prepareStatement.setString(5, meeting.getLocation());
 			prepareStatement.setInt(6, meeting.getContact().getSeq());
-			prepareStatement.setInt(7, meeting.getSeq());
+			prepareStatement.setInt(7, meeting.getActId());
+			prepareStatement.setInt(8, meeting.getSeq());
 			resultSet = prepareStatement.executeQuery();
 
 		} catch (SQLException e) {
@@ -254,8 +257,9 @@ public class MeetingDaoImpl implements MeetingDao {
 		String detail = resultSet.getString(5);
 		String location = resultSet.getString(6);
 		ContactDto contact = contactDao.getContactById(transaction, resultSet.getInt(7));
+		int actId = resultSet.getInt(8);
 
-		return new MeetingDto(seq, from, to, detail, contact, user, location);
+		return new MeetingDto(seq, from, to, detail, contact, user, location, actId);
 	}
 	public List<MeetingDto> getMeetingToday(Transaction transaction) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -413,13 +417,13 @@ public class MeetingDaoImpl implements MeetingDao {
 			}
 		}
 	}
-	private static String GET_MEETING_BY_DAY_AND_USER = "select seq, user_id, from_date, to_date, detail, location, contact_seq from t_meeting where from_date >= ? and from_date < ? and user_id=?";
-	private static String ADD_MEETING 			 = "insert into t_meeting (seq, user_id, from_date, to_date, detail, location, contact_seq) values (?, ?, ?, ?, ?, ?, ?)";
-	private static String GET_MEETING_BY_USER 	 = "select seq, user_id, from_date, to_date, detail, location, contact_seq from t_meeting where user_id=? order by from_date desc";
-	private static String EDIT_MEETING 			 = "update t_meeting set user_id=?, from_date=?, to_date=?, detail=?, location=?, contact_seq=? where seq=?";
+	private static String GET_MEETING_BY_DAY_AND_USER = "select seq, user_id, from_date, to_date, detail, location, contact_seq, activity_seq from t_meeting where from_date >= ? and from_date < ? and user_id=?";
+	private static String ADD_MEETING 			 = "insert into t_meeting (seq, user_id, from_date, to_date, detail, location, contact_seq, activity_seq) values (?, ?, ?, ?, ?, ?, ?, ?)";
+	private static String GET_MEETING_BY_USER 	 = "select seq, user_id, from_date, to_date, detail, location, contact_seq, activity_seq from t_meeting where user_id=? order by from_date desc";
+	private static String EDIT_MEETING 			 = "update t_meeting set user_id=?, from_date=?, to_date=?, detail=?, location=?, contact_seq=?, activity_seq=? where seq=?";
 	private static String DELETE_MEETING 		 = "delete from t_meeting where seq=?";
-	private static String GET_BY_ID 			 = "select seq, user_id, from_date, to_date, detail, location, contact_seq from t_meeting where seq=?";
+	private static String GET_BY_ID 			 = "select seq, user_id, from_date, to_date, detail, location, contact_seq, activity_seq from t_meeting where seq=?";
 	private static String GET_SEQ 				 = "select max(seq)+1 from t_meeting";
-	private static String GET_MEETING_TODAY 	 = "select seq, user_id, from_date, to_date, detail, location, contact_seq from t_meeting where from_date >= ? and from_date < ? order by from_date asc";
-	private static String GET_MEETING_TODAY_USER = "select seq, user_id, from_date, to_date, detail, location, contact_seq from t_meeting where from_date >= ? and from_date < ? and user_id=?";
+	private static String GET_MEETING_TODAY 	 = "select seq, user_id, from_date, to_date, detail, location, contact_seq, activity_seq from t_meeting where from_date >= ? and from_date < ? order by from_date asc";
+	private static String GET_MEETING_TODAY_USER = "select seq, user_id, from_date, to_date, detail, location, contact_seq, activity_seq from t_meeting where from_date >= ? and from_date < ? and user_id=?";
 }

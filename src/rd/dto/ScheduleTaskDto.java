@@ -9,6 +9,8 @@ public class ScheduleTaskDto {
 	private Date time;
 	private String username;
 	private ContactDto contact;
+	private int actId;
+	private String status;
 
 	public String getCategory() {
 		return category;
@@ -42,16 +44,19 @@ public class ScheduleTaskDto {
 		this.seq = seq;
 	}
 
-	public ScheduleTaskDto(int seq, String category, Date time, String username, String detail, ContactDto contact) {
+	public ScheduleTaskDto(int seq, String category, Date time, String username, String detail, ContactDto contact, int actId, String status) {
 		this.seq = seq;
 		this.category = category;
 		this.time = time;
 		this.username = username;
 		this.detail = detail;
 		this.contact = contact;
+		this.actId = actId;
+		this.status = status;
 	}
 
 	public ScheduleTaskDto() {
+		this.status = "pending";
 	}
 
 	public String getUsername() {
@@ -76,6 +81,22 @@ public class ScheduleTaskDto {
 
 	public void setContact(ContactDto contact) {
 		this.contact = contact;
+	}
+
+	public int getActId() {
+		return actId;
+	}
+
+	public void setActId(int actId) {
+		this.actId = actId;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	private String detail;

@@ -246,7 +246,7 @@ public class InvoiceDaoImpl implements InvoiceDao {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(ADD_INVOICE);
 			prepareStatement.setInt(1, getSeq(transaction));
-			prepareStatement.setInt(2, invoice.getCustomer().getSeq());
+			prepareStatement.setInt(2, invoice.getContact().getSeq());
 			prepareStatement.setDate(3, new java.sql.Date(invoice.getPurchaseDate().getTime()));
 			prepareStatement.setDouble(4, invoice.getAmount());
 			prepareStatement.setString(5, invoice.getSalesperson().getId());
@@ -256,6 +256,7 @@ public class InvoiceDaoImpl implements InvoiceDao {
 				prepareStatement = connection.prepareStatement(ADD_PRODUCT_PURCHASE);
 				prepareStatement.setInt(1, invoice.getSeq());
 				prepareStatement.setInt(2, dto.getSeq());
+				prepareStatement.setInt(3, dto.getDuration());
 				resultSet = prepareStatement.executeQuery();
 			}
 		} catch (SQLException e) {
@@ -286,7 +287,7 @@ public class InvoiceDaoImpl implements InvoiceDao {
 	private static String DELETE_INVOICE 			= "delete from t_invoice where seq=?";
 	private static String GET_SEQ 					= "select max(seq)+1 from t_invoice";
 	private static String GET_ALL 					= "select seq, contact_seq, purchase_date, amount, salesperson from t_invoice order by seq";
-	private static String ADD_PRODUCT_PURCHASE 		= "insert into t_product_purchase (invoice_seq, product_seq) values (?, ?)";
+	private static String ADD_PRODUCT_PURCHASE 		= "insert into t_product_purchase (invoice_seq, product_seq, duration) values (?, ?, ?)";
 	private static String DELETE_PRODUCT_PURCHASE 	= "delete from t_product_purchase where invoice_seq=?";
 
 	private static String FIND_INVOICES_BY_PRODUCT 	= "select distinct ti.seq from t_invoice ti join t_product_purchase tpp on ti.seq=tpp.invoice_seq where tpp.product_seq=?";
@@ -339,7 +340,7 @@ public class InvoiceDaoImpl implements InvoiceDao {
 		try {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(UPDATE_INVOICE);
-			prepareStatement.setInt(1, invoice.getCustomer().getSeq());
+			prepareStatement.setInt(1, invoice.getContact().getSeq());
 			prepareStatement.setDate(2, new java.sql.Date(invoice.getPurchaseDate().getTime()));
 			prepareStatement.setDouble(3, invoice.getAmount());
 			prepareStatement.setString(4, invoice.getSalesperson().getId());
@@ -354,6 +355,7 @@ public class InvoiceDaoImpl implements InvoiceDao {
 				prepareStatement = connection.prepareStatement(ADD_PRODUCT_PURCHASE);
 				prepareStatement.setInt(1, invoice.getSeq());
 				prepareStatement.setInt(2, dto.getSeq());
+				prepareStatement.setInt(3, dto.getDuration());
 				resultSet = prepareStatement.executeQuery();
 			}
 

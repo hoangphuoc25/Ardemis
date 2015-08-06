@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import rd.dto.UserDto;
 import rd.spec.service.UserService;
 
-@Named
 public class UserValidator implements Validator {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());

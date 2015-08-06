@@ -404,7 +404,7 @@ public class ManagerController implements Serializable {
 		int noOfEmp = sales.size();
 		int amount = currentTarget.getTarget() / noOfEmp;
 		for (UserDto dto: sales) {
-			SaleTargetDto std = new SaleTargetDto(dto, amount, currentTarget.getFromDate(), currentTarget.getToDate(), 0);
+			SaleTargetDto std = new SaleTargetDto(dto, amount, currentTarget.getFromDate(), currentTarget.getToDate(), 0, currentTarget.getUnit());
 			stService.addSaleTarget(std);
 
 			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");

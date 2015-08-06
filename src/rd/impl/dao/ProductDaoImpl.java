@@ -31,19 +31,20 @@ public class ProductDaoImpl implements ProductDao {
 		this.prodCache = prodCache;
 	}
 
-	private static String GET_ALL 					= "select seq, name, summary, target, price from t_product order by seq";
+	private static String GET_ALL 					= "select seq, name, summary, target, price, permanent_price from t_product order by seq";
 	private static String GET_SEQ  					= "select max(seq)+1 from t_product";
-	private static String ADD_PRODUCT 				= "insert into t_product (seq, name, summary, target, price) values (?, ?, ?, ?, ?)";
-	private static String GET_PRODUCT_BY_ID 		= "select seq, name, summary, target, price from t_product where seq=?";
+	private static String ADD_PRODUCT 				= "insert into t_product (seq, name, summary, target, price, permanent_price) values (?, ?, ?, ?, ?, ?)";
+	private static String GET_PRODUCT_BY_ID 		= "select seq, name, summary, target, price, permanent_price from t_product where seq=?";
 	private static String REMOVE_PRODUCT 			= "delete from t_product where seq=?";
-	private static String UPDATE_PRODUCT 			= "update t_product set name=?, summary=?, target=?, price=? where seq=?";
-	private static String SEARCH_BY_NAME 			= "select seq, name, summary, target, price from t_product where upper(name) like ?";
-	private static String GET_BY_NAME 				= "select seq, name, summary, target, price from t_product where name=?";
-	private static String GET_CATEGORY_BY_PRODUCT 	= "select category from t_product_cateogry where product_seq=?";
+	private static String UPDATE_PRODUCT 			= "update t_product set name=?, summary=?, target=?, price=?, permanent_price=? where seq=?";
+	private static String SEARCH_BY_NAME 			= "select seq, name, summary, target, price, permanent_price from t_product where upper(name) like ?";
+	private static String GET_BY_NAME 				= "select seq, name, summary, target, price, permanent_price from t_product where name=?";
+	private static String GET_CATEGORY_BY_PRODUCT 	= "select category from t_prod_category where product_seq=?";
 
 	private static String ADD_PRODUCT_CATEGORY 		= "insert into t_prod_category (product_seq, category) values (?, ?)";
 	private static String REMOVE_PRODUCT_CATEGORY 	= "delete from t_prod_category where product_seq=?";
-	private static String SEARCH_BY_PRODUCT_DESC 	= "select seq, name, summary, target, price from t_product where summary like ?";
+	private static String SEARCH_BY_PRODUCT_DESC 	= "select seq, name, summary, target, price, permanent_price from t_product where summary like ?";
+	private static String SEARCH_BY_PRICE 			= "select seq, name, summary, target, price, permanent_price from t_product where price<? or permanent_price<?";
 
 
 	public void addProduct (Transaction transaction, ProductDto product) throws IOException {
@@ -59,6 +60,7 @@ public class ProductDaoImpl implements ProductDao {
 			prepareStatement.setString(3, product.getSummary());
 			prepareStatement.setString(4, product.getTarget());
 			prepareStatement.setDouble(5, product.getPrice());
+			prepareStatement.setDouble(6, product.getPermanentPrice());
 
 			resultSet = prepareStatement.executeQuery();
 			prodCache.putProduct(product);
@@ -211,7 +213,8 @@ public class ProductDaoImpl implements ProductDao {
 		String summary = resultSet.getString(3);
 		String target = resultSet.getString(4);
 		double price = resultSet.getDouble(5);
-		return new ProductDto(seq, name, summary, target, price, null);
+		double permanentPrice = resultSet.getDouble(6);
+		return new ProductDto(seq, name, summary, target, price, null, permanentPrice);
 	}
 
 	public void updateProduct (Transaction transaction, ProductDto product) throws IOException {
@@ -226,7 +229,9 @@ public class ProductDaoImpl implements ProductDao {
 			prepareStatement.setString(2, product.getSummary());
 			prepareStatement.setString(3, product.getTarget());
 			prepareStatement.setDouble(4, product.getPrice());
-			prepareStatement.setInt(5, product.getSeq());
+			prepareStatement.setDouble(5, product.getPermanentPrice());
+			prepareStatement.setInt(6, product.getSeq());
+
 			resultSet = prepareStatement.executeQuery();
 
 			prodCache.putProduct(product);
@@ -476,6 +481,43 @@ public class ProductDaoImpl implements ProductDao {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(SEARCH_BY_PRODUCT_DESC);
 			prepareStatement.setString(1, "%" + keyword.toLowerCase() + "%");
+			resultSet = prepareStatement.executeQuery();
+
+			List<ProductDto> result = new ArrayList<ProductDto>();
+			while (resultSet.next()) {
+				result.add(makeProductDto(transaction, resultSet));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	public List<ProductDto> searchByPrice(Transaction transaction, int budget) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_BY_PRICE);
+			prepareStatement.setInt(1, budget);
+			prepareStatement.setInt(2, budget);
 			resultSet = prepareStatement.executeQuery();
 
 			List<ProductDto> result = new ArrayList<ProductDto>();

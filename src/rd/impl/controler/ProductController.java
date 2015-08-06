@@ -617,6 +617,12 @@ public class ProductController implements Serializable {
 
 	@Inject FaqService faqService;
 	public void addFaq() throws IOException {
+		if (newFaq.getQuestion() == null || newFaq.getQuestion().isEmpty() ||
+				newFaq.getAnswer() == null || newFaq.getAnswer().isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Question and answer are required", null);
+			return;
+		}
+
 		faqService.addFaq(newFaq);
 		faq.add(newFaq);
 

@@ -43,7 +43,7 @@
 			<p:menuitem value="Expense" url="#{requestContext}/faces/expense.jsf" />
 			<p:menuitem value="Products" url="../faces/products.jsf" />
 			<p:menuitem value="Call Report" url="../faces/calls.jsf" />
-			<p:menuitem value="Customers" url="../faces/companyList.jsf" />
+			<p:menuitem value="Customers" url="../faces/contactList.jsf" />
 			<p:menuitem value="Notes" url="../faces/notes.jsf" />
 			<p:menuitem value="LOG OUT" style="float: right; font-weight:bold;" action="#{managerController.logout}" immediate="true" update="form01" />
 		</p:menubar>
@@ -233,13 +233,19 @@
 			<p:dialog id="saleTargetDialog" closable="false" visible="#{managerController.assignTargetMode}"
 					widgetVar="saleTargetDialog_w" modal="true" resizable="false" draggable="true" header="Sale target">
 				<p:messages />
-				<p:panelGrid columns="2">
+				<p:panelGrid columns="3">
 					<h:outputText value="Target" />
 					<p:inputText value="#{managerController.currentTarget.target}" />
+					<p:selectOneRadio value="#{managerController.currentTarget.unit}">
+						<f:selectItem itemLabel="SGD" itemValue="SGD" />
+						<f:selectItem itemLabel="Customers" itemValue="Customers" />
+					</p:selectOneRadio>
 					<h:outputText value="From" />
 					<p:calendar value="#{managerController.currentTarget.fromDate}" pattern="dd/MM/yyyy" />
+					<h:outputText />
 					<h:outputText value="To" />
 					<p:calendar value="#{managerController.currentTarget.toDate}" pattern="dd/MM/yyyy" />
+					<h:outputText />
 				</p:panelGrid>
 				<p:commandButton value="Assign" actionListener="#{managerController.assignSaleTarget}" update=":form01" />
 				<p:commandButton value="Cancel" actionListener="#{managerController.cancelAssignTask}" update=":form01" />
@@ -247,7 +253,7 @@
 		</p:outputPanel>
 
 		<p:outputPanel id="promotionArea">
-			<p:dialog id="promoDialog" closable="false" visible="#{managerController.addPromoMode}"
+			<p:dialog id="promoDialog" closable="false" visible="#{managerController.addPromoMode}" style="max-width: 700px"
 					widgetVar="promoDialog_w" modal="true" resizable="false" draggable="true" header="Add promotion">
 				<p:panelGrid columns="2">
 					<h:outputText value="Start date" />
@@ -263,7 +269,7 @@
 						</p:autoComplete>
 						<p:dataTable id="tb1" rowIndexVar="row" value="#{managerController.selectedProducts}" var="prod">
 							<p:column headerText="Select">
-								<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{prod.selected}" />
+								<p:selectBooleanCheckbox value="#{prod.selected}" />
 							</p:column>
 							<p:column headerText="Name">
 								<h:outputText value="#{prod.name}" />
@@ -298,7 +304,7 @@
 						<p:column headerText="Status">
 							<h:outputText value="#{act.status}" />
 						</p:column>
-						<p:column headerText="Remark">
+						<p:column headerText="Note">
 							<h:outputText value="#{act.remark}" />
 						</p:column>
 					</p:dataTable>

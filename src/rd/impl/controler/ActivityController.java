@@ -1,10 +1,6 @@
 package rd.impl.controler;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,12 +10,8 @@ import java.util.List;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.UploadedFile;
 
 import rd.dto.ActivityDto;
 import rd.dto.CallReportDto;
@@ -231,19 +223,24 @@ public class ActivityController implements Serializable {
 		}
 		getNewInvoice().setSeq(invoiceService.getSeq());
 
-		// getNewInvoice().setCustomer(selectedAct.getCustomer());
 		newInvoice.setContact(selectedAct.getContact());
 		double amount = 0;
 		for (ProductDto dto: getSelectedProducts()) {
-			amount += dto.getPrice();
+			if (dto.getDuration() == 0)
+				amount += dto.getPermanentPrice() * dto.getQuantity();
+			else
+				amount += dto.getPrice() * dto.getDuration() * dto.getQuantity();
 		}
-		getNewInvoice().setProducts(getSelectedProducts());
-		getNewInvoice().setAmount(amount);
+		newInvoice.setProducts(getSelectedProducts());
+		newInvoice.setAmount(amount);
 		newInvoice.setSalesperson(sessionManager.getLoginUser());
-		invoiceService.addInvoice(getNewInvoice());
+		invoiceService.addInvoice(newInvoice);
 		sessionManager.addGlobalMessageInfo("New purchase record added", null);
 
-		getStd().setCurrent(getStd().getCurrent() + (int) Math.ceil(amount));
+		if (getStd().getUnit().equalsIgnoreCase("SGD"))
+			std.setCurrent(std.getCurrent() + (int) Math.ceil(amount));
+		else
+			std.setCurrent(std.getCurrent() + 1);
 		stService.updateSaleTarget(std);
 		sessionManager.addGlobalMessageInfo("Sale progress updated.", null);
 
@@ -396,6 +393,7 @@ public class ActivityController implements Serializable {
 		// newMeeting.setCustomer(act.getCustomer());
 		newMeeting.setContact(act.getContact());
 		newMeeting.setSalesperson(sessionManager.getLoginUser());
+		newMeeting.setActId(act.getSeq());
 		addMeetingMode = true;
 	}
 
@@ -427,6 +425,7 @@ public class ActivityController implements Serializable {
 		if (showingMode.equalsIgnoreCase("all")) {
 			allAct = actService.getByUser(sessionManager.getLoginUser().getId());
 		} else {
+			System.out.println(showingMode);
 			allAct = actService.findByStatus(showingMode, sessionManager.getLoginUser().getId());
 		}
 	}
@@ -455,6 +454,7 @@ public class ActivityController implements Serializable {
 	public void startAddTask(ActivityDto act) throws IOException {
 		addTaskMode = true;
 		// newTask.setCustomer(act.getCustomer());
+		newTask.setActId(act.getSeq());
 		newTask.setContact(act.getContact());
 		newTask.setUsername(sessionManager.getLoginUser().getId());
 	}
@@ -473,6 +473,14 @@ public class ActivityController implements Serializable {
 	@Inject ScheduleTaskService taskService;
 
 	public void addTask() throws IOException {
+		if (newTask.getCategory() == null || newTask.getCategory().isEmpty()) {
+			sessionManager.addGlobalMessageFatal("Action is required", null);
+			return;
+		}
+		if (newTask.getTime() == null) {
+			sessionManager.addGlobalMessageFatal("Time is required", null);
+			return;
+		}
 		taskService.addEvent(newTask);
 		newTask = new ScheduleTaskDto();
 		sessionManager.addGlobalMessageInfo("New task added", null);
@@ -497,8 +505,8 @@ public class ActivityController implements Serializable {
 
 	public void startFindRelatedTask(ActivityDto act) throws IOException {
 		viewRelatedTask = true;
-		relatedCallRecords = crService.getByCompanyId(act.getCustomer().getSeq());
-		relatedTask = taskService.getByCompany(act.getCustomer().getSeq());
+		relatedCallRecords = crService.getByContact(act.getContact().getSeq());
+		relatedTask = taskService.getByContact(act.getContact().getSeq());
 	}
 
 	public void cancelViewRelatedTask() {

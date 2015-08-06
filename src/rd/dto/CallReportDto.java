@@ -11,6 +11,7 @@ public class CallReportDto {
 	private String rating;
 	private Date callTime;
 	private String detail;
+	private int actId;
 
 	public Date getCallTime() {
 		return this.callTime;
@@ -29,7 +30,7 @@ public class CallReportDto {
 	}
 
 	public CallReportDto(int seq, ContactDto contact, Date callTime,
-			String detail, String rating, UserDto user, int callBack) {
+			String detail, String rating, UserDto user, int callBack, int actId) {
 		this.seq = seq;
 		this.contact = contact;
 		this.callTime = callTime;
@@ -37,6 +38,7 @@ public class CallReportDto {
 		this.rating = rating;
 		this.salesperson = user;
 		this.callBack = callBack;
+		this.actId = actId;
 	}
 
 	public CallReportDto() {
@@ -88,5 +90,13 @@ public class CallReportDto {
 
 	public void setContact(ContactDto contact) {
 		this.contact = contact;
+	}
+
+	public int getActId() {
+		return actId;
+	}
+
+	public void setActId(int actId) {
+		this.actId = actId;
 	}
 }
