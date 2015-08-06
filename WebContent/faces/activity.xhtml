@@ -12,6 +12,11 @@
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
+	<style>
+         .ui-growl {
+            z-index: 999999 !important;
+         }
+     </style>
 </h:head>
 <h:body>
 	<h:form id="form01">
@@ -37,29 +42,35 @@
 
 		<h:messages />
 		<p:growl autoUpdate="true" />
-		<p:fieldset legend="New Deal">
-			<p:panelGrid columns="2">
-				<h:outputText value="Customer" />
-				<p:autoComplete value="#{activityController.contactName}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestContact}" forceSelection="true" />
-				<h:outputText value="Start Date" />
-				<p:calendar value="#{activityController.newAct.startDate}" pattern="dd/MM/yyyy" />
-				<h:outputText value="Status" />
-				<p:selectOneMenu value="#{activityController.newAct.status}">
-					<f:selectItems value="#{activityController.statusOptions}" />
-				</p:selectOneMenu>
-				<h:outputText value="Note" />
-				<p:inputTextarea value="#{activityController.newAct.remark}" />
-			</p:panelGrid>
-			<br/>
-			<p:commandButton value="Add new deal" actionListener="#{activityController.addActivity}" update=":form01"/>
-		</p:fieldset>
+		<p:outputPanel id="newDealArea">
+			<p:dialog id="newDealDialog" closable="false" visible="#{activityController.addDealMode}"
+					widgetVar="newDealDialog_w" modal="true" resizable="false" draggable="true" header="New deal detail">
+				<p:panelGrid columns="2">
+					<h:outputText value="Customer" />
+					<p:autoComplete value="#{activityController.contactName}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestContact}" forceSelection="true" />
+					<h:outputText value="Start Date" />
+					<p:calendar value="#{activityController.newAct.startDate}" pattern="dd/MM/yyyy" />
+					<h:outputText value="Status" />
+					<p:selectOneMenu value="#{activityController.newAct.status}">
+						<f:selectItems value="#{activityController.statusOptions}" />
+					</p:selectOneMenu>
+					<h:outputText value="Note" />
+					<p:inputTextarea value="#{activityController.newAct.remark}" />
+				</p:panelGrid>
+				<br/>
+				<p:commandButton value="Add" actionListener="#{activityController.addActivity}" update=":form01:newDealArea"/>
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:commandButton value="Add new deal" actionListener="#{activityController.startAddNewDeal}" update=":form01:newDealArea" />
+
 
 		<br/>
 		<h:panelGrid columns="2">
 			<h:outputText value="Showing"/>
 			<p:selectOneMenu value="#{activityController.showingMode}">
 				<f:selectItem itemLabel="All deals" itemValue="all" />
-				<f:selectItem itemLabel="Meeting" itemValue="Meeting" />
+				<f:selectItem itemLabel="Qualified" itemValue="Qualified" />
 				<f:selectItem itemLabel="Completed" itemValue="Completed" />
 				<f:selectItem itemLabel="Negotiating" itemValue="Negotiating" />
 				<f:selectItem itemLabel="Failed" itemValue="Failed" />
@@ -82,8 +93,11 @@
 				<p:column headerText="Status">
 					<h:outputText value="#{act.status}" />
 				</p:column>
+				<p:column headerText="Products">
+					<p:dataList value="#{act.products}" var="prod">#{prod.name}</p:dataList>
+				</p:column>
 				<p:column headerText="Note">
-					<h:outputText value="#{act.remark}" />
+					<h:outputText value="#{act.remark}" escape="false"/>
 				</p:column>
 				<p:column headerText="Action">
 
@@ -175,14 +189,17 @@
 		<p:dialog id="newTaskDialog" closable="false" visible="#{activityController.addTaskMode}"
 				widgetVar="newTaskDialog_w" modal="true" resizable="false" draggable="true" header="Add new task">
 			<p:panelGrid columns="2">
-				<h:outputText value="Action" />
-				<p:inputText value="#{activityController.newTask.category}" />
-
 				<h:outputText value="Customer" />
 				<h:outputText value="#{activityController.newTask.contact.name}" />
 
+				<h:outputText value="Action" />
+				<p:inputText value="#{activityController.newTask.category}" />
+
 				<h:outputText value="Time" />
 				<p:calendar value="#{activityController.newTask.time}" pattern="dd/MM/yyyy HH:mm" />
+
+				<h:outputText value="Detail" />
+				<p:inputTextarea value="#{activityController.newTask.detail}" />
 			</p:panelGrid>
 			<p:commandButton value="Add" actionListener="#{activityController.addTask}" update=":form01:newTaskDialog"/>
 			<p:commandButton value="Cancel" actionListener="#{activityController.cancelAddTask}" update=":form01:newTaskDialog"/>

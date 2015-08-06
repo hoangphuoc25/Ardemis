@@ -15,7 +15,11 @@
 	<title></title>
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
-
+	<style>
+         .ui-growl {
+            z-index: 999999 !important;
+         }
+     </style>
 </h:head>
 <h:body>
 	<h:form id="form01">
@@ -107,7 +111,9 @@
 			<p:selectOneMenu value="#{salespersonController.showingMode}">
 				<f:selectItem itemLabel="All customers" itemValue="all" />
 				<f:selectItem itemLabel="Uncontacted customers" itemValue="new" />
-				<f:selectItem itemLabel="Contacted customers" itemValue="contacted" />
+				<f:selectItem itemLabel="Qualified customers" itemValue="qualified" />
+				<f:selectItem itemLabel="Unqualified customers" itemValue="unqualified" />
+				<f:selectItem itemLabel="Unresponsive customers" itemValue="unresponsive" />
 				<p:ajax event="change" listener="#{salespersonController.updateContactList}" update=":form01:panel1" />
 			</p:selectOneMenu>
 		</h:panelGrid>

@@ -103,6 +103,10 @@ public class ActivityController implements Serializable {
 	public List<ActivityDto> getAllAct() throws IOException {
 		if (allAct == null) {
 			allAct = actService.getByUser(sessionManager.getLoginUser().getId());
+			for (ActivityDto act: allAct) {
+				List<ProductDto> prods = actService.getProductByDeal(act.getSeq());
+				act.setProducts(prods);
+			}
 		}
 		return allAct;
 	}
@@ -145,6 +149,8 @@ public class ActivityController implements Serializable {
 		allAct.add(newAct);
 		newAct = new ActivityDto();
 		sessionManager.addGlobalMessageInfo("New deal added", null);
+
+		addDealMode = false;
 	}
 	@Inject ContactService contactService;
 
@@ -547,6 +553,19 @@ public class ActivityController implements Serializable {
 		this.contactName = contactName;
 	}
 
+	public boolean isAddDealMode() {
+		return addDealMode;
+	}
+
+	public void setAddDealMode(boolean addDealMode) {
+		this.addDealMode = addDealMode;
+	}
+
 	private String contactName;
+	private boolean addDealMode = false;
+
+	public void startAddNewDeal() {
+		addDealMode = true;
+	}
 }
 

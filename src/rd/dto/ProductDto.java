@@ -44,6 +44,7 @@ public class ProductDto {
 		this.target = selectedProd.target;
 		this.price = selectedProd.price;
 		this.category = selectedProd.category;
+		this.permanentPrice = selectedProd.getPermanentPrice();
 	}
 
 	public int getSeq() {

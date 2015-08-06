@@ -24,6 +24,7 @@ import rd.dto.CompanyDto;
 import rd.dto.ContactDto;
 import rd.dto.MeetingDto;
 import rd.dto.NoteDto;
+import rd.dto.ProductDto;
 import rd.dto.SaleTargetDto;
 import rd.dto.ScheduleTaskDto;
 import rd.dto.UserDto;
@@ -33,6 +34,7 @@ import rd.spec.service.CompanyService;
 import rd.spec.service.ContactService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.NoteService;
+import rd.spec.service.ProductService;
 import rd.spec.service.SaleTargetService;
 import rd.spec.service.ScheduleTaskService;
 import rd.utils.Pair;
@@ -664,8 +666,24 @@ public class ScheduleController implements Serializable {
 		this.contactName = contactName;
 	}
 
+	public ActivityDto getTempAct() {
+		return tempAct;
+	}
+
+	public void setTempAct(ActivityDto tempAct) {
+		this.tempAct = tempAct;
+	}
+
 	private boolean meetingAtCustomer = true;
 	private MeetingDto newMeeting = new MeetingDto();
 	private String contactName_2;
 	private String contactName;
+	private ActivityDto tempAct;
+
+	public void startViewDealDetail(ScheduleTaskDto task) throws IOException {
+		tempAct = actService.getById(task.getActId());
+		List<ProductDto> prods = actService.getProductByDeal(task.getActId());
+		tempAct.setProducts(prods);
+
+	}
 }

@@ -14,6 +14,9 @@
 	<title></title>
 
 	<style>
+         .ui-growl {
+            z-index: 999999 !important;
+         }
 		.message {
 			display: block;
 			font-family: Arial;
@@ -180,15 +183,40 @@
 				<p:column headerText="Status" styleClass="#{task.status == 'Overdue'? 'newMsg' : null}" >
 					<h:outputText value="#{task.status}" />
 				</p:column>
+				<p:column headerText="Deal detail">
+					<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
+							actionListener="#{scheduleController.startViewDealDetail(task)}" icon="ui-icon-search" title="View" rendered="#{task.actId gt 0}" />
+				</p:column>
 				<p:column headerText="Action">
-					<p:commandButton value="Delete" actionListener="#{scheduleController.deleteTask(task)}" update=":form01:tasks" />
-					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditTask(task)}" update=":form01" />
-					<a href="callReport.jsf?contactSeq=#{task.contact.seq}&amp;backMain=true&amp;dealId=#{task.actId}&amp;taskId=#{task.seq}" style="color: blue;">Call record</a>
+					<p:commandButton value="Delete" actionListener="#{scheduleController.deleteTask(task)}" update=":form01:tasks" rendered="#{task.status != 'Done'}" />
+					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditTask(task)}" update=":form01" rendered="#{task.status != 'Done'}" />
+					<h:outputLink value="callReport.jsf?contactSeq=#{task.contact.seq}&amp;backMain=true&amp;dealId=#{task.actId}&amp;taskId=#{task.seq}" style="color: blue;" >Call</h:outputLink>
 				</p:column>
 			</p:dataTable>
 			<br/>
 			<p:commandButton value="Add new task" actionListener="#{scheduleController.startAddTask}" update=":form01"/>
 		</p:panel>
+
+		<p:overlayPanel widgetVar="carOP" showEffect="fade" hideEffect="fade" dismissable="false" showCloseIcon="true" style="max-width: 700px">
+			<p:outputPanel id="carDetail" style="text-align:center;">
+			    <p:panelGrid  columns="2" rendered="#{not empty scheduleController.tempAct}" columnClasses="label,value">
+			        <h:outputText value="Start Date" />
+			        <h:outputText value="#{scheduleController.tempAct.startDate}">
+			        	<f:convertDateTime pattern="dd/MM/yyyy" />
+			        </h:outputText>
+
+			        <h:outputText value="Status" />
+			        <h:outputText value="#{scheduleController.tempAct.status}" />
+
+			        <h:outputText value="Note" />
+			        <h:outputText value="#{scheduleController.tempAct.remark}" escaped="false" />
+
+					<h:outputText value="Products" />
+					<p:dataList value="#{scheduleController.tempAct.products}" var="prod">#{prod.name}</p:dataList>
+		        </p:panelGrid>
+		    </p:outputPanel>
+		</p:overlayPanel>
+
 
    		<p:dialog id="newMeetingDialog" closable="false" visible="#{scheduleController.addMeetingMode}"
 				widgetVar="newMeetingDialog_w" modal="true" resizable="false" draggable="true" header="">

@@ -18,6 +18,14 @@
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title></title>
+	<style>
+		.ui-growl {
+			z-index: 999999 !important;
+		}
+		.newMsg {
+			background-color: #ffef8f;
+		}
+     </style>
 </h:head>
 <h:body>
 	<h:form id="form01">
@@ -53,8 +61,9 @@
 					</p:panelGrid>
 					<p:panelGrid id="panel" columns="2">
 						<h:outputText value="Contact name"/>
-						<p:autoComplete minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestContact}" value="#{callReportController.contactName}" forceSelection="true" style="width: 100%;" />
-
+						<p:autoComplete minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestContact}" value="#{callReportController.contactName}" style="width: 100%;">
+							<p:ajax listener="#{callReportController.updateCallee}" event="itemSelect" update="panel"/>
+						</p:autoComplete>
 
 						<h:outputText value="Call time"/>
 						<p:calendar value="#{callReportController.callTime}" pattern="MM/dd/yyyy HH:mm" />
@@ -62,21 +71,38 @@
 						<h:outputText value="Call detail" />
 						<p:inputTextarea value="#{callReportController.callDetail}" />
 
-						<h:outputText value="Action" />
-						<p:selectOneMenu value="#{callReportController.rating}" >
-							<f:selectItems value="#{callReportController.ratings}" />
-							<f:selectItem itemLabel="Close deal" itemValue="close" itemDisabled="#{callReportController.dealId le 0}" />
+						<h:outputText value="Customer status" rendered="#{callReportController.callee != null}"/>
+						<p:selectOneMenu value="#{callReportController.callee.contactStatus}" rendered="#{callReportController.callee != null}">
+							<f:selectItem itemLabel="New" itemValue="New" />
+							<f:selectItem itemLabel="Qualified" itemValue="Qualified" />
+							<f:selectItem itemLabel="Unqualified" itemValue="Unqualified" />
+							<f:selectItem itemLabel="Not interested" itemValue="Notinterested" />
 							<p:ajax update="panel" process="panel" />
 						</p:selectOneMenu>
 
-						<h:outputText value="Product" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
-						<p:commandButton value="Add products" actionListener="#{callReportController.startAddProducts}" update=":form01:productsArea" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
+						<h:outputText value="Deal status" rendered="#{callReportController.dealId > 0}" />
+						<p:selectOneMenu value="#{callReportController.currentDeal.status}" rendered="#{callReportController.dealId > 0}">
+							<f:selectItem itemLabel="Customer qualified" itemValue="Customer qualified" />
+							<f:selectItem itemLabel="Negotiating" itemValue="Negotiating" />
+							<f:selectItem itemLabel="Completed" itemValue="Completed" />
+							<f:selectItem itemLabel="Failed" itemValue="Failed" />
+						</p:selectOneMenu>
 
-						<h:outputText value="New meeting" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
-						<p:commandButton value="Edit detail" actionListener="#{callReportController.startAddNewMeeting}" update=":form01:newMeetingArea" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
+						<h:outputText value="Action" rendered="#{callReportController.callee.contactStatus == 'Qualified'}"/>
+						<p:selectOneMenu value="#{callReportController.rating}" rendered="#{callReportController.callee.contactStatus == 'Qualified'}" >
+							<f:selectItems value="#{callReportController.ratings}" />
+							<f:selectItem itemLabel="Close deal" itemValue="close"/>
+							<p:ajax update="panel" process="panel" />
+						</p:selectOneMenu>
 
-						<h:outputText value="Call back after" rendered="#{callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later'}"/>
-						<p:outputPanel rendered="#{callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later'}">
+						<h:outputText value="Product" rendered="#{callReportController.callee.contactStatus == 'Qualified' and callReportController.rating == 'Follow-up meeting'}" />
+						<p:commandButton value="Add products" actionListener="#{callReportController.startAddProducts}" update=":form01:productsArea" rendered="#{callReportController.rating == 'Follow-up meeting' and callReportController.callee.contactStatus == 'Qualified'}" />
+
+						<h:outputText value="New meeting" rendered="#{callReportController.rating == 'Follow-up meeting' and callReportController.callee.contactStatus == 'Qualified'}" />
+						<p:commandButton value="Edit detail" actionListener="#{callReportController.startAddNewMeeting}" update=":form01:newMeetingArea" rendered="#{callReportController.rating == 'Follow-up meeting' and callReportController.callee.contactStatus == 'Qualified'}" />
+
+						<h:outputText value="Call back after" rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and callReportController.callee.contactStatus == 'Qualified'}"/>
+						<p:outputPanel rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and callReportController.callee.contactStatus == 'Qualified'}">
 							<p:panelGrid columns="2">
 								<p:spinner min="0" value="#{callReportController.callBackNo}" />
 								<p:selectOneMenu value="#{callReportController.callBackUnit}">
@@ -85,17 +111,19 @@
 							</p:panelGrid>
 						</p:outputPanel>
 
-						<h:outputText value="Call back again on" rendered="#{callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later'}"/>
-						<p:calendar value="#{callReportController.callBackAgainTime}" pattern="dd/MM/yyyy HH:mm" rendered="#{callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later'}" />
+						<h:outputText value="Call back again on" rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and callReportController.callee.contactStatus == 'Qualified'}"/>
+						<p:calendar value="#{callReportController.callBackAgainTime}" pattern="dd/MM/yyyy HH:mm" rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and callReportController.callee.contactStatus == 'Qualified'}" />
 
-						<h:outputText value="Purchase record" rendered="#{callReportController.rating == 'close'}"/>
-						<p:commandButton value="Add purchase record" actionListener="#{callReportController.startAddPurchaseRecord}" update=":form01:productsArea" rendered="#{callReportController.rating == 'close'}" />
+						<h:outputText value="Purchase record" rendered="#{callReportController.rating == 'close' and callReportController.callee.contactStatus == 'Qualified'}"/>
+						<p:commandButton value="Add purchase record" actionListener="#{callReportController.startAddPurchaseRecord}" update=":form01:productsArea" rendered="#{callReportController.rating == 'close' and callReportController.callee.contactStatus == 'Qualified'}" />
 
 					</p:panelGrid>
 					<p:selectBooleanCheckbox value="#{callReportController.appendToActivity}" itemLabel="Append this call report to the sale activity log"/>
-					<br/>
-					<p:commandButton value="Submit" actionListener="#{callReportController.addNewReport}" update=":form01:panel" />
-					<br/>
+
+					<p:panelGrid columns="2">
+						<p:commandButton value="Submit" actionListener="#{callReportController.addNewReport}" update=":form01:panel" />
+						<p:commandButton value="Back" action="#{callReportController.goBack}" rendered="#{callReportController.back or callReportController.backMain}" />
+					</p:panelGrid>
 					<p:commandButton value="Add new contact" actionListener="#{callReportController.startAddNewContact}" update=":form01:contactArea"/>
 				</div>
 		        <div class="ui-grid-col-8">
@@ -113,13 +141,18 @@
 							<p:column headerText="Name">
 								<h:outputText value="#{prod.name}" />
 							</p:column>
-							<p:column headerText="Price">
+							<p:column headerText="Price per month">
 								<h:outputText value="#{prod.price}" />
+							</p:column>
+							<p:column headerText="Permanent price">
+								<h:outputText value="#{prod.permanentPrice}" />
 							</p:column>
 							<p:column headerText="Action">
 								<p:commandButton value="FAQs" actionListener="#{callReportController.startViewFaq(prod)}" update=":form01:faqArea"/>
 								<p:spacer width="7" />
 								<p:commandButton value="Detail" actionListener="#{callReportController.startViewDetail(prod)}" update=":form01:detailArea" />
+								<p:spacer width="7" />
+								<a href="#{callReportController.catalogLink(prod)}" target="_blank" style="color: blue;">Catalog</a>
 							</p:column>
 						</p:dataTable>
 					</p:outputPanel>
@@ -157,6 +190,10 @@
 		        			<p:inputText value="#{callReportController.prodDescSearch}" />
 		        			<p:commandButton value="Search" actionListener="#{callReportController.searchProdByDesc}" update="p3"/>
 
+		        			<h:outputText value="Budget" />
+		        			<p:inputText value="#{callReportController.budget}" />
+		        			<p:commandButton value="Search" actionListener="#{callReportController.searchByBudget}" update="p3" />
+
 		        			<h:outputText value="Category" />
 		        			<p:outputPanel id="p31">
 		        				 <p:selectCheckboxMenu id="menu" value="#{callReportController.selectedCats}" label="Select categories"
@@ -166,9 +203,6 @@
 		        			</p:outputPanel>
 		        			<p:commandButton value="Search" actionListener="#{callReportController.searchByCat}" update="p3" />
 
-		        			<h:outputText value="Budget" />
-		        			<p:inputText value="#{callReportController.budget}" />
-		        			<p:commandButton value="Search" actionListener="#{callReportController.searchByBudget}" update="p3" />
 		        		</p:panelGrid>
 
 						<p:fieldset legend="Search result">
@@ -178,8 +212,11 @@
 								<p:column headerText="Name">
 									<h:outputText value="#{prod.name}" />
 								</p:column>
-								<p:column headerText="Price">
+								<p:column headerText="Price per month">
 									<h:outputText value="#{prod.price}" />
+								</p:column>
+								<p:column headerText="Permanent price" styleClass="#{prod.permanentPrice le callReportController.budget ? 'newMsg': null}">
+									<h:outputText value="#{prod.permanentPrice}" />
 								</p:column>
 								<p:column headerText="Action">
 									<p:commandButton value="FAQs" actionListener="#{callReportController.startViewFaq(prod)}" update=":form01:faqArea"/>
@@ -280,6 +317,9 @@
 					<h:outputText value="Email" />
 					<p:inputText value="#{callReportController.newContact.email}" />
 
+					<h:outputText value="Address" />
+					<p:inputText value="#{callReportController.newContact.address}" />
+
 					<h:outputText value="Gender" />
 					<p:selectOneRadio value="#{callReportController.newContact.gender}">
 						<f:selectItem itemLabel="Male" itemValue="Male" />
@@ -287,7 +327,7 @@
 					</p:selectOneRadio>
 				</p:panelGrid>
 
-				<p:commandButton value="Add" actionListener="#{callReportController.addNewContact}" update=":form01:contactArea" />
+				<p:commandButton value="Add" actionListener="#{callReportController.addNewContact}" update=":form01:contactArea, :form01:panel" />
 				<p:commandButton value="Cancel" actionListener="#{callReportController.cancelAddNewContact}" update=":form01:contactArea" />
 			</p:dialog>
 		</p:outputPanel>
@@ -341,7 +381,7 @@
 									<f:selectItem itemLabel="Permanent" itemValue="0" />
 								</p:selectOneMenu>
 							</p:column>
-							<p:column headerText="Quantity">
+							<p:column headerText="Quantity" rendered="#{callReportController.rating == 'close'}">
 								<p:spinner min="0" value="#{prod.quantity}" />
 							</p:column>
 						</p:dataTable>
@@ -356,15 +396,16 @@
 		<p:outputPanel id="newMeetingArea">
 			<p:dialog id="newMeetingDialog" closable="false" visible="#{callReportController.addMeetingDetailMode}"
 					widgetVar="newMeetingDialog_w" modal="true" resizable="false" draggable="true" header="New meeting detail">
+				<p:growl globalOnly="true" />
 				<p:panelGrid columns="2">
 					<h:outputText value="Meeting location" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
 					<p:outputPanel id="p4" rendered="#{callReportController.rating == 'Follow-up meeting'}" >
 						<p:selectOneRadio value="#{callReportController.meetingLocationMode}">
 						 	<f:selectItem itemLabel="At customer office" itemValue="true" />
 				            <f:selectItem itemLabel="Other" itemValue="false" />
-				            <p:ajax update="p4" listener="#{callReportController.updateMeetingLocation}" />
+				            <p:ajax update="p4"/>
 						</p:selectOneRadio>
-						<p:inputTextarea value="#{callReportController.newMeeting.location}" rendered="#{callReportController.meetingLocationMode == 'true'}" />
+						<p:inputTextarea value="#{callReportController.newMeeting.location}" rendered="#{callReportController.meetingLocationMode == 'false'}"/>
 					</p:outputPanel>
 
 					<h:outputText value="Meeting detail" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
@@ -376,7 +417,8 @@
 					<h:outputText value="Meeting end" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
 					<p:calendar value="#{callReportController.newMeeting.to}" rendered="#{callReportController.rating == 'Follow-up meeting'}" pattern="dd/MM/yyyy HH:mm" />
 				</p:panelGrid>
-				<p:commandButton value="OK" actionListener="#{callReportController.cancelAddNewMeeting}" update=":form01:newMeetingArea" />
+				<p:commandButton value="OK" actionListener="#{callReportController.confirmAddNewMeeting}" update=":form01:newMeetingArea" />
+				<p:commandButton value="Cancel" actionListener="#{callReportController.cancelAddNewMeeting}" update=":form01:newMeetingArea" />
 			</p:dialog>
 		</p:outputPanel>
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import rd.dto.ActivityDto;
+import rd.dto.ProductDto;
 
 public interface ActivityService {
 	public void addActivity(ActivityDto act) throws IOException;
@@ -14,4 +15,5 @@ public interface ActivityService {
 	public int getSeq() throws IOException;
 	public List<ActivityDto> findByStatus(String status, String username) throws IOException;
 	public List<ActivityDto> getActiveDeal() throws IOException;
+	public List<ProductDto> getProductByDeal(int seq) throws IOException;
 }

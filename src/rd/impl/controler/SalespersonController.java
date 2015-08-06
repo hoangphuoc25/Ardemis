@@ -570,7 +570,7 @@ public class SalespersonController implements Serializable {
 
 			String email = row.getCell(3).getStringCellValue();
 			String gender = row.getCell(4).getStringCellValue();
-			String address = row.getCell(4).getStringCellValue();
+			String address = row.getCell(5).getStringCellValue();
 
 			if (name.isEmpty()) {
 				msg += "Row " + (r+2) + ": Name is required";

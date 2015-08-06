@@ -32,8 +32,8 @@ public class ContactDaoImpl implements ContactDao {
 	private static final String GET_BY_COMPANY 		= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where company=?";
 	private static final String SEARCH_CONTACT_BY_NAME 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(name) like ?";
 	private static final String GET_ALL 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact";
-	private static String GET_BY_STATUS_AND_USER 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where contact_status=? and salesperson=?";
-	private static String GET_BY_STATUS 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where contact_status=?";
+	private static String GET_BY_STATUS_AND_USER 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(contact_status)=? and salesperson=?";
+	private static String GET_BY_STATUS 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(contact_status)=?";
 
 	private UserDao userDao;
 
@@ -360,7 +360,7 @@ public class ContactDaoImpl implements ContactDao {
 		try {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(GET_BY_STATUS_AND_USER);
-			prepareStatement.setString(1, status);
+			prepareStatement.setString(1, status.toLowerCase());
 			prepareStatement.setString(2, userId);
 			resultSet = prepareStatement.executeQuery();
 
@@ -397,7 +397,7 @@ public class ContactDaoImpl implements ContactDao {
 		try {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(GET_BY_STATUS);
-			prepareStatement.setString(1, status);
+			prepareStatement.setString(1, status.toLowerCase());
 			resultSet = prepareStatement.executeQuery();
 
 			List<ContactDto> result = new ArrayList<ContactDto>();

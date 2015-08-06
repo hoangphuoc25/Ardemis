@@ -7,6 +7,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import rd.dto.ActivityDto;
+import rd.dto.ProductDto;
 import rd.spec.dao.ActivityDao;
 import rd.spec.dao.Transaction;
 import rd.spec.service.ActivityService;
@@ -114,6 +115,18 @@ public class ActivityServiceImpl implements ActivityService, Serializable {
 		try{
 			transaction.begin();
 			List<ActivityDto> result = activityDao.getActiveDeal(transaction);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<ProductDto> getProductByDeal(int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ProductDto> result = activityDao.getProductByDeal(transaction, seq);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {

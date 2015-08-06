@@ -14,6 +14,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -27,6 +28,7 @@ import rd.dto.FaqDto;
 import rd.dto.InvoiceDto;
 import rd.dto.MeetingDto;
 import rd.dto.ProductDto;
+import rd.dto.SaleTargetDto;
 import rd.dto.ScheduleTaskDto;
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
@@ -39,6 +41,7 @@ import rd.spec.service.FaqService;
 import rd.spec.service.InvoiceService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.ProductService;
+import rd.spec.service.SaleTargetService;
 import rd.spec.service.ScheduleTaskService;
 import rd.spec.service.UserService;
 
@@ -57,6 +60,7 @@ public class CallReportController implements Serializable {
 	@Inject MeetingService meetingService;
 	@Inject FaqService faqService;
 	@Inject InvoiceService invoiceService;
+	@Inject SaleTargetService targetService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -134,11 +138,8 @@ public class CallReportController implements Serializable {
 				callBackNo *= 30;
 			}
 		}
-		ContactDto targetContact = contactService.getContactById(Integer.parseInt(contactName.split("[()]")[1]));
-//		int compSeq = Integer.parseInt(companyName.split("[()]")[1]);
-//		CompanyDto customer = compService.getById(compSeq);
 		int seq = crService.getSeq();
-		CallReportDto cr = new CallReportDto(seq, targetContact, callTime, callDetail, rating, sessionManager.getLoginUser(), callBackNo, dealId);
+		CallReportDto cr = new CallReportDto(seq, getCallee(), callTime, callDetail, rating, sessionManager.getLoginUser(), callBackNo, dealId);
 
 		crService.addReport(cr);
 
@@ -155,28 +156,38 @@ public class CallReportController implements Serializable {
 			String category = "";
 			if (cr.getRating().equalsIgnoreCase("contact again later"))
 				category = "Call back again";
-			else if (cr.getRating().equalsIgnoreCase("Follow-up"))
+			else if (cr.getRating().equalsIgnoreCase("Follow-up call"))
 				category = "Follow-up call";
 
 			int stSeq = stService.getSeq();
-			ScheduleTaskDto task = new ScheduleTaskDto(stSeq, category, temp, sessionManager.getLoginUser().getId(), callDetail, targetContact, dealId, "pending");
+			ScheduleTaskDto task = new ScheduleTaskDto(stSeq, category, temp, sessionManager.getLoginUser().getId(), callDetail, callee, dealId, "Pending");
 			stService.addEvent(task);
 		}
 
 		if (cr.getRating().equalsIgnoreCase("follow-up meeting")) {
-			int actSeq = actService.getSeq();
-			ActivityDto act = new ActivityDto(actSeq, targetContact, new Date(), "Contacted", "Deal started", sessionManager.getLoginUser(), selectedProdList);
-			actService.addActivity(act);
-			sessionManager.addGlobalMessageInfo("New deal added", null);
+			if (getCurrentDeal() == null) {
+				int actSeq = actService.getSeq();
+				ActivityDto act = new ActivityDto(actSeq, callee, new Date(), "Contacted", "Deal started", sessionManager.getLoginUser(), selectedProdList);
+				actService.addActivity(act);
+				sessionManager.addGlobalMessageInfo("New deal added", null);
 
-			if (meetingLocationMode.equalsIgnoreCase("true")) {
-				newMeeting.setLocation(targetContact.getAddress());
+				if (meetingLocationMode.equalsIgnoreCase("true")) {
+					newMeeting.setLocation(callee.getAddress());
+				}
+
+				newMeeting.setContact(callee);
+				newMeeting.setSalesperson(sessionManager.getLoginUser());
+				newMeeting.setActId(actSeq);
+				meetingService.addMeeting(newMeeting);
+				sessionManager.addGlobalMessageInfo("New meeting added", null);
+			} else {
+				actService.updateActivity(currentDeal);
+				newMeeting.setContact(callee);
+				newMeeting.setSalesperson(sessionManager.getLoginUser());
+				newMeeting.setActId(dealId);
+				meetingService.addMeeting(newMeeting);
+				sessionManager.addGlobalMessageInfo("New meeting added", null);
 			}
-			newMeeting.setContact(targetContact);
-			newMeeting.setSalesperson(sessionManager.getLoginUser());
-			newMeeting.setActId(actSeq);
-			meetingService.addMeeting(newMeeting);
-			sessionManager.addGlobalMessageInfo("New meeting added", null);
 		}
 
 		if (rating.equalsIgnoreCase("close")) {
@@ -187,20 +198,31 @@ public class CallReportController implements Serializable {
 				else
 					amount += dto.getPrice() * dto.getDuration() * dto.getQuantity();
 			}
-			InvoiceDto newPurchase = new InvoiceDto(invoiceService.getSeq(), targetContact, (new Date()), amount, selectedProdList, sessionManager.getLoginUser());
+			InvoiceDto newPurchase = new InvoiceDto(invoiceService.getSeq(), callee, (new Date()), amount, selectedProdList, sessionManager.getLoginUser());
 			invoiceService.addInvoice(newPurchase);
 			sessionManager.addGlobalMessageInfo("New purchase record added", null);
 
-			ActivityDto act = actService.getById(dealId);
-			act.setStatus("Completed");
-			actService.updateActivity(act);
-			sessionManager.addGlobalMessageInfo("Deal updated", null);
+			if (dealId > 0) {
+				ActivityDto act = actService.getById(dealId);
+				act.setStatus("Completed");
+				actService.updateActivity(act);
+				sessionManager.addGlobalMessageInfo("Deal updated", null);
+			} else {
+				ActivityDto act = new ActivityDto(actService.getSeq(), callee, (new Date()), "Completed", "", sessionManager.getLoginUser(), selectedProdList);
+				actService.addActivity(act);
+				sessionManager.addGlobalMessageInfo("Deal created and updated", null);
+			}
+
+			SaleTargetDto std = targetService.getSaleTarget(sessionManager.getLoginUser().getId());
+			if (std.getUnit().equalsIgnoreCase("SGD"))
+				std.setCurrent(std.getCurrent() + (int) Math.ceil(amount));
+			else
+				std.setCurrent(std.getCurrent() + 1);
+			targetService.updateSaleTarget(std);
+			sessionManager.addGlobalMessageInfo("Sale progress updated.", null);
 		}
 
-		if (targetContact.getContactStatus().equalsIgnoreCase("new")) {
-			targetContact.setContactStatus("contacted");
-			contactService.updateContact(targetContact);
-		}
+		contactService.updateContact(callee);
 
 		callTime = new Date();
 		callDetail = "";
@@ -210,7 +232,6 @@ public class CallReportController implements Serializable {
 		callBackNo = 0;
 		callBackUnit = "day";
 		callBackAgainTime = null;
-		// prod = new ProductDto();
 
 		sessionManager.addGlobalMessageInfo("New call report added", null);
 
@@ -247,8 +268,6 @@ public class CallReportController implements Serializable {
 			ratings.add("Follow-up call");
 			ratings.add("Follow-up meeting");
 			ratings.add("Contact again later");
-			ratings.add("Not interested");
-			ratings.add("Unresponsive");
 		}
 		return ratings;
 	}
@@ -663,6 +682,15 @@ public class CallReportController implements Serializable {
 		addContactMode = true;
 	}
 
+	public void confirmAddNewMeeting() {
+		if (newMeeting.getFrom() == null || newMeeting.getTo() == null
+				|| newMeeting.getFrom().getTime() > newMeeting.getTo().getTime()) {
+			sessionManager.addGlobalMessageFatal("Invalid time", null);
+			return;
+		}
+		cancelAddNewMeeting();
+	}
+
 	public void cancelAddNewContact() {
 		addContactMode = false;
 		setNewContact(new ContactDto());
@@ -684,8 +712,10 @@ public class CallReportController implements Serializable {
 
 		contactName = newContact.getName() + " - " + newContact.getCompany() + "(" + newContact.getSeq() + ")";
 		sessionManager.addGlobalMessageInfo("New customer added", null);
+		callee = newContact;
 		setNewContact(new ContactDto());
 		addContactMode = false;
+		System.out.println(callee.getName());
 	}
 
 	public ContactDto getNewContact() {
@@ -808,7 +838,6 @@ public class CallReportController implements Serializable {
 	}
 	public void cancelAddProd() {
 		addProdMode = false;
-		selectedProdList = null;
 	}
 
 	public boolean isAddProdMode() {
@@ -827,14 +856,17 @@ public class CallReportController implements Serializable {
 		}
 	}
 
-	private boolean addMeetingDetailMode;
+	private boolean addMeetingDetailMode = false;
 
-	public void startAddNewMeeting() {
-		setAddMeetingDetailMode(true);
+	public void startAddNewMeeting() throws NumberFormatException, IOException {
+		addMeetingDetailMode = true;
 		System.out.println("CallReportController.startAddNewMeeting()");
+		newMeeting = new MeetingDto();
+		setCallee(contactService.getContactById(Integer.parseInt(contactName.split("[()]")[1])));
+		newMeeting.setLocation(getCallee().getAddress());
 	}
 	public void cancelAddNewMeeting() {
-		setAddMeetingDetailMode(false);
+		addMeetingDetailMode = false;
 		System.out.println("CallReportController.cancelAddNewMeeting()");
 	}
 
@@ -927,5 +959,53 @@ public class CallReportController implements Serializable {
 
 	public void setBudget(int budget) {
 		this.budget = budget;
+	}
+
+	private ContactDto callee;
+	public void updateMeetingLocation(AjaxBehaviorEvent event) throws NumberFormatException, IOException {
+		if (meetingLocationMode.equals("false")) {
+			newMeeting.setLocation("");
+		} else {
+			newMeeting.setLocation(getCallee().getAddress());
+		}
+	}
+
+	public void goBack() throws IOException {
+		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+		if (isBack()) {
+			ec.redirect("contactList.jsf?status=new");
+		} else if (isBackMain()) {
+			ec.redirect("salesperson.jsf");
+		} else
+			ec.redirect("salesperson.jsf");
+	}
+
+	public ContactDto getCallee() throws IOException {
+		if (callee == null && contactSeq > 0) {
+			callee = contactService.getContactById(contactSeq);
+		}
+		return callee;
+	}
+
+	public void setCallee(ContactDto callee) {
+		this.callee = callee;
+	}
+
+	public ActivityDto getCurrentDeal() throws IOException {
+		if (currentDeal == null && dealId > 0) {
+			currentDeal = actService.getById(dealId);
+			selectedProdList = actService.getProductByDeal(dealId);
+		}
+		return currentDeal;
+	}
+
+	public void setCurrentDeal(ActivityDto currentDeal) {
+		this.currentDeal = currentDeal;
+	}
+
+	private ActivityDto currentDeal;
+
+	public void updateCallee() throws NumberFormatException, IOException {
+		callee = contactService.getContactById(Integer.parseInt(contactName.split("[()]")[1]));
 	}
 }

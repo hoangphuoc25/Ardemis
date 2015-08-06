@@ -615,6 +615,10 @@ public class ManagerController implements Serializable {
 		otherSalesperson = act.getSalesperson().getName() + "(" + act.getSalesperson().getId() + ")";
 	}
 	public void assignToOther() throws NumberFormatException, IOException {
+		if (otherSalesperson == null || otherSalesperson.isEmpty()) {
+			sessionManager.addGlobalMessageInfo("Invalid info", null);
+			return;
+		}
 		UserDto newSale = userService.findUserById(otherSalesperson.split("[()]")[1]);
 		selectedAct.setSalesperson(newSale);
 		assignToOtherMode = false;

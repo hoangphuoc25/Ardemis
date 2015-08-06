@@ -20,6 +20,7 @@ import rd.dto.ProductDto;
 import rd.dto.UserDto;
 import rd.spec.dao.ActivityDao;
 import rd.spec.dao.ContactDao;
+import rd.spec.dao.ProductDao;
 import rd.spec.dao.Transaction;
 import rd.spec.dao.UserDao;
 import rd.spec.dataCache.ActivityCache;
@@ -30,12 +31,14 @@ public class ActivityDaoImpl implements ActivityDao {
 	private ContactDao contactDao;
 	private UserDao userDao;
 	private ActivityCache actCache;
+	private ProductDao prodDao;
 
 	@Inject
-	public ActivityDaoImpl(ContactDao contactDao, UserDao userDao, ActivityCache actCache) {
+	public ActivityDaoImpl(ContactDao contactDao, UserDao userDao, ActivityCache actCache, ProductDao prodDao) {
 		this.contactDao = contactDao;
 		this.userDao = userDao;
 		this.actCache = actCache;
+		this.prodDao = prodDao;
 	}
 
 	private static String ADD_ACTIVITY 		= "insert into t_activity (seq, contact_seq, start_date, status, remark, salesperson) values (?, ?, ?, ?, ?, ?)";
@@ -48,6 +51,7 @@ public class ActivityDaoImpl implements ActivityDao {
 	private static String GET_ACTIVE_DEAL 	= "select seq, contact_seq, start_date, status, remark, salesperson from t_activity where lower(status) <> ?";
 	private static String ADD_DEAL_PRODUCT	= "insert into t_deal_product (deal_seq, product_seq) values (?, ?)";
 	private static String DELETE_DEAL_PRODUCT= "delete from t_deal_product where deal_seq=?";
+	private static String GET_PRODUCT_BY_DEAL = "select product_seq from t_deal_product where deal_seq=?";
 
 	public void addActivity(Transaction transaction, ActivityDto act)
 			throws IOException {
@@ -68,11 +72,13 @@ public class ActivityDaoImpl implements ActivityDao {
 
 			actCache.put(act);
 
-			for (ProductDto dto: act.getProducts()) {
-				prepareStatement = connection.prepareStatement(ADD_DEAL_PRODUCT);
-				prepareStatement.setInt(1, getSeq(transaction));
-				prepareStatement.setInt(2, dto.getSeq());
-				resultSet = prepareStatement.executeQuery();
+			if (act.getProducts() != null) {
+				for (ProductDto dto: act.getProducts()) {
+					prepareStatement = connection.prepareStatement(ADD_DEAL_PRODUCT);
+					prepareStatement.setInt(1, getSeq(transaction));
+					prepareStatement.setInt(2, dto.getSeq());
+					resultSet = prepareStatement.executeQuery();
+				}
 			}
 
 		} catch (SQLException e) {
@@ -190,8 +196,7 @@ public class ActivityDaoImpl implements ActivityDao {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(UPDATE_ACTIVITY);
 			prepareStatement.setInt(1, act.getContact().getSeq());
-			prepareStatement.setDate(2, new java.sql.Date(act.getStartDate()
-					.getTime()));
+			prepareStatement.setDate(2, new java.sql.Date(act.getStartDate().getTime()));
 			prepareStatement.setString(3, act.getStatus());
 			prepareStatement.setString(4, act.getRemark());
 			prepareStatement.setString(5, act.getSalesperson().getId());
@@ -382,4 +387,41 @@ public class ActivityDaoImpl implements ActivityDao {
 			}
 		}
 	}
+	public List<ProductDto> getProductByDeal(Transaction transaction, int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_PRODUCT_BY_DEAL);
+			prepareStatement.setInt(1, seq);
+			resultSet = prepareStatement.executeQuery();
+
+			List<ProductDto> result = new ArrayList<ProductDto>();
+			while (resultSet.next()) {
+				result.add(prodDao.getProductById(transaction, resultSet.getInt(1)));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
 }
