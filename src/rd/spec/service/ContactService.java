@@ -21,4 +21,5 @@ public interface ContactService {
 	public List<ContactDto> getAll() throws IOException;
 	public List<ContactDto> getByStatusAndUser(String status, String userId) throws IOException;
 	public List<ContactDto> getByStatus(String status) throws IOException;
+	public int getNumberOfContactPerSale(String saleId) throws IOException;
 }

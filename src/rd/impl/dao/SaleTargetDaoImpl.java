@@ -28,12 +28,12 @@ public class SaleTargetDaoImpl implements SaleTargetDao {
 		this.userDao = userDao;
 	}
 
-	private static String ADD_SALE_TARGET 		= "insert into t_sale_target (sale, target, from_date, to_date, current_record, unit) values (?, ?, ?, ?, ?, ?)";
+	private static String ADD_SALE_TARGET 		= "insert into t_sale_target (sale, target, from_date, to_date, current_record, unit, action) values (?, ?, ?, ?, ?, ?, ?)";
 	private static String DELETE_SALE_TARGET 	= "delete from t_sale_target where sale=?";
 	private static String GET_SEQ 				= "select max(seq) + 1 from t_sale_target";
-	private static String UPDATE_SALE_TARGET 	= "update t_sale_target set target=?, from_date=?, to_date=?, current_record=?, unit=? where sale=?";
-	private static String GET_BY_USER 			= "select seq, target, from_date, to_date, current_record, unit from t_sale where sale=?";
-	private static String GET_SALE_TARGET 		= "select sale, target, from_date, to_date, current_record, unit from t_sale_target where sale=?";
+	private static String UPDATE_SALE_TARGET 	= "update t_sale_target set target=?, from_date=?, to_date=?, current_record=?, unit=?, action=? where sale=?";
+	private static String GET_BY_USER 			= "select seq, target, from_date, to_date, current_record, unit, action from t_sale where sale=?";
+	private static String GET_SALE_TARGET 		= "select sale, target, from_date, to_date, current_record, unit, action from t_sale_target where sale=?";
 
 	public SaleTargetDto getSaleTarget(Transaction transaction, String saleId)
 			throws IOException {
@@ -80,8 +80,9 @@ public class SaleTargetDaoImpl implements SaleTargetDao {
 		Date toDate = new Date(resultSet.getDate(4).getTime());
 		int current = resultSet.getInt(5);
 		String unit = resultSet.getString(6);
+		String action = resultSet.getString(7);
 
-		return new SaleTargetDto(sale, target, fromDate, toDate, current, unit);
+		return new SaleTargetDto(sale, action, target, fromDate, toDate, current, unit);
 	}
 
 	public void addSaleTarget(Transaction transaction, SaleTargetDto std)
@@ -105,6 +106,7 @@ public class SaleTargetDaoImpl implements SaleTargetDao {
 			prepareStatement.setDate(4, new java.sql.Date(std.getToDate().getTime()));
 			prepareStatement.setInt(5, std.getCurrent());
 			prepareStatement.setString(6, std.getUnit());
+			prepareStatement.setString(7, std.getAction());
 
 			resultSet = prepareStatement.executeQuery();
 
@@ -174,6 +176,7 @@ public class SaleTargetDaoImpl implements SaleTargetDao {
 			prepareStatement.setInt(4, std.getCurrent());
 			prepareStatement.setString(5, std.getUnit());
 			prepareStatement.setString(6, std.getSale().getId());
+			prepareStatement.setString(7, std.getAction());
 
 			resultSet = prepareStatement.executeQuery();
 

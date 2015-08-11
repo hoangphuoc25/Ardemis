@@ -22,6 +22,7 @@ public class ProductDto {
 		this.summary = summary;
 		this.target = target;
 		this.price = price2;
+		this.quantity = 1;
 	}
 
 	public ProductDto(int seq, String name, String summary, String target, double price2, List<CategoryDto> category, double permanentPrice) {
@@ -32,9 +33,11 @@ public class ProductDto {
 		this.price = price2;
 		this.category = category;
 		this.permanentPrice = permanentPrice;
+		this.quantity = 1;
 	}
 
 	public ProductDto() {
+		this.quantity = 1;
 	}
 
 	public ProductDto(ProductDto selectedProd) {
@@ -45,6 +48,7 @@ public class ProductDto {
 		this.price = selectedProd.price;
 		this.category = selectedProd.category;
 		this.permanentPrice = selectedProd.getPermanentPrice();
+		this.quantity = 1;
 	}
 
 	public int getSeq() {

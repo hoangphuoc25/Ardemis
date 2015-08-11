@@ -22,4 +22,5 @@ public interface InvoiceService {
 	public List<InvoiceDto> searchInvoiceAfterDate(Date date) throws IOException;
 	public List<InvoiceDto> searchInvoiceBeforeAfter(Date after, Date before) throws IOException;
 	public List<CompanyDto> findCompanyByProduct(int seq) throws IOException;
+	public List<InvoiceDto> getBySalesperson(String userId) throws IOException;
 }

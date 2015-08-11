@@ -121,7 +121,7 @@
 			</p:panelGrid>
 		</p:fieldset>
 
-		<p:panel id="toggleable" header="Meeting schedule today" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px">
+		<p:panel id="toggleable" header="Your meeting schedule today" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px">
 			<p:dataTable id="tbl2" rowIndexVar="row" value="#{scheduleController.events}" var="event"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="8">
@@ -159,7 +159,7 @@
 	        <p:commandButton value="Add new meeting" actionListener="#{scheduleController.startAddMeeting}" update=":form01"/>
     	</p:panel>
 
-		<p:panel id="tasks" header="Task today" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="tasksPanel" style="margin-bottom:20px">
+		<p:panel id="tasks" header="Your task today" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="tasksPanel" style="margin-bottom:20px">
 			<p:dataTable id="taskTbl" rowIndexVar="row" value="#{scheduleController.tasks}" var="task"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="15" >

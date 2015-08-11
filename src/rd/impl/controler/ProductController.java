@@ -295,7 +295,7 @@ public class ProductController implements Serializable {
 	public String logout() {
 		conversationEnd();
 		sessionManager.logoff();
-		return "../portal.jsf?faces-redirect=true";
+		return "../main.jsf?faces-redirect=true";
 	}
 
 	public List<FeedbackDto> getFeedbacks() throws IOException {

@@ -111,13 +111,15 @@
 					<h:outputText value="#{sale.phone}" />
 				</p:column>
 				<p:column table="Link">
-					<p:commandButton value="View Expense" actionListener="#{managerController.viewExpense(sale)}" update=":form01" />
+					<p:commandButton value="Expense" actionListener="#{managerController.viewExpense(sale)}" update=":form01" />
 					<p:spacer width="7px" />
-					<p:commandButton value="View Schedule" actionListener="#{managerController.updateEmpId(sale)}" update=":form01:schedule" />
+					<p:commandButton value="Schedule" actionListener="#{managerController.updateEmpId(sale)}" update=":form01:schedule" />
 					<p:spacer width="7px" />
 					<p:commandButton value="Assign task" actionListener="#{managerController.startAssign(sale)}" update=":form01" />
 					<p:spacer width="7px" />
-					<p:commandButton value="View Sale Activity" actionListener="#{managerController.viewActivity(sale)}" update=":form01" />
+					<p:commandButton value="Current deals" actionListener="#{managerController.viewActivity(sale)}" update=":form01" />
+					<p:spacer width="7px" />
+					<p:commandButton value="Sale Record" actionListener="#{managerController.startViewSaleRecord(sale)}" update=":form01:saleRecordArea" />
 				</p:column>
 			</p:dataTable>
 		</p:fieldset>
@@ -132,10 +134,10 @@
 			</p:outputPanel>
 		</p:fieldset>
 
-		<h3>Current deals</h3>
+		<h4>Current deals</h4>
 		<p:dataTable id="tbl4" rowIndexVar="row" value="#{managerController.allDeal}" var="deal"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-				rows="15">
+				rows="10">
 			<p:column headerText="Contact">
 				<h:outputText value="#{deal.contact.name}" />
 			</p:column>
@@ -146,9 +148,8 @@
 				<h:outputText value="#{deal.salesperson.name}" />
 			</p:column>
 			<p:column>
-				<p:commandButton value="Assign to other salesperson" actionListener="#{managerController.startAssignToOther(deal)}" update=":form01:assignOtherArea"/>
+				<p:commandButton value="Reassign" actionListener="#{managerController.startAssignToOther(deal)}" update=":form01:assignOtherArea"/>
 			</p:column>
-
 		</p:dataTable>
 
 		<p:dialog id="assignDialog" closable="false" visible="#{managerController.assignMode}"
@@ -233,18 +234,25 @@
 			<p:dialog id="saleTargetDialog" closable="false" visible="#{managerController.assignTargetMode}"
 					widgetVar="saleTargetDialog_w" modal="true" resizable="false" draggable="true" header="Sale target">
 				<p:messages />
-				<p:panelGrid columns="3">
+				<p:panelGrid columns="4">
 					<h:outputText value="Target" />
+					<p:selectOneMenu value="#{managerController.currentTarget.action}">
+						<f:selectItem itemLabel="Select" itemValue="Select" />
+						<f:selectItem itemLabel="Generate revenue of" itemValue="Generate revenue of" />
+						<f:selectItem itemLabel="Close deals with" itemValue="Close deals with" />
+						<p:ajax update="saleTargetArea" listener="#{managerController.updateUnit}" />
+					</p:selectOneMenu>
 					<p:inputText value="#{managerController.currentTarget.target}" />
-					<p:selectOneRadio value="#{managerController.currentTarget.unit}">
-						<f:selectItem itemLabel="SGD" itemValue="SGD" />
-						<f:selectItem itemLabel="Customers" itemValue="Customers" />
-					</p:selectOneRadio>
+					<h:outputText rendered="#{managerController.currentTarget.action eq null or managerController.currentTarget.action=='Select'}" />
+					<h:outputText value="SGD" rendered="#{managerController.currentTarget.action == 'Generate revenue of'}" />
+					<h:outputText value="Customers" rendered="#{managerController.currentTarget.action == 'Close deals with'}" />
 					<h:outputText value="From" />
 					<p:calendar value="#{managerController.currentTarget.fromDate}" pattern="dd/MM/yyyy" />
 					<h:outputText />
+					<h:outputText />
 					<h:outputText value="To" />
 					<p:calendar value="#{managerController.currentTarget.toDate}" pattern="dd/MM/yyyy" />
+					<h:outputText />
 					<h:outputText />
 				</p:panelGrid>
 				<p:commandButton value="Assign" actionListener="#{managerController.assignSaleTarget}" update=":form01" />
@@ -322,6 +330,31 @@
 
 				<p:commandButton value="Confirm" actionListener="#{managerController.assignToOther}" update=":form01" />
 				<p:commandButton value="Cancel" actionListener="#{managerController.cancelAssignToOther}" update=":form01" />
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:outputPanel id="saleRecordArea">
+			<p:dialog id="saleRecordDialog" closable="false" visible="#{managerController.viewSaleRecordMode}"
+					widgetVar="saleRecordDialog_w" modal="true" resizable="false" draggable="true" header="Sale record" width="600px">
+				<p:commandButton value="Close" actionListener="#{managerController.cancelViewSaleRecord}" update=":form01:saleRecordArea"/>
+				<p:dataTable id="saleRecordTbl" rowIndexVar="row" value="#{managerController.empSaleRecords}" var="invoice"
+						paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+						rows="10">
+					<p:column headerText="seq">
+						<h:outputText value="#{invoice.seq}" />
+					</p:column>
+					<p:column headerText="Customer name">
+						<h:outputText value="#{invoice.contact.name}" />
+					</p:column>
+					<p:column headerText="Purchase Date">
+						<h:outputText value="#{invoice.purchaseDate}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="Amount">
+						<h:outputText value="#{invoice.amount}" />
+					</p:column>
+				</p:dataTable>
 			</p:dialog>
 		</p:outputPanel>
 	</h:form>

@@ -499,6 +499,7 @@ public class CallReportController implements Serializable {
 
 	public void searchSchedule() throws IOException {
 		mySchedule = meetingService.getMeetingByDayAndUser(sessionManager.getLoginUser().getId(), scheduleSearch);
+		myTask = stService.getByUser(sessionManager.getLoginUser().getId(), scheduleSearch);
 	}
 
 	public String getAssignee() throws IOException {
@@ -1008,4 +1009,14 @@ public class CallReportController implements Serializable {
 	public void updateCallee() throws NumberFormatException, IOException {
 		callee = contactService.getContactById(Integer.parseInt(contactName.split("[()]")[1]));
 	}
+
+	public List<ScheduleTaskDto> getMyTask() {
+		return myTask;
+	}
+
+	public void setMyTask(List<ScheduleTaskDto> myTask) {
+		this.myTask = myTask;
+	}
+
+	private List<ScheduleTaskDto> myTask;
 }

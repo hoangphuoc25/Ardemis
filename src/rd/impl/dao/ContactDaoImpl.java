@@ -34,6 +34,7 @@ public class ContactDaoImpl implements ContactDao {
 	private static final String GET_ALL 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact";
 	private static String GET_BY_STATUS_AND_USER 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(contact_status)=? and salesperson=?";
 	private static String GET_BY_STATUS 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(contact_status)=?";
+	private static String GET_NUMBER_OF_CONTACT_PER_SALE = "select count(*) from t_contact where lower(contact_status)='new' and salesperson=?";
 
 	private UserDao userDao;
 
@@ -425,4 +426,41 @@ public class ContactDaoImpl implements ContactDao {
 			}
 		}
 	}
+	public int getNumberOfContactPerSale(Transaction transaction, String saleId) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_NUMBER_OF_CONTACT_PER_SALE);
+			prepareStatement.setString(1, saleId);
+			resultSet = prepareStatement.executeQuery();
+
+			int result = 0;
+			while (resultSet.next()) {
+				result = resultSet.getInt(1);
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
 }

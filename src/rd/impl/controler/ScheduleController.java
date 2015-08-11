@@ -12,6 +12,8 @@ import java.util.List;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -204,10 +206,14 @@ public class ScheduleController implements Serializable {
 		return true;
 	}
 
-	public String logout() {
+	public String logout() throws IOException {
 		conversationEnd();
+		System.out.println("ended");
 		sessionManager.logoff();
-		return "../portal.jsf?faces-redirect=true";
+		System.out.println("logged out");
+		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+		ec.redirect("main.jsf");
+		return "../main.jsf?faces-redirect=true";
 	}
 
 	public List<MeetingDto> getEvents() throws IOException {

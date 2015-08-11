@@ -292,10 +292,11 @@ public class InvoiceDaoImpl implements InvoiceDao {
 	private static String DELETE_PRODUCT_PURCHASE 	= "delete from t_product_purchase where invoice_seq=?";
 
 	private static String FIND_INVOICES_BY_PRODUCT 	= "select distinct ti.seq from t_invoice ti join t_product_purchase tpp on ti.seq=tpp.invoice_seq where tpp.product_seq=?";
-	private static String SEARCH_INVOICE_BEFORE_DATE = "select seq, contact_seq, purchase_date, amount from t_invoice where purchase_date <= ? ";
-	private static String SEARCH_INVOICE_AFTER_DATE = "select seq, contact_seq, purchase_date, amount from t_invoice where purchase_date >= ?";
-	private static String SEARCH_INVOICE_BEFORE_AFTER = "select seq, contact_seq, purchase_date, amount from t_invoice where purchase_date >= ? and purchase_date <= ?";
+	private static String SEARCH_INVOICE_BEFORE_DATE = "select seq, contact_seq, purchase_date, amount, salesperson from t_invoice where purchase_date <= ? ";
+	private static String SEARCH_INVOICE_AFTER_DATE = "select seq, contact_seq, purchase_date, amount, salesperson from t_invoice where purchase_date >= ?";
+	private static String SEARCH_INVOICE_BEFORE_AFTER = "select seq, contact_seq, purchase_date, amount, salesperson from t_invoice where purchase_date >= ? and purchase_date <= ?";
 	private static String FIND_COMPANY_BY_PRODUCT 	= "select distinct i.contact_seq from t_invoice i join t_product_purchase pp on i.seq = pp.invoice_seq where pp.product_seq=?";
+	private static String GET_BY_SALESPERSON 		= "select seq, contact_seq, purchase_date, amount, salesperson from t_invoice where salesperson=? order by purchase_date desc";
 
 	public List<InvoiceDto> getByCustomer(Transaction transaction, int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -545,6 +546,42 @@ public class InvoiceDaoImpl implements InvoiceDao {
 			List<CompanyDto> result = new ArrayList<CompanyDto>();
 			while (resultSet.next()) {
 				result.add(companyDao.getById(transaction, resultSet.getInt(1)));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	public List<InvoiceDto> getBySalesperson(Transaction transaction, String userId) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_SALESPERSON);
+			prepareStatement.setString(1, userId);
+			resultSet = prepareStatement.executeQuery();
+
+			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
+			while (resultSet.next()) {
+				result.add(makeInvoiceDto(transaction, resultSet));
 			}
 			return result;
 

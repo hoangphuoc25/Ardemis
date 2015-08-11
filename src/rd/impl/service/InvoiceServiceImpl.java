@@ -183,4 +183,16 @@ public class InvoiceServiceImpl implements InvoiceService, Serializable {
 			throw e;
 		}
 	}
+	public List<InvoiceDto> getBySalesperson(String userId) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<InvoiceDto> result = invoiceDao.getBySalesperson(transaction, userId);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

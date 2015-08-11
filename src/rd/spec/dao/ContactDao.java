@@ -26,4 +26,5 @@ public interface ContactDao {
 	public List<ContactDto> getByStatusAndUser(Transaction transaction, String status, String userId) throws IOException;
 
 	public List<ContactDto> getByStatus(Transaction transaction, String status) throws IOException;
+	public int getNumberOfContactPerSale(Transaction transaction, String saleId) throws IOException;
 }

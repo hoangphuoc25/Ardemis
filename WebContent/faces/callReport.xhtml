@@ -61,12 +61,12 @@
 					</p:panelGrid>
 					<p:panelGrid id="panel" columns="2">
 						<h:outputText value="Contact name"/>
-						<p:autoComplete minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestContact}" value="#{callReportController.contactName}" style="width: 100%;">
+						<p:autoComplete minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestContact}" value="#{callReportController.contactName}">
 							<p:ajax listener="#{callReportController.updateCallee}" event="itemSelect" update="panel"/>
 						</p:autoComplete>
 
 						<h:outputText value="Call time"/>
-						<p:calendar value="#{callReportController.callTime}" pattern="MM/dd/yyyy HH:mm" />
+						<p:calendar value="#{callReportController.callTime}" pattern="MM/dd/yyyy HH:mm"/>
 
 						<h:outputText value="Call detail" />
 						<p:inputTextarea value="#{callReportController.callDetail}" />
@@ -136,7 +136,7 @@
 			        		</p:autoComplete>
 		        		</p:panelGrid>
 		        		<p:dataTable id="prodTable" rowIndexVar="row" value="#{callReportController.searchProdList}" var="prod"
-								paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+
 								rows="15">
 							<p:column headerText="Name">
 								<h:outputText value="#{prod.name}" />
@@ -164,9 +164,13 @@
 		        			<p:calendar value="#{callReportController.scheduleSearch}" pattern="dd/MM/yyyy" />
 		        			<p:commandButton value="Search" actionListener="#{callReportController.searchSchedule}" update="p2"/>
 		        		</p:panelGrid>
+		        		<h4>Meeting schedule</h4>
 		        		<p:dataTable id="scheduleTable" rowIndexVar="row" value="#{callReportController.mySchedule}" var="sch"
 								paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 								rows="15">
+							<p:column headerText="Customer">
+								<h:outputText value="#{sch.contact.name} - #{sch.contact.company}" />
+							</p:column>
 							<p:column headerText="From">
 								<h:outputText value="#{sch.from}">
 									<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
@@ -179,6 +183,22 @@
 							</p:column>
 							<p:column headerText="Detail">
 								<h:outputText value="#{sch.detail}" />
+							</p:column>
+						</p:dataTable>
+						<h4>Tasks</h4>
+						<p:dataTable id="taskTable" rowIndexVar="row" value="#{callReportController.myTask}" var="task"
+								paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+								rows="15">
+							<p:column headerText="Customer">
+								<h:outputText value="#{task.contact.name}" />
+							</p:column>
+							<p:column headerText="Time">
+								<h:outputText value="#{task.time}">
+									<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="Detail">
+								<h:outputText value="#{task.detail}" />
 							</p:column>
 						</p:dataTable>
 	        		</p:outputPanel>
@@ -305,11 +325,11 @@
 			<p:dialog id="contactDialog" closable="false" visible="#{callReportController.addContactMode}"
 					widgetVar="contactDialog_w" modal="true" resizable="false" draggable="true" header="">
 				<p:panelGrid columns="2">
-					<h:outputText value="Company Name"/>
-					<p:inputText value="#{callReportController.newContact.company}" />
-
 					<h:outputText value="Contact name" />
 					<p:inputText value="#{callReportController.newContact.name}" />
+
+					<h:outputText value="Company Name"/>
+					<p:inputText value="#{callReportController.newContact.company}" />
 
 					<h:outputText value="Contact number" />
 					<p:inputText value="#{callReportController.newContact.phone}" />
@@ -382,7 +402,7 @@
 								</p:selectOneMenu>
 							</p:column>
 							<p:column headerText="Quantity" rendered="#{callReportController.rating == 'close'}">
-								<p:spinner min="0" value="#{prod.quantity}" />
+								<p:spinner min="1" value="#{prod.quantity}" />
 							</p:column>
 						</p:dataTable>
 						<p:commandButton value="Delete selected" actionListener="#{callReportController.deleteSelectedProduct}" update="p5"/>

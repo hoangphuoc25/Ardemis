@@ -2,6 +2,7 @@ package rd.impl.service;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -139,6 +140,30 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService, Serializabl
 		try{
 			transaction.begin();
 			List<ScheduleTaskDto> result = seDao.getByDeal(transaction, seq);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<ScheduleTaskDto> getTaskNextWeekByUser(String userId) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ScheduleTaskDto> result = seDao.getTaskNextWeekByUser(transaction, userId);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<ScheduleTaskDto> getByUser(String userId, Date date) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ScheduleTaskDto> result = seDao.getByUser(transaction, userId, date);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {

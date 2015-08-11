@@ -1,6 +1,7 @@
 package rd.spec.service;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import rd.dto.ScheduleTaskDto;
@@ -16,4 +17,6 @@ public interface ScheduleTaskService {
 	public List<ScheduleTaskDto> getByCompany(int seq) throws IOException;
 	public List<ScheduleTaskDto> getByContact(int seq) throws IOException;
 	public List<ScheduleTaskDto> getByDeal(int seq) throws IOException;
+	public List<ScheduleTaskDto> getTaskNextWeekByUser(String userId) throws IOException;
+	public List<ScheduleTaskDto> getByUser(String userId, Date date) throws IOException;
 }

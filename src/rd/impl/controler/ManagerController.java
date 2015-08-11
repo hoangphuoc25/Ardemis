@@ -34,7 +34,7 @@ import org.primefaces.model.StreamedContent;
 
 import rd.dto.ActivityDto;
 import rd.dto.CompanyDto;
-import rd.dto.ContactDto;
+import rd.dto.InvoiceDto;
 import rd.dto.MeetingDto;
 import rd.dto.NoteDto;
 import rd.dto.ProductDto;
@@ -46,6 +46,7 @@ import rd.spec.manager.SessionManager;
 import rd.spec.service.ActivityService;
 import rd.spec.service.CompanyService;
 import rd.spec.service.ContactService;
+import rd.spec.service.InvoiceService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.NoteService;
 import rd.spec.service.ProductService;
@@ -404,13 +405,13 @@ public class ManagerController implements Serializable {
 		int noOfEmp = sales.size();
 		int amount = currentTarget.getTarget() / noOfEmp;
 		for (UserDto dto: sales) {
-			SaleTargetDto std = new SaleTargetDto(dto, amount, currentTarget.getFromDate(), currentTarget.getToDate(), 0, currentTarget.getUnit());
+			SaleTargetDto std = new SaleTargetDto(dto, currentTarget.getAction(), amount, currentTarget.getFromDate(), currentTarget.getToDate(), 0, currentTarget.getUnit());
 			stService.addSaleTarget(std);
 
 			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 			String fromDateStr = sdf.format(currentTarget.getFromDate());
 			String toDateStr = sdf.format(currentTarget.getToDate());
-			String messageContent = "New sale target has been assigned: " + amount + " from " + fromDateStr + " to " + toDateStr;
+			String messageContent = "New sale target has been assigned: " + currentTarget.getAction().toLowerCase() + " " + amount + " " + currentTarget.getUnit() + " from " + fromDateStr + " to " + toDateStr;
 
 			NoteDto message = new NoteDto(noteService.getSeq(), sessionManager.getLoginUser(), dto, messageContent, new Date());
 			noteService.addNote(message);
@@ -622,6 +623,7 @@ public class ManagerController implements Serializable {
 		UserDto newSale = userService.findUserById(otherSalesperson.split("[()]")[1]);
 		selectedAct.setSalesperson(newSale);
 		assignToOtherMode = false;
+		sessionManager.addGlobalMessageInfo("Deal reassigned", null);
 	}
 	public void cancelAssignToOther() {
 		assignToOtherMode = false;
@@ -652,5 +654,42 @@ public class ManagerController implements Serializable {
 
 	public void setAllDeal(List<ActivityDto> allDeal) {
 		this.allDeal = allDeal;
+	}
+
+	public List<InvoiceDto> getEmpSaleRecords() {
+		return empSaleRecords;
+	}
+
+	public void setEmpSaleRecords(List<InvoiceDto> empSaleRecords) {
+		this.empSaleRecords = empSaleRecords;
+	}
+
+	public boolean isViewSaleRecordMode() {
+		return viewSaleRecordMode;
+	}
+
+	public void setViewSaleRecordMode(boolean viewSaleRecordMode) {
+		this.viewSaleRecordMode = viewSaleRecordMode;
+	}
+
+	private List<InvoiceDto> empSaleRecords;
+	private boolean viewSaleRecordMode = false;
+
+	@Inject InvoiceService invoiceService;
+	public void startViewSaleRecord(UserDto salesperson) throws IOException {
+		empSaleRecords = invoiceService.getBySalesperson(salesperson.getId());
+		viewSaleRecordMode = true;
+	}
+
+	public void cancelViewSaleRecord() {
+		viewSaleRecordMode = false;
+	}
+
+	public void updateUnit() {
+		if (currentTarget.getAction().equalsIgnoreCase("Generate revenue of")) {
+			currentTarget.setUnit("SGD");
+		} else if (currentTarget.getAction().equalsIgnoreCase("Close deals with")) {
+			currentTarget.setUnit("customers");
+		}
 	}
 }

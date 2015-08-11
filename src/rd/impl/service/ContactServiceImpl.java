@@ -143,4 +143,16 @@ public class ContactServiceImpl implements ContactService, Serializable {
 			throw e;
 		}
 	}
+	public int getNumberOfContactPerSale(String saleId) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			int result = contactDao.getNumberOfContactPerSale(transaction, saleId);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

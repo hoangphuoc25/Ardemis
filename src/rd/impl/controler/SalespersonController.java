@@ -9,6 +9,8 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -27,6 +29,8 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
@@ -38,9 +42,9 @@ import rd.dto.CompanyDto;
 import rd.dto.ContactDto;
 import rd.dto.InvoiceDto;
 import rd.dto.ProductDto;
-import rd.dto.SaleExpenseDto;
 import rd.dto.TeamDto;
 import rd.dto.UserDto;
+import rd.dto.WrUserDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.CallReportService;
 import rd.spec.service.CompanyService;
@@ -243,7 +247,7 @@ public class SalespersonController implements Serializable {
 	public String logout() {
 		conversationEnd();
 		sessionManager.logoff();
-		return "../portal.jsf?faces-redirect=true";
+		return "../main.jsf?faces-redirect=true";
 	}
 
 	public String getShowingMode() {
@@ -548,6 +552,19 @@ public class SalespersonController implements Serializable {
 
 		HSSFSheet sheet = wb.getSheetAt(0);
 		int rows = sheet.getPhysicalNumberOfRows();
+
+		List<ContactDto> contacts = new ArrayList<ContactDto>();
+		FormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
+
+		for (int r = 0; r < rows - 1; r++) {
+			HSSFRow row = sheet.getRow(r + 1);
+			evaluator.evaluateInCell(row.getCell(1));
+			evaluator.evaluateInCell(row.getCell(2));
+			evaluator.evaluateInCell(row.getCell(3));
+			evaluator.evaluateInCell(row.getCell(4));
+			evaluator.evaluateInCell(row.getCell(5));
+		}
+
 		for (int r = 0; r < rows - 1; r++) {
 			HSSFRow row = sheet.getRow(r + 1);
 			if (row == null) {
@@ -559,7 +576,11 @@ public class SalespersonController implements Serializable {
 				name = String.valueOf(row.getCell(0).getNumericCellValue());
 			} else if (row.getCell(0).getCellType() == HSSFCell.CELL_TYPE_STRING) {
 				name = row.getCell(0).getStringCellValue();
+			} else if (row.getCell(0).getCellType() == HSSFCell.CELL_TYPE_FORMULA) {
+				CellValue cellValue = evaluator.evaluate(row.getCell(0));
+				name = cellValue.getStringValue();
 			}
+			System.out.println(row.getCell(0).getCellType());
 			String company = row.getCell(1).getStringCellValue();
 			String phone = "";
 			if (row.getCell(2).getCellType() == HSSFCell.CELL_TYPE_NUMERIC) {
@@ -574,16 +595,70 @@ public class SalespersonController implements Serializable {
 
 			if (name.isEmpty()) {
 				msg += "Row " + (r+2) + ": Name is required";
+				System.out.println("name invalid at row" + (r+2));
 				continue;
 			}
 			if (!validatePhone(phone)) {
 				msg += "Row " + (r+2) + ": Phone number is invalid.";
+				System.out.println("phone invalid at row" + (r+2));
 				continue;
 			}
 
-			ContactDto contact = new ContactDto(contactService.getSeq(), name, gender, phone, email, company, "English", address, sessionManager.getLoginUser(), "new");
-			contactService.addContact(contact);
+			ContactDto contact = new ContactDto(contactService.getSeq(), name, gender, phone, email, company, "English", address, sessionManager.getLoginUser(), "New");
+			contacts.add(contact);
+			//contactService.addContact(contact);
 		}
+
+		List<UserDto> sales = userService.getUserByRole("sale");
+		List<WrUserDto> wrSales = new ArrayList<WrUserDto>();
+		for (UserDto dto: sales) {
+			wrSales.add(new WrUserDto(dto, contactService.getNumberOfContactPerSale(dto.getId())));
+		}
+		Collections.sort(wrSales, new Comparator<WrUserDto>() {
+			public int compare(WrUserDto f1, WrUserDto f2) {
+				if (f1.getAssignedContacts() == f2.getAssignedContacts()) {
+					return 0;
+				} else if (f1.getAssignedContacts() > f2.getAssignedContacts()) {
+					return 1;
+				} else {
+					return -1;
+				}
+			}
+		});
+
+		int currentNoAssigned = 0;
+		for (WrUserDto dto: wrSales) {
+			System.out.println(dto.getAssignedContacts());
+			currentNoAssigned += dto.getAssignedContacts();
+		}
+
+		int newAvg = (currentNoAssigned + contacts.size()) / sales.size() + 1;
+		System.out.println("SalespersonController.readEmpListFromExcel()");
+		System.out.println(currentNoAssigned + " " + contacts.size());
+		System.out.println(newAvg);
+		int i = 0;
+		for (ContactDto contact: contacts) {
+			if (wrSales.get(i).current > newAvg) {
+				i = (i + 1) % wrSales.size();
+			}
+			contact.setAssignee(wrSales.get(i).getSale());
+			contactService.addContact(contact);
+			wrSales.get(i).current++;
+			i = (i + 1) % wrSales.size();
+		}
+
+//		for (WrUserDto wrud: wrSales) {
+//			for (int j = 0; j < newAvg - wrud.getAssignedContacts(); j++) {
+//				contacts.get(j+i).setAssignee(wrud.getSale());
+//				contactService.addContact(contacts.get(j+i));
+//			}
+//			i += newAvg - wrud.getAssignedContacts();
+//			System.out.println("i: " + i);
+//		}
+		for (WrUserDto wrud: wrSales) {
+			System.out.println(wrud.current);
+		}
+
 		return msg;
 	}
 

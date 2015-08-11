@@ -1,6 +1,7 @@
 package rd.spec.dao;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import rd.dto.ScheduleTaskDto;
@@ -16,4 +17,6 @@ public interface ScheduleTaskDao {
 	public List<ScheduleTaskDto> getByCompany(Transaction transaction, int seq) throws IOException;
 	public List<ScheduleTaskDto> getByContact(Transaction transaction, int seq) throws IOException;
 	public List<ScheduleTaskDto> getByDeal(Transaction transaction, int seq) throws IOException;
+	public List<ScheduleTaskDto> getTaskNextWeekByUser(Transaction transaction, String userId) throws IOException;
+	public List<ScheduleTaskDto> getByUser(Transaction transaction, String userId, Date date) throws IOException;
 }

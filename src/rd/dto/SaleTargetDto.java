@@ -4,15 +4,17 @@ import java.util.Date;
 
 public class SaleTargetDto {
 	private int target;
+	private String action;
 	private Date fromDate;
 	private Date toDate;
 	private UserDto sale;
 	private int current;
 	private String unit;
 
-	public SaleTargetDto(UserDto sale, int target, Date fromDate, Date toDate,
+	public SaleTargetDto(UserDto sale, String action, int target, Date fromDate, Date toDate,
 			int current, String unit) {
 		this.target = target;
+		this.setAction(action);
 		this.fromDate = fromDate;
 		this.toDate = toDate;
 		this.sale = sale;
@@ -69,5 +71,13 @@ public class SaleTargetDto {
 
 	public void setUnit(String unit) {
 		this.unit = unit;
+	}
+
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
 	}
 }
