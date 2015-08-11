@@ -24,4 +24,5 @@ public interface InvoiceDao {
 	public List<InvoiceDto> searchInvoiceBeforeAfter(Transaction transaction, Date after, Date before) throws IOException;
 	public List<CompanyDto> findCompanyByProduct(Transaction transaction, int seq) throws IOException;
 	public List<InvoiceDto> getBySalesperson(Transaction transaction, String userId) throws IOException;
+	public List<InvoiceDto> getExpiringPurchase(Transaction transaction) throws IOException;
 }

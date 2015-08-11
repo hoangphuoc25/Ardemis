@@ -11,8 +11,7 @@ public class SaleTargetDto {
 	private int current;
 	private String unit;
 
-	public SaleTargetDto(UserDto sale, String action, int target, Date fromDate, Date toDate,
-			int current, String unit) {
+	public SaleTargetDto(UserDto sale, String action, int target, Date fromDate, Date toDate, int current, String unit) {
 		this.target = target;
 		this.setAction(action);
 		this.fromDate = fromDate;

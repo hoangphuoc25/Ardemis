@@ -195,4 +195,16 @@ public class InvoiceServiceImpl implements InvoiceService, Serializable {
 			throw e;
 		}
 	}
+	public List<InvoiceDto> getExpiringPurchase() throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<InvoiceDto> result = invoiceDao.getExpiringPurchase(transaction);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

@@ -553,5 +553,4 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 			}
 		}
 	}
-
 }

@@ -604,4 +604,44 @@ public class InvoiceDaoImpl implements InvoiceDao {
 			}
 		}
 	}
+	public List<InvoiceDto> getExpiringPurchase(Transaction transaction) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_EXPIRING_PURCHASE);
+			resultSet = prepareStatement.executeQuery();
+
+
+			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
+			while (resultSet.next()) {
+				result.add(getById(transaction, resultSet.getInt(1)));
+			}
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_EXPIRING_PURCHASE = "select i.seq "
+												+ " from t_invoice i join t_product_purchase pp "
+												+ " on i.seq = pp.invoice_seq "
+												+ " where add_months(i.purchase_date, pp.duration) - 7 <= current_date"
+												+ " and pp.duration <> 0;";
 }
