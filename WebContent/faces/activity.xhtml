@@ -130,11 +130,12 @@
 			<p:commandButton value="Cancel" actionListener="#{activityController.cancelEditAct}" update=":form01" />
 		</p:dialog>
 
-		<p:dialog id="purchaseDialog" closable="false" visible="#{activityController.addInvoiceMode}" style="max-width: 800px;"
+		<p:dialog id="purchaseDialog" closable="false" visible="#{activityController.addInvoiceMode}" style="max-width: 900px;"
 				widgetVar="purchaseDialog_w" modal="true" resizable="false" draggable="true" header="Add new purchase">
 			<p:messages />
+			<p:growl />
 			<p:panelGrid columns="2">
-				<h:outputText value="Company" />
+				<h:outputText value="Customer" />
 				<h:outputText value="#{activityController.selectedAct.contact.name}" />
 
 				<h:outputText value="Purchase date" />
@@ -161,7 +162,7 @@
 							</p:selectOneMenu>
 						</p:column>
 						<p:column headerText="Quantity">
-							<p:spinner min="0" value="#{prod.quantity}" />
+							<p:spinner min="1" value="#{prod.quantity}" />
 						</p:column>
 					</p:dataTable>
 					<p:commandButton value="Delete" actionListener="#{activityController.deleteSelected}" update=":form01" />

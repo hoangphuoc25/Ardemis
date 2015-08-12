@@ -5,6 +5,7 @@ import java.util.List;
 
 import rd.dto.CompanyDto;
 import rd.dto.ContactDto;
+import rd.dto.ProductDto;
 
 public interface ContactService {
 	public void addContact(ContactDto contact) throws IOException;
@@ -22,4 +23,6 @@ public interface ContactService {
 	public List<ContactDto> getByStatusAndUser(String status, String userId) throws IOException;
 	public List<ContactDto> getByStatus(String status) throws IOException;
 	public int getNumberOfContactPerSale(String saleId) throws IOException;
+	public void addCompanyContact(ContactDto contact,CompanyDto company) throws IOException;
+	public void registerInterest(ContactDto contact,List<ProductDto> products) throws IOException;
 }

@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
@@ -64,25 +66,70 @@ public class PublicController implements Serializable {
 			sessionManager.addGlobalMessageFatal("Please fill in all required information", null);
 			return;
 		}
-		List<WrUserDto> wrSales = new ArrayList<WrUserDto>();
-		List<UserDto> sales = userService.getUserByRole("sale");
-		for (UserDto dto: sales) {
-			wrSales.add(new WrUserDto(dto, contactService.getNumberOfContactPerSale(dto.getId())));
+		if (!validatePhone(newCustomer.getPhone())) {
+			sessionManager.addGlobalMessageFatal("Malformed phone number. Please include full nation code.", null);
+			return;
 		}
+
+		newCustomer.setAssignee(getWrSales().get(0).getSale());
+		contactService.addContact(newCustomer);
+		wrSales.get(0).current++;
 		Collections.sort(wrSales, new Comparator<WrUserDto>() {
 			public int compare(WrUserDto f1, WrUserDto f2) {
-				if (f1.getAssignedContacts() == f2.getAssignedContacts()) {
+				if (f1.current == f2.current) {
 					return 0;
-				} else if (f1.getAssignedContacts() > f2.getAssignedContacts()) {
+				} else if (f1.current > f2.current) {
 					return 1;
 				} else {
 					return -1;
 				}
 			}
 		});
-		newCustomer.setAssignee(wrSales.get(0).getSale());
-		contactService.addContact(newCustomer);
 		newCustomer = new ContactDto();
 		sessionManager.addGlobalMessageInfo("Your information has been recorded. Our representative will contact you soon", null);
+	}
+
+	public List<WrUserDto> getWrSales() throws IOException {
+		if (wrSales == null || wrSales.size() == 0) {
+			System.out.println("PublicController.getWrSales()");
+			if (userService == null) {
+				System.out.println("userService is null");
+			}
+			List<UserDto> sales = userService.getUserByRole("sale");
+			for (UserDto dto: sales) {
+				wrSales.add(new WrUserDto(dto, contactService.getNumberOfContactPerSale(dto.getId())));
+			}
+			Collections.sort(wrSales, new Comparator<WrUserDto>() {
+				public int compare(WrUserDto f1, WrUserDto f2) {
+					if (f1.getAssignedContacts() == f2.getAssignedContacts()) {
+						return 0;
+					} else if (f1.getAssignedContacts() > f2.getAssignedContacts()) {
+						return 1;
+					} else {
+						return -1;
+					}
+				}
+			});
+			System.out.println(wrSales.size());
+		}
+		return wrSales;
+	}
+
+	public void setWrSales(List<WrUserDto> wrSales) {
+		this.wrSales = wrSales;
+	}
+
+	private List<WrUserDto> wrSales = new ArrayList<WrUserDto>();
+
+	private boolean validatePhone(String p) {
+		String phone = p.replace(" ", "");
+		String regex = "^\\+(?:[0-9] ?){6,14}[0-9]$";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(phone);
+		if (!matcher.matches()) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

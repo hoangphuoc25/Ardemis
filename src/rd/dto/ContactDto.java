@@ -15,7 +15,7 @@ public class ContactDto {
 	public ContactDto() {
 		this.language = "English";
 		this.gender = "Male";
-		setContactStatus("new");
+		setContactStatus("New");
 	}
 
 	public ContactDto(int seq, String name, String gender, String phone,

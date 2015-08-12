@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import rd.dto.CompanyDto;
 import rd.dto.ContactDto;
+import rd.dto.ProductDto;
 import rd.dto.UserDto;
 import rd.spec.dao.ContactDao;
 import rd.spec.dao.Transaction;
@@ -35,6 +36,7 @@ public class ContactDaoImpl implements ContactDao {
 	private static String GET_BY_STATUS_AND_USER 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(contact_status)=? and salesperson=?";
 	private static String GET_BY_STATUS 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(contact_status)=?";
 	private static String GET_NUMBER_OF_CONTACT_PER_SALE = "select count(*) from t_contact where lower(contact_status)='new' and salesperson=?";
+	private static String ADD_COMPANY_CONTACT 		= "insert into t_company_contact (company_seq, contact_seq) values (?, ?)";
 
 	private UserDao userDao;
 
@@ -463,4 +465,69 @@ public class ContactDaoImpl implements ContactDao {
 		}
 	}
 
+	public void addCompanyContact(Transaction transaction, ContactDto contact,CompanyDto company) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(ADD_COMPANY_CONTACT);
+			prepareStatement.setInt(1, company.getSeq());
+			prepareStatement.setInt(2, contact.getSeq());
+			resultSet = prepareStatement.executeQuery();
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	public void registerInterest(Transaction transaction, ContactDto contact,List<ProductDto> products) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			for (ProductDto prod: products) {
+				prepareStatement = connection.prepareStatement(REGISTER_INTEREST);
+				prepareStatement.setInt(1, contact.getSeq());
+				prepareStatement.setInt(2, prod.getSeq());
+				resultSet = prepareStatement.executeQuery();
+			}
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String REGISTER_INTEREST = "insert into t_contact_product (contact_seq, product_seq) values (?, ?)";
 }

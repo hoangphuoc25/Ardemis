@@ -224,6 +224,17 @@ public class CallReportController implements Serializable {
 
 		contactService.updateContact(callee);
 
+		if (callee.getContactStatus().equalsIgnoreCase("qualified")) {
+			int compSeq = compService.getSeq();
+			if (compService.searchCompanyByNameExact(callee.getName()) == null) {
+				CompanyDto comp = new CompanyDto(compSeq, callee.getCompany(), "", "", "", 1970, "", "", "", "Contacted", sessionManager.getLoginUser(), callee.getAddress());
+				compService.insertCompany(comp);
+				contactService.addCompanyContact(callee, comp);
+			} else {
+				contactService.addCompanyContact(callee, compService.searchCompanyByNameExact(callee.getName()));
+			}
+		}
+
 		callTime = new Date();
 		callDetail = "";
 		this.rating = "";
@@ -254,6 +265,9 @@ public class CallReportController implements Serializable {
 	@Inject SessionController sessionController;
 
 	public String getRating() {
+		if (rating == null) {
+			rating = "";
+		}
 		return rating;
 	}
 

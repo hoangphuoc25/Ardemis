@@ -75,6 +75,7 @@
 				rows="15">
 			<p:column headerText="Company">
 				<a href="#{request.contextPath}/faces/history.jsf?seq=#{invoice.customer.seq}" style="color: blue;">#{invoice.customer.name}</a>
+				<h:outputText value="#{invoice.contact.name} - #{invoice.contact.company}" />
 			</p:column>
 			<p:column headerText="Purchase date">
 				<h:outputText value="#{invoice.purchaseDate}">
@@ -85,7 +86,8 @@
 				<h:outputText value="#{reportController.deduceAmount(invoice)}" />
 			</p:column>
 			<p:column headerText="Products">
-				<h:outputText value="#{reportController.productPurchased(invoice)}" escape="false" />
+
+				<p:dataList value="#{invoice.products}" var="prod">#{prod.name}</p:dataList>
 			</p:column>
 
 			<p:column headerText="Action" rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager')}">
@@ -102,6 +104,21 @@
 			<p:calendar value="#{reportController.toDate}" />
 			<p:commandButton value="Search" actionListener="#{reportController.search}" update=":form01"/>
 			<p:commandButton value="Clear" actionListener="#{reportController.clear}" update=":form01"/>
+
+			<h:outputText value="Customer name" />
+			<p:inputText value="#{reportController.customerSearch}" />
+			<p:commandButton value="Search" actionListener="#{reportController.searchByCustomerName}" update=":form01" />
+			<h:outputText />
+			<h:outputText />
+			<h:outputText />
+
+			<h:outputText value="Company name" />
+			<p:inputText value="#{reportController.companySearch}" />
+			<p:commandButton value="Search" actionListener="#{reportController.searchByCompanyName}" update=":form01" />
+			<h:outputText />
+			<h:outputText />
+			<h:outputText />
+
 		</h:panelGrid>
 
 		<h3 style="font-family: Helvetica;">Add new purchase</h3>

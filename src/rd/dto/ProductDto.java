@@ -15,6 +15,7 @@ public class ProductDto {
 	private String type;
 	private int duration;
 	private int quantity;
+	private int storage;
 
 	public ProductDto(int seq, String name, String summary, String target, double price2) {
 		this.seq = seq;
@@ -23,6 +24,7 @@ public class ProductDto {
 		this.target = target;
 		this.price = price2;
 		this.quantity = 1;
+		this.storage = 1;
 	}
 
 	public ProductDto(int seq, String name, String summary, String target, double price2, List<CategoryDto> category, double permanentPrice) {
@@ -34,6 +36,7 @@ public class ProductDto {
 		this.category = category;
 		this.permanentPrice = permanentPrice;
 		this.quantity = 1;
+		this.storage = 1;
 	}
 
 	public ProductDto() {
@@ -49,6 +52,7 @@ public class ProductDto {
 		this.category = selectedProd.category;
 		this.permanentPrice = selectedProd.getPermanentPrice();
 		this.quantity = 1;
+		this.storage = 1;
 	}
 
 	public int getSeq() {
@@ -137,5 +141,13 @@ public class ProductDto {
 
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
+	}
+
+	public int getStorage() {
+		return storage;
+	}
+
+	public void setStorage(int storage) {
+		this.storage = storage;
 	}
 }

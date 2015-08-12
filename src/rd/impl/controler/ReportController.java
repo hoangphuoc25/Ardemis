@@ -269,4 +269,31 @@ public class ReportController implements Serializable {
 			}
 		}
 	}
+
+	public String getCompanySearch() {
+		return companySearch;
+	}
+
+	public void setCompanySearch(String companySearch) {
+		this.companySearch = companySearch;
+	}
+
+	public String getCustomerSearch() {
+		return customerSearch;
+	}
+
+	public void setCustomerSearch(String customerSearch) {
+		this.customerSearch = customerSearch;
+	}
+
+	private String customerSearch;
+	private String companySearch;
+
+	public void searchByCustomerName() {
+
+	}
+
+	public void searchByCompanyName() {
+
+	}
 }

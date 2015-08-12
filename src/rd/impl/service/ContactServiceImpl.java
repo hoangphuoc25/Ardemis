@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import rd.dto.CompanyDto;
 import rd.dto.ContactDto;
+import rd.dto.ProductDto;
 import rd.spec.dao.ContactDao;
 import rd.spec.dao.Transaction;
 import rd.spec.service.ContactService;
@@ -71,11 +72,13 @@ public class ContactServiceImpl implements ContactService, Serializable {
 			throw e;
 		}
 	}
+
 	public List<ContactDto> getByCompany(CompanyDto company) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		try{
+		try {
 			transaction.begin();
-			List<ContactDto> result = contactDao.getByCompany(transaction, company);
+			List<ContactDto> result = contactDao.getByCompany(transaction,
+					company);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {
@@ -83,9 +86,10 @@ public class ContactServiceImpl implements ContactService, Serializable {
 			throw e;
 		}
 	}
+
 	public int getSeq() throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		try{
+		try {
 			transaction.begin();
 			int result = contactDao.getSeq(transaction);
 			transaction.commit();
@@ -95,11 +99,14 @@ public class ContactServiceImpl implements ContactService, Serializable {
 			throw e;
 		}
 	}
-	public List<ContactDto> searchContactByName(String partial) throws IOException {
+
+	public List<ContactDto> searchContactByName(String partial)
+			throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		try{
+		try {
 			transaction.begin();
-			List<ContactDto> result = contactDao.searchContactByName(transaction, partial);
+			List<ContactDto> result = contactDao.searchContactByName(
+					transaction, partial);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {
@@ -107,9 +114,10 @@ public class ContactServiceImpl implements ContactService, Serializable {
 			throw e;
 		}
 	}
+
 	public List<ContactDto> getAll() throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		try{
+		try {
 			transaction.begin();
 			List<ContactDto> result = contactDao.getAll(transaction);
 			transaction.commit();
@@ -119,11 +127,14 @@ public class ContactServiceImpl implements ContactService, Serializable {
 			throw e;
 		}
 	}
-	public List<ContactDto> getByStatusAndUser(String status, String userId) throws IOException {
+
+	public List<ContactDto> getByStatusAndUser(String status, String userId)
+			throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		try{
+		try {
 			transaction.begin();
-			List<ContactDto> result = contactDao.getByStatusAndUser(transaction, status, userId);
+			List<ContactDto> result = contactDao.getByStatusAndUser(
+					transaction, status, userId);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {
@@ -131,11 +142,13 @@ public class ContactServiceImpl implements ContactService, Serializable {
 			throw e;
 		}
 	}
+
 	public List<ContactDto> getByStatus(String status) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		try{
+		try {
 			transaction.begin();
-			List<ContactDto> result = contactDao.getByStatus(transaction, status);
+			List<ContactDto> result = contactDao.getByStatus(transaction,
+					status);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {
@@ -143,13 +156,41 @@ public class ContactServiceImpl implements ContactService, Serializable {
 			throw e;
 		}
 	}
+
 	public int getNumberOfContactPerSale(String saleId) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
-		try{
+		try {
 			transaction.begin();
-			int result = contactDao.getNumberOfContactPerSale(transaction, saleId);
+			int result = contactDao.getNumberOfContactPerSale(transaction,
+					saleId);
 			transaction.commit();
 			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+
+	public void addCompanyContact(ContactDto contact, CompanyDto company)
+			throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try {
+			transaction.begin();
+			contactDao.addCompanyContact(transaction, contact, company);
+			transaction.commit();
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+
+	public void registerInterest(ContactDto contact, List<ProductDto> products)
+			throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try {
+			transaction.begin();
+			contactDao.registerInterest(transaction, contact, products);
+			transaction.commit();
 		} catch (IOException e) {
 			transaction.rollback();
 			throw e;

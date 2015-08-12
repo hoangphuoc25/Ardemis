@@ -5,6 +5,7 @@ import java.util.List;
 
 import rd.dto.CompanyDto;
 import rd.dto.ContactDto;
+import rd.dto.ProductDto;
 
 public interface ContactDao {
 	public void addContact(Transaction transaction, ContactDto contact) throws IOException;
@@ -27,4 +28,6 @@ public interface ContactDao {
 
 	public List<ContactDto> getByStatus(Transaction transaction, String status) throws IOException;
 	public int getNumberOfContactPerSale(Transaction transaction, String saleId) throws IOException;
+	public void addCompanyContact(Transaction transaction, ContactDto contact,CompanyDto company) throws IOException;
+	public void registerInterest(Transaction transaction, ContactDto contact,List<ProductDto> products) throws IOException;
 }

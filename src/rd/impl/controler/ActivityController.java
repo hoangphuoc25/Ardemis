@@ -102,7 +102,7 @@ public class ActivityController implements Serializable {
 
 	public List<ActivityDto> getAllAct() throws IOException {
 		if (allAct == null) {
-			allAct = actService.getByUser(sessionManager.getLoginUser().getId());
+			allAct = actService.findByStatus(showingMode, sessionManager.getLoginUser().getId());
 			for (ActivityDto act: allAct) {
 				List<ProductDto> prods = actService.getProductByDeal(act.getSeq());
 				act.setProducts(prods);
@@ -212,6 +212,7 @@ public class ActivityController implements Serializable {
 		System.out.println("ActivityController.startAddNewPurchase()");
 		addInvoiceMode = true;
 		selectedAct = act;
+		selectedProducts = act.getProducts();
 	}
 
 	private InvoiceDto newInvoice;
@@ -243,10 +244,14 @@ public class ActivityController implements Serializable {
 		invoiceService.addInvoice(newInvoice);
 		sessionManager.addGlobalMessageInfo("New purchase record added", null);
 
-		if (getStd().getUnit().equalsIgnoreCase("SGD"))
+		if (getStd().getUnit().equalsIgnoreCase("SGD")) {
 			std.setCurrent(std.getCurrent() + (int) Math.ceil(amount));
-		else
+			System.out.println("sgd");
+		}
+		else {
 			std.setCurrent(std.getCurrent() + 1);
+			System.out.println(std.getCurrent());
+		}
 		stService.updateSaleTarget(std);
 		sessionManager.addGlobalMessageInfo("Sale progress updated.", null);
 
@@ -425,7 +430,7 @@ public class ActivityController implements Serializable {
 		this.showingMode = showingMode;
 	}
 
-	private String showingMode = "all";
+	private String showingMode = "Qualified";
 
 	public void updateAllAct() throws IOException {
 		if (showingMode.equalsIgnoreCase("all")) {

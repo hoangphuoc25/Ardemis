@@ -76,7 +76,7 @@
 							<f:selectItem itemLabel="New" itemValue="New" />
 							<f:selectItem itemLabel="Qualified" itemValue="Qualified" />
 							<f:selectItem itemLabel="Unqualified" itemValue="Unqualified" />
-							<f:selectItem itemLabel="Not interested" itemValue="Notinterested" />
+							<f:selectItem itemLabel="Unresponsive" itemValue="Unresponsive" />
 							<p:ajax update="panel" process="panel" />
 						</p:selectOneMenu>
 
@@ -103,12 +103,12 @@
 
 						<h:outputText value="Call back after" rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and callReportController.callee.contactStatus == 'Qualified'}"/>
 						<p:outputPanel rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and callReportController.callee.contactStatus == 'Qualified'}">
-							<p:panelGrid columns="2">
+							<h:panelGrid columns="2">
 								<p:spinner min="0" value="#{callReportController.callBackNo}" />
 								<p:selectOneMenu value="#{callReportController.callBackUnit}">
 									<f:selectItems value="#{callReportController.callBackUnits}" />
 								</p:selectOneMenu>
-							</p:panelGrid>
+							</h:panelGrid>
 						</p:outputPanel>
 
 						<h:outputText value="Call back again on" rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and callReportController.callee.contactStatus == 'Qualified'}"/>
@@ -118,12 +118,11 @@
 						<p:commandButton value="Add purchase record" actionListener="#{callReportController.startAddPurchaseRecord}" update=":form01:productsArea" rendered="#{callReportController.rating == 'close' and callReportController.callee.contactStatus == 'Qualified'}" />
 
 					</p:panelGrid>
-					<p:selectBooleanCheckbox value="#{callReportController.appendToActivity}" itemLabel="Append this call report to the sale activity log"/>
 
-					<p:panelGrid columns="2">
+					<h:panelGrid columns="2">
 						<p:commandButton value="Submit" actionListener="#{callReportController.addNewReport}" update=":form01:panel" />
 						<p:commandButton value="Back" action="#{callReportController.goBack}" rendered="#{callReportController.back or callReportController.backMain}" />
-					</p:panelGrid>
+					</h:panelGrid>
 					<p:commandButton value="Add new contact" actionListener="#{callReportController.startAddNewContact}" update=":form01:contactArea"/>
 				</div>
 		        <div class="ui-grid-col-8">
@@ -232,7 +231,7 @@
 								<p:column headerText="Name">
 									<h:outputText value="#{prod.name}" />
 								</p:column>
-								<p:column headerText="Price per month">
+								<p:column headerText="Price per month" styleClass="#{prod.price*12 le callReportController.budget ? 'newMsg': null}">
 									<h:outputText value="#{prod.price}" />
 								</p:column>
 								<p:column headerText="Permanent price" styleClass="#{prod.permanentPrice le callReportController.budget ? 'newMsg': null}">
@@ -376,7 +375,7 @@
 		</p:outputPanel>
 
 		<p:outputPanel id="productsArea">
-			<p:dialog id="addProdDialog" closable="false" visible="#{callReportController.addProdMode}" width="700px"
+			<p:dialog id="addProdDialog" closable="false" visible="#{callReportController.addProdMode}" width="800px"
 					widgetVar="addProdDialog_w" modal="true" resizable="false" draggable="true" header="Product Detail">
 				<p:panelGrid columns="2">
 					<h:outputText value="Product" />
@@ -425,6 +424,7 @@
 				            <f:selectItem itemLabel="Other" itemValue="false" />
 				            <p:ajax update="p4"/>
 						</p:selectOneRadio>
+						<h:outputText value="No customer address recorded" rendered="#{callReportController.meetingLocationMode == 'true' and callReportController.callee.address eq null}" style="font-style: italic;" />
 						<p:inputTextarea value="#{callReportController.newMeeting.location}" rendered="#{callReportController.meetingLocationMode == 'false'}"/>
 					</p:outputPanel>
 

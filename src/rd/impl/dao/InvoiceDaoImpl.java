@@ -54,7 +54,7 @@ public class InvoiceDaoImpl implements InvoiceDao {
 
 			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
 			while (resultSet.next()) {
-				result.add(makeInvoiceDto(transaction, resultSet));
+				result.add(makeInvoiceDtoComplete(transaction, resultSet));
 			}
 			return result;
 
@@ -89,6 +89,17 @@ public class InvoiceDaoImpl implements InvoiceDao {
 		UserDto sale = userDao.findUser(transaction, resultSet.getString(5));
 
 		return new InvoiceDto(seq, contact, purchaseDate, amount, null, sale);
+	}
+
+	private InvoiceDto makeInvoiceDtoComplete(Transaction transaction, ResultSet resultSet) throws IOException, SQLException {
+		int seq = resultSet.getInt(1);
+		ContactDto contact = contactDao.getContactById(transaction, resultSet.getInt(2));
+		Date purchaseDate = new Date(resultSet.getDate(3).getTime());
+		double amount = resultSet.getDouble(4);
+		UserDto sale = userDao.findUser(transaction, resultSet.getString(5));
+		List<ProductDto> products = getProductByInvoiceId(transaction, resultSet.getInt(1));
+
+		return new InvoiceDto(seq, contact, purchaseDate, amount, products, sale);
 	}
 
 	public InvoiceDto getById(Transaction transaction, int seq) throws IOException {

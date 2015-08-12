@@ -486,9 +486,20 @@ public class SalespersonController implements Serializable {
 			sessionManager.addGlobalMessageFatal("Invalid phone number.", null);
 			return;
 		}
+		if (assigneeName != null && !assigneeName.isEmpty()) {
+			UserDto newAss = userService.findUserById(assigneeName.split("[()]")[1]);
+			newContact.setAssignee(newAss);
+			for (int i = contactList.size() - 1; i >= 0; i--) {
+				if (contactList.get(i).getSeq() == newContact.getSeq()) {
+					contactList.remove(i);
+					break;
+				}
+			}
+		}
 		contactService.updateContact(newContact);
 		editContactMode = false;
 		sessionManager.addGlobalMessageInfo("Customer info updated.", null);
+		assigneeName = "";
 	}
 	public void cancelEditContact() {
 		newContact = new ContactDto();

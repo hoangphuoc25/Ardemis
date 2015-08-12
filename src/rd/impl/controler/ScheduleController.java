@@ -211,9 +211,7 @@ public class ScheduleController implements Serializable {
 		System.out.println("ended");
 		sessionManager.logoff();
 		System.out.println("logged out");
-		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-		ec.redirect("main.jsf");
-		return "../main.jsf?faces-redirect=true";
+		return "../portal.jsf?faces-redirect=true";
 	}
 
 	public List<MeetingDto> getEvents() throws IOException {

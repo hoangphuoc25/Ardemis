@@ -175,8 +175,8 @@ public class SaleTargetDaoImpl implements SaleTargetDao {
 			prepareStatement.setDate(3, new java.sql.Date(std.getToDate().getTime()));
 			prepareStatement.setInt(4, std.getCurrent());
 			prepareStatement.setString(5, std.getUnit());
-			prepareStatement.setString(6, std.getSale().getId());
-			prepareStatement.setString(7, std.getAction());
+			prepareStatement.setString(6, std.getAction());
+			prepareStatement.setString(7, std.getSale().getId());
 
 			resultSet = prepareStatement.executeQuery();
 
