@@ -30,11 +30,11 @@ public class ContactDaoImpl implements ContactDao {
 	private static final String UPDATE_CONTACT 		= "update t_contact set name=?, gender=?, phone=?, email=?, company=?, language=?, address=?, salesperson=?, contact_status=? where seq=?";
 	private static final String GET_CONTACT_BY_ID 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where seq=?";
 	private static final String ADD_CONTACT 		= "insert into t_contact (seq, name, gender, phone, email, company, language, address, salesperson, contact_status) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	private static final String GET_BY_COMPANY 		= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where company=?";
-	private static final String SEARCH_CONTACT_BY_NAME 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(name) like ?";
-	private static final String GET_ALL 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact";
-	private static String GET_BY_STATUS_AND_USER 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(contact_status)=? and salesperson=?";
-	private static String GET_BY_STATUS 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(contact_status)=?";
+	private static final String GET_BY_COMPANY 		= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where company=? order by seq desc";
+	private static final String SEARCH_CONTACT_BY_NAME 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(name) like ? order by seq desc";
+	private static final String GET_ALL 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact order by seq desc";
+	private static String GET_BY_STATUS_AND_USER 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(contact_status)=? and salesperson=? order by seq desc";
+	private static String GET_BY_STATUS 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(contact_status)=? order by seq desc";
 	private static String GET_NUMBER_OF_CONTACT_PER_SALE = "select count(*) from t_contact where lower(contact_status)='new' and salesperson=?";
 	private static String ADD_COMPANY_CONTACT 		= "insert into t_company_contact (company_seq, contact_seq) values (?, ?)";
 

@@ -347,6 +347,9 @@ public class ScheduleController implements Serializable {
 					t.setStatus("Overdue");
 				}
 			}
+			List<ScheduleTaskDto> overdue = taskService.getByUserAndStatus(sessionManager.getLoginUser().getId(), "Overdue");
+			overdue.addAll(tasks);
+			tasks = overdue;
 		}
 		return tasks;
 	}
@@ -688,6 +691,125 @@ public class ScheduleController implements Serializable {
 		tempAct = actService.getById(task.getActId());
 		List<ProductDto> prods = actService.getProductByDeal(task.getActId());
 		tempAct.setProducts(prods);
-
 	}
+
+	public Date getDateSearch() {
+		return dateSearch;
+	}
+
+	public void setDateSearch(Date dateSearch) {
+		this.dateSearch = dateSearch;
+	}
+
+	public boolean isScheduleSearchMode() {
+		return scheduleSearchMode;
+	}
+
+	public void setScheduleSearchMode(boolean scheduleSearchMode) {
+		this.scheduleSearchMode = scheduleSearchMode;
+	}
+
+	private Date dateSearch;
+	private boolean scheduleSearchMode;
+	private List<MeetingDto> searchedMeetings;
+
+	public void searchSchedule() throws IOException {
+		searchedMeetings = meetingService.getMeetingByDayAndUser(sessionManager.getLoginUser().getId(), dateSearch);
+		System.out.println(dateSearch);
+		System.out.println(sessionManager.getLoginUser().getId());
+		System.out.println("ScheduleController.searchSchedule()");
+		System.out.println(searchedMeetings.size());
+		scheduleSearchMode = true;
+	}
+	public void resetSearchSchedule() {
+		scheduleSearchMode = false;
+		dateSearch = null;
+	}
+
+	public List<MeetingDto> getSearchedMeetings() {
+		return searchedMeetings;
+	}
+
+	public void setSearchedMeetings(List<MeetingDto> searchedMeetings) {
+		this.searchedMeetings = searchedMeetings;
+	}
+
+	public Date getTaskDateSearch() {
+		return taskDateSearch;
+	}
+
+	public void setTaskDateSearch(Date taskDateSearch) {
+		this.taskDateSearch = taskDateSearch;
+	}
+
+	public boolean isTaskSearchMode() {
+		return taskSearchMode;
+	}
+
+	public void setTaskSearchMode(boolean taskSearchMode) {
+		this.taskSearchMode = taskSearchMode;
+	}
+
+	private Date taskDateSearch;
+	private boolean taskSearchMode;
+	private List<ScheduleTaskDto> searchedTasks;
+
+	public void searchTask() throws IOException {
+		setSearchedTasks(taskService.getByUser(sessionManager.getLoginUser().getId(), taskDateSearch));
+		taskSearchMode = true;
+	}
+	public void resetSearchTask() {
+		taskSearchMode = false;
+		taskDateSearch = null;
+	}
+
+	public List<ScheduleTaskDto> getSearchedTasks() {
+		return searchedTasks;
+	}
+
+	public void setSearchedTasks(List<ScheduleTaskDto> searchedTasks) {
+		this.searchedTasks = searchedTasks;
+	}
+
+	public void startViewDetail(MeetingDto meeting) throws IOException {
+		tempAct = actService.getById(meeting.getActId());
+		System.out.println(tempAct.getProducts().size());
+		List<ProductDto> prods = actService.getProductByDeal(meeting.getActId());
+		tempAct.setProducts(prods);
+	}
+
+	public void markAsDone(ScheduleTaskDto task) throws IOException {
+		task.setStatus("Done");
+		taskService.updateEvent(task);
+	}
+
+	public String getReminder() throws IOException {
+		for (MeetingDto event: getEvents()) {
+			long difference = event.getFrom().getTime() - (new Date()).getTime();
+			System.out.println(difference);
+			if (0 < difference && difference < 1000*30*60) {
+				reminder = "You will have a meeting in 30 minutes";
+				sessionManager.addGlobalMessageInfo(reminder, null);
+				System.out.println("ScheduleController.getReminder() 1");
+				break;
+			} else if (0 < difference && difference < 1000*60*60) {
+				reminder = "You will have a meeting in 1 hour";
+				sessionManager.addGlobalMessageInfo(reminder, null);
+				System.out.println("ScheduleController.getReminder() 2");
+				break;
+			} else if (0 < difference && difference < 1000*120*60) {
+				reminder = "You will have a meeting in 2 hour";
+				sessionManager.addGlobalMessageInfo(reminder, null);
+				System.out.println("ScheduleController.getReminder() 3");
+				break;
+			}
+		}
+		return reminder;
+	}
+
+	public void setReminder(String reminder) {
+		this.reminder = reminder;
+	}
+
+	private String reminder;
 }

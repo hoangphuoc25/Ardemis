@@ -16,4 +16,5 @@ public interface ActivityService {
 	public List<ActivityDto> findByStatus(String status, String username) throws IOException;
 	public List<ActivityDto> getActiveDeal() throws IOException;
 	public List<ProductDto> getProductByDeal(int seq) throws IOException;
+	public List<ActivityDto> searchByCustomerName(String name) throws IOException;
 }

@@ -134,4 +134,16 @@ public class ActivityServiceImpl implements ActivityService, Serializable {
 			throw e;
 		}
 	}
+	public List<ActivityDto> searchByCustomerName(String name) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ActivityDto> result = activityDao.searchByCustomerName(transaction, name);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

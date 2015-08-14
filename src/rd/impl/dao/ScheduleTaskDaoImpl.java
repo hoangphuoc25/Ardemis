@@ -37,6 +37,7 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 	private static String GET_BY_DEAL 	 = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where activity_seq=?";
 	private static String GET_TASK_NEXT_WEEK_BY_USER = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where username=? and time>=? and time<? order by time asc";
 	private static String GET_BY_USER_AND_DATE = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where username=? and time>=? and time<? order by time asc";
+	private static String GET_BY_USER_AND_STATUS = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where username=? and status=?";
 
 	private ContactDao contactDao;
 
@@ -534,6 +535,43 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 				result.add(makeScheduleTaskDto(transaction, resultSet));
 			}
 			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	public List<ScheduleTaskDto> getByUserAndStatus(Transaction transaction, String userId, String status) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_USER_AND_STATUS);
+			prepareStatement.setString(1, userId);
+			prepareStatement.setString(2, status);
+			resultSet = prepareStatement.executeQuery();
+
+			List<ScheduleTaskDto> result = new ArrayList<ScheduleTaskDto>();
+			while (resultSet.next()) {
+				result.add(makeScheduleTaskDto(transaction, resultSet));
+			}
+			return result;
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {

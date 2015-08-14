@@ -7,7 +7,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -48,10 +50,10 @@ public class ActivityDaoImpl implements ActivityDao {
 	private static String DELETE_ACTIVITY 	= "delete from t_activity where seq=?";
 	private static String UPDATE_ACTIVITY 	= "update t_activity set contact_seq=?, start_date=?, status=?, remark=?, salesperson=? where seq=?";
 	private static String FIND_BY_STATUS 	= "select seq, contact_seq, start_date, status, remark, salesperson from t_activity where salesperson=? and lower(status)=?";
-	private static String GET_ACTIVE_DEAL 	= "select seq, contact_seq, start_date, status, remark, salesperson from t_activity where lower(status) <> ?";
+	private static String GET_ACTIVE_DEAL 	= "select seq, contact_seq, start_date, status, remark, salesperson from t_activity where lower(status) <> ? and lower(status) <> ?";
 	private static String ADD_DEAL_PRODUCT	= "insert into t_deal_product (deal_seq, product_seq) values (?, ?)";
 	private static String DELETE_DEAL_PRODUCT= "delete from t_deal_product where deal_seq=?";
-	private static String GET_PRODUCT_BY_DEAL = "select product_seq from t_deal_product where deal_seq=?";
+	private static String GET_PRODUCT_BY_DEAL = "select distinct product_seq from t_deal_product where deal_seq=?";
 
 	public void addActivity(Transaction transaction, ActivityDto act)
 			throws IOException {
@@ -272,8 +274,9 @@ public class ActivityDaoImpl implements ActivityDao {
 		String status = resultSet.getString(4);
 		String remark = resultSet.getString(5);
 		UserDto salesperson = userDao.findUser(transaction, resultSet.getString(6));
+		List<ProductDto> prods = getProductByDeal(transaction, resultSet.getInt(1));
 
-		return new ActivityDto(seq, contact, startDate, status, remark, salesperson, null);
+		return new ActivityDto(seq, contact, startDate, status, remark, salesperson, prods);
 	}
 
 	public int getSeq(Transaction transaction) throws IOException {
@@ -358,6 +361,7 @@ public class ActivityDaoImpl implements ActivityDao {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(GET_ACTIVE_DEAL);
 			prepareStatement.setString(1, "completed");
+			prepareStatement.setString(2, "failed");
 			resultSet = prepareStatement.executeQuery();
 
 			List<ActivityDto> result = new ArrayList<ActivityDto>();
@@ -424,4 +428,43 @@ public class ActivityDaoImpl implements ActivityDao {
 		}
 	}
 
+	public List<ActivityDto> searchByCustomerName(Transaction transaction, String name) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_BY_CUSTOMER_NAME);
+			prepareStatement.setString(1, "%" + name.toLowerCase() + "%");
+			resultSet = prepareStatement.executeQuery();
+
+			List<ActivityDto> result = new ArrayList<ActivityDto>();
+			while (resultSet.next()) {
+				ActivityDto act = getById(transaction, resultSet.getInt(1));
+				result.add(act);
+				actCache.put(act);
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String SEARCH_BY_CUSTOMER_NAME = "select distinct a.seq from t_activity a join t_contact c on a.contact_seq = c.seq where lower(c.name) like ?";
 }

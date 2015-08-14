@@ -10,6 +10,8 @@ import java.util.List;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -88,7 +90,7 @@ public class ActivityController implements Serializable {
 	public List<String> getStatusOptions() {
 		if (statusOptions == null) {
 			statusOptions = new ArrayList<String>();
-			statusOptions.add("Meeting");
+			statusOptions.add("Qualified");
 			statusOptions.add("Negotiating");
 			statusOptions.add("Completed");
 			statusOptions.add("Failed");
@@ -102,11 +104,11 @@ public class ActivityController implements Serializable {
 
 	public List<ActivityDto> getAllAct() throws IOException {
 		if (allAct == null) {
-			allAct = actService.findByStatus(showingMode, sessionManager.getLoginUser().getId());
-			for (ActivityDto act: allAct) {
-				List<ProductDto> prods = actService.getProductByDeal(act.getSeq());
-				act.setProducts(prods);
-			}
+			if (dealSeq > 0) {
+				allAct = new ArrayList<ActivityDto>();
+				allAct.add(actService.getById(dealSeq));
+			} else
+				allAct = actService.findByStatus(showingMode, sessionManager.getLoginUser().getId());
 		}
 		return allAct;
 	}
@@ -178,7 +180,7 @@ public class ActivityController implements Serializable {
 
 	public void startEdit(ActivityDto act) {
 		editMode = true;
-		selectedAct = act;
+		selectedAct = new ActivityDto(act);
 		String content = act.getRemark();
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 		String date = sdf.format(new Date());
@@ -271,6 +273,9 @@ public class ActivityController implements Serializable {
 				}
 			}
 		}
+		if (dealSeq > 0) {
+			goBack();
+		}
 	}
 
 	public InvoiceDto getNewInvoice() {
@@ -314,19 +319,21 @@ public class ActivityController implements Serializable {
 		}
 		int seq = Integer.parseInt(getSearch().split("[()]")[1]);
 		ProductDto prod = prodService.getProductById(seq);
-		for (int i = 0; i < selectedProducts.size(); i++) {
-			if (selectedProducts.get(i).getSeq() == seq)
-				return;
-		}
+//		for (int i = 0; i < selectedProducts.size(); i++) {
+//			if (selectedProducts.get(i).getSeq() == seq)
+//				return;
+//		}
 		selectedProducts.add(prod);
 		search = "";
 	}
 
 	public void cancelEditAct() throws IOException {
 		editMode = false;
+		System.out.println(selectedAct.getRemark());
 		for (int i = 0; i < allAct.size(); i++) {
 			if (allAct.get(i).getSeq() == selectedAct.getSeq()) {
 				ActivityDto temp = actService.getById(selectedAct.getSeq());
+				System.out.println(temp.getRemark());
 				allAct.set(i, temp);
 				break;
 			}
@@ -365,7 +372,7 @@ public class ActivityController implements Serializable {
 	public List<String> getStatusOptionsEditBox() {
 		if (statusOptionsEditBox == null) {
 			statusOptionsEditBox = new ArrayList<String>();
-			statusOptionsEditBox.add("Meeting");
+			statusOptionsEditBox.add("Qualified");
 			statusOptionsEditBox.add("Negotiating");
 			statusOptionsEditBox.add("Failed");
 		}
@@ -406,6 +413,8 @@ public class ActivityController implements Serializable {
 		newMeeting.setSalesperson(sessionManager.getLoginUser());
 		newMeeting.setActId(act.getSeq());
 		addMeetingMode = true;
+		actContact = newMeeting.getContact();
+		newMeeting.setLocation(actContact.getAddress());
 	}
 
 	public void addNewMeeting() throws IOException {
@@ -572,5 +581,64 @@ public class ActivityController implements Serializable {
 	public void startAddNewDeal() {
 		addDealMode = true;
 	}
+
+	public void cancelAddNewDeal() {
+		addDealMode = false;
+	}
+
+	private String custNameSearch;
+
+	public void searchByCustomer() throws IOException {
+		allAct = actService.searchByCustomerName(getCustNameSearch());
+	}
+
+	public void cancelSearchByCustomer() throws IOException {
+		allAct = actService.findByStatus(showingMode, sessionManager.getLoginUser().getId());
+	}
+
+	public String getCustNameSearch() {
+		return custNameSearch;
+	}
+
+	public void setCustNameSearch(String custNameSearch) {
+		this.custNameSearch = custNameSearch;
+	}
+
+	public int getDealSeq() {
+		return dealSeq;
+	}
+
+	public void setDealSeq(int dealSeq) {
+		this.dealSeq = dealSeq;
+	}
+
+	private int dealSeq;
+
+	public void goBack() throws IOException {
+		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+		ec.redirect("salesperson.jsf");
+	}
+
+	public String getMeetingLocationMode() {
+		if (meetingLocationMode == null || meetingLocationMode.isEmpty()) {
+			meetingLocationMode = "true";
+		}
+		return meetingLocationMode;
+	}
+
+	public void setMeetingLocationMode(String meetingLocationMode) {
+		this.meetingLocationMode = meetingLocationMode;
+	}
+
+	public ContactDto getActContact() {
+		return actContact;
+	}
+
+	public void setActContact(ContactDto actContact) {
+		this.actContact = actContact;
+	}
+
+	private String meetingLocationMode = "true";
+	private ContactDto actContact;
 }
 

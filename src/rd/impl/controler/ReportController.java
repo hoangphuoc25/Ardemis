@@ -289,11 +289,46 @@ public class ReportController implements Serializable {
 	private String customerSearch;
 	private String companySearch;
 
-	public void searchByCustomerName() {
-
+	public void searchByCustomerName() throws IOException {
+		invoices = invoiceService.searchInvoiceByCustomerName(customerSearch);
 	}
 
-	public void searchByCompanyName() {
+	public void searchByCompanyName() throws IOException {
+		invoices = invoiceService.searchInvoiceByCompanyName(companySearch);
+	}
 
+	public boolean isEditInvoiceMode() {
+		return editInvoiceMode;
+	}
+
+	public void setEditInvoiceMode(boolean editInvoiceMode) {
+		this.editInvoiceMode = editInvoiceMode;
+	}
+
+	public InvoiceDto getEditInvoice() {
+		return editInvoice;
+	}
+
+	public void setEditInvoice(InvoiceDto editInvoice) {
+		this.editInvoice = editInvoice;
+	}
+
+	private boolean editInvoiceMode;
+	private InvoiceDto editInvoice;
+
+	public void startEditInvoice(InvoiceDto invoice) {
+		editInvoice = invoice;
+		editInvoiceMode = true;
+		selectedProducts = invoice.getProducts();
+	}
+	public void editInvoice() throws IOException {
+		editInvoice.setProducts(selectedProducts);
+		invoiceService.updateInvoice(editInvoice);
+		editInvoiceMode = false;
+		selectedProducts = new ArrayList<ProductDto>();
+		sessionManager.addGlobalMessageInfo("Purchase order updated", null);
+	}
+	public void cancelEditInvoice() {
+		editInvoiceMode = false;
 	}
 }

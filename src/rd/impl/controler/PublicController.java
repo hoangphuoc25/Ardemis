@@ -86,7 +86,7 @@ public class PublicController implements Serializable {
 			}
 		});
 		newCustomer = new ContactDto();
-		sessionManager.addGlobalMessageInfo("Your information has been recorded. Our representative will contact you soon", null);
+		sessionManager.addGlobalMessageInfo("Thank you for your interest. Our representative will contact you soon.", null);
 	}
 
 	public List<WrUserDto> getWrSales() throws IOException {

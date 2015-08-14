@@ -16,4 +16,5 @@ public interface ActivityDao {
 	public List<ActivityDto> findByStatus(Transaction transaction, String status, String username) throws IOException;
 	public List<ActivityDto> getActiveDeal(Transaction transaction) throws IOException;
 	public List<ProductDto> getProductByDeal(Transaction transaction, int seq) throws IOException;
+	public List<ActivityDto> searchByCustomerName(Transaction transaction, String name) throws IOException;
 }

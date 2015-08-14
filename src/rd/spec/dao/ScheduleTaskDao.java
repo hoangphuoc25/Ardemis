@@ -19,4 +19,5 @@ public interface ScheduleTaskDao {
 	public List<ScheduleTaskDto> getByDeal(Transaction transaction, int seq) throws IOException;
 	public List<ScheduleTaskDto> getTaskNextWeekByUser(Transaction transaction, String userId) throws IOException;
 	public List<ScheduleTaskDto> getByUser(Transaction transaction, String userId, Date date) throws IOException;
+	public List<ScheduleTaskDto> getByUserAndStatus(Transaction transaction, String userId, String status) throws IOException;
 }

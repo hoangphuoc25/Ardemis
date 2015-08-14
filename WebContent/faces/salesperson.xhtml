@@ -63,6 +63,15 @@
 		.newMsg {
 			background-color: #ffef8f;
 		}
+		.completed{
+			color: green;
+		}
+		.pending {
+			color: blue;
+		}
+		.overdue {
+			color: red;
+		}
 	</style>
 </h:head>
 <h:body>
@@ -95,6 +104,8 @@
 			<a href="#form01:tbl3">You have <span class="badge badge-success">#{scheduleController.newNotes}</span> unread message(s).</a>
 		</p:outputPanel>
 
+		<h:outputText value="#{scheduleController.reminder}" style="color: red" />
+
 		<p:fieldset legend="Your sale misson">
 			<p:panelGrid columns="3">
 				<h:outputText value="Your sale target" />
@@ -104,7 +115,7 @@
 				<h:outputText value="#{scheduleController.std.current} #{scheduleController.std.unit} (#{scheduleController.percentage} %)" />
 				<p:menuButton value="Actions">
 					<p:menuitem value="See all active deals" url="activity.jsf" />
-					<p:menuitem value="Find new customer" url="contactList.jsf" target="_blank" />
+					<p:menuitem value="Find new customer" url="contactList.jsf?status=new" target="_blank" />
 				</p:menuButton>
 				<h:outputText value="From" />
 				<h:outputText value="#{scheduleController.std.fromDate}">
@@ -121,10 +132,14 @@
 			</p:panelGrid>
 		</p:fieldset>
 
-		<p:panel id="toggleable" header="Your meeting schedule today" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px">
-			<p:dataTable id="tbl2" rowIndexVar="row" value="#{scheduleController.events}" var="event"
-					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-					rows="8">
+		<p:panel id="toggleable" header="Your meeting schedule" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px">
+			<h:panelGrid columns="4" >
+				<h:outputText value="Search my schedule on" />
+				<p:calendar value="#{scheduleController.dateSearch}" pattern="dd/MM/yyyy" />
+				<p:commandButton value="Search" actionListener="#{scheduleController.searchSchedule}" update="toggleable" />
+				<p:commandButton value="Reset" actionListener="#{scheduleController.resetSearchSchedule}" update="toggleable" />
+			</h:panelGrid>
+			<p:dataTable id="tbl1" rowIndexVar="row" value="#{scheduleController.searchedMeetings}" var="event" rendered="#{scheduleController.scheduleSearchMode}" >
 				<p:column headerText="From">
 					<h:outputText value="#{event.from}">
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
@@ -144,8 +159,36 @@
 				<p:column headerText="Location">
 					<h:outputText value="#{event.location}" />
 				</p:column>
+			</p:dataTable>
+			<p:dataTable id="tbl2" rowIndexVar="row" value="#{scheduleController.events}" var="event" rendered="#{not scheduleController.scheduleSearchMode}"
+					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+					rows="8">
+				<p:column headerText="From">
+					<h:outputText value="#{event.from}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+					<h:outputText value=" - " />
+					<h:outputText value="#{event.to}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:column>
+
+				<p:column headerText="Detail">
+					<h:outputText value="#{event.detail}" />
+				</p:column>
+				<p:column headerText="Customer">
+					<h:outputText value="#{event.contact.name}" />
+				</p:column>
+				<p:column headerText="Location">
+					<h:outputText value="#{event.location}" />
+				</p:column>
+				<p:column headerText="Deal detail">
+					<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
+							actionListener="#{scheduleController.startViewDetail(event)}" icon="ui-icon-search" title="View" />
+				</p:column>
 				<p:column headerText="Action">
 					<p:commandButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01" />
+					<a href="activity.jsf?seq=#{event.actId}" style="color: blue; text-decoraton: underline;">Update deal</a>
 				</p:column>
 			</p:dataTable>
 	        <f:facet name="options">
@@ -160,9 +203,7 @@
     	</p:panel>
 
 		<p:panel id="tasks" header="Your task today" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="tasksPanel" style="margin-bottom:20px">
-			<p:dataTable id="taskTbl" rowIndexVar="row" value="#{scheduleController.tasks}" var="task"
-					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-					rows="15" >
+			<p:dataTable id="tbl4" rowIndexVar="row" value="#{scheduleController.searchedTasks}" var="task" rendered="#{scheduleController.taskSearchMode}" >
 				<p:column headerText="Action">
 					<h:outputText value="#{task.category}" />
 				</p:column>
@@ -183,6 +224,30 @@
 				<p:column headerText="Status" styleClass="#{task.status == 'Overdue'? 'newMsg' : null}" >
 					<h:outputText value="#{task.status}" />
 				</p:column>
+			</p:dataTable>
+			<p:dataTable id="taskTbl" rowIndexVar="row" value="#{scheduleController.tasks}" var="task" rendered="#{not scheduleController.taskSearchMode}"
+					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+					rows="15">
+				<p:column headerText="Action">
+					<h:outputText value="#{task.category}" />
+				</p:column>
+				<p:column headerText="Customer">
+					<h:outputText value="#{task.contact.name}" />
+					<br/>
+					<h:outputText value="Contact no: #{task.contact.phone}" />
+
+				</p:column>
+				<p:column headerText="Time">
+					<h:outputText value="#{task.time}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Detail">
+					<h:outputText value="#{task.detail}" />
+				</p:column>
+				<p:column headerText="Status" styleClass="#{task.status == 'Overdue'? 'newMsg' : null}" >
+					<h:outputText value="#{task.status}" styleClass="#{task.status == 'Overdue'? 'overdue' : task.status=='Done'? 'completed' : null}"/>
+				</p:column>
 				<p:column headerText="Deal detail">
 					<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
 							actionListener="#{scheduleController.startViewDealDetail(task)}" icon="ui-icon-search" title="View" rendered="#{task.actId gt 0}" />
@@ -190,9 +255,17 @@
 				<p:column headerText="Action">
 					<p:commandButton value="Delete" actionListener="#{scheduleController.deleteTask(task)}" update=":form01:tasks" rendered="#{task.status != 'Done'}" />
 					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditTask(task)}" update=":form01" rendered="#{task.status != 'Done'}" />
-					<h:outputLink value="callReport.jsf?contactSeq=#{task.contact.seq}&amp;backMain=true&amp;dealId=#{task.actId}&amp;taskId=#{task.seq}" style="color: blue;" >Call</h:outputLink>
+					<h:outputLink value="callReport.jsf?contactSeq=#{task.contact.seq}&amp;backMain=true&amp;dealId=#{task.actId}&amp;taskId=#{task.seq}"
+							style="color: blue;" rendered="#{(task.category == 'Follow-up call' or task.category == 'Call again') and task.status != 'Done'}">Call</h:outputLink>
+					<p:commandButton value="Mask as done" actionListener="#{scheduleController.markAsDone(task)}" upate=":form01:tasks" rendered="#{task.status != 'Done' and task.category == 'Email'}" />
 				</p:column>
 			</p:dataTable>
+			<h:panelGrid columns="4" >
+				<h:outputText value="Search my schedule on" />
+				<p:calendar value="#{scheduleController.taskDateSearch}" pattern="dd/MM/yyyy" />
+				<p:commandButton value="Search" actionListener="#{scheduleController.searchTask}" update="tasks" />
+				<p:commandButton value="Reset" actionListener="#{scheduleController.resetSearchTask}" update="tasks" />
+			</h:panelGrid>
 			<br/>
 			<p:commandButton value="Add new task" actionListener="#{scheduleController.startAddTask}" update=":form01"/>
 		</p:panel>
@@ -307,7 +380,11 @@
 				widgetVar="editTaskDialog_w" modal="true" resizable="false" draggable="true" header="Edit Task">
 			<p:panelGrid columns="2">
 				<h:outputText value="Action" />
-				<p:inputText value="#{scheduleController.editingTask.category}" />
+				<p:selectOneMenu value="#{scheduleController.editingTask.category}">
+					<f:selectItem itemLabel="Follow-up call" itemValue="Follow-up call"/>
+					<f:selectItem itemLabel="Call again" itemValue="Call again"/>
+					<f:selectItem itemLabel="Email" itemValue="Email"/>
+				</p:selectOneMenu>
 
 				<h:outputText value="Customer" />
 				<h:outputText value="#{scheduleController.editingTask.contact.name}" />
@@ -316,7 +393,7 @@
 				<p:calendar value="#{scheduleController.editingTask.time}" pattern="dd/MM/yyyy HH:mm" />
 
 				<h:outputText value="Detail" />
-				<p:inputText value="#{scheduleController.editingTask.detail}" />
+				<p:inputTextarea value="#{scheduleController.editingTask.detail}" />
 			</p:panelGrid>
 			<p:commandButton value="Confirm" actionListener="#{scheduleController.editTask}" update=":form01" />
 			<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelEditTask}" update=":form01" />

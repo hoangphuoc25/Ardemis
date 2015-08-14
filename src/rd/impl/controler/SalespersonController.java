@@ -251,6 +251,11 @@ public class SalespersonController implements Serializable {
 	}
 
 	public String getShowingMode() {
+		if (getStatus() == null || getStatus().isEmpty()) {
+			showingMode = "all";
+		} else {
+			showingMode = getStatus();
+		}
 		return showingMode;
 	}
 
@@ -258,12 +263,12 @@ public class SalespersonController implements Serializable {
 		this.showingMode = showingMode;
 	}
 
-	private String showingMode = "all";
+	private String showingMode;
 
 	public void updateCompanyList() throws IOException {
-		if (showingMode.equals("all"))
+		if (getShowingMode().equals("all"))
 			customerList = comService.getAll();
-		else if (showingMode.equalsIgnoreCase("new"))
+		else if (getShowingMode().equalsIgnoreCase("new"))
 			customerList = comService.getCompanyByContactStatusAndUser(showingMode, sessionManager.getLoginUser().getId());
 		else
 			customerList = comService.getCompanyByContactStatus(showingMode);
@@ -407,9 +412,10 @@ public class SalespersonController implements Serializable {
 		this.newContact = newContact;
 	}
 
-	public void startAddContact(CompanyDto comp) {
+	public void startAddContact(CompanyDto comp) throws IOException {
 		newContact.setCompany(comp.getName());
 		addContactMode = true;
+		assigneeName = sessionManager.getLoginUser().getName() + "(" + sessionManager.getLoginUser().getId() + ")";
 	}
 
 	public void startAddContact() throws IOException {
@@ -429,11 +435,15 @@ public class SalespersonController implements Serializable {
 			sessionManager.addGlobalMessageFatal("Invalid phone number.", null);
 			return;
 		}
-		UserDto assignee = userService.findUserById(assigneeName.split("[()]")[1]);
-		newContact.setAssignee(assignee);
+		if (assigneeName == null || assigneeName.isEmpty()) {
+			newContact.setAssignee(sessionManager.getLoginUser());
+			contactList.add(newContact);
+		} else {
+			UserDto assignee = userService.findUserById(assigneeName.split("[()]")[1]);
+			newContact.setAssignee(assignee);
+		}
 		newContact.setSeq(contactService.getSeq());
 		contactService.addContact(newContact);
-		contactList.add(newContact);
 		addContactMode = false;
 		newContact = new ContactDto();
 		sessionManager.addGlobalMessageInfo("New customer added", null);
@@ -694,5 +704,12 @@ public class SalespersonController implements Serializable {
 	}
 
 	private String assigneeName;
+
+	public boolean showCallLink(ContactDto contact) throws IOException {
+		if (contact.getAssignee().getId().equalsIgnoreCase(sessionManager.getLoginUser().getId())) {
+			return true;
+		} else
+			return false;
+	}
 }
 

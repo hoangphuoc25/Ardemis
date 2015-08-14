@@ -37,7 +37,7 @@
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 				rows="15" >
 			<p:column headerText="Company">
-				<a href="history.jsf?seq=#{call.customer.seq}" style="color: blue">#{call.customer.name}</a>
+				<a href="history.jsf?seq=#{call.contact.seq}" style="color: blue">#{call.contact.name}</a>
 			</p:column>
 			<p:column headerText="Call time">
 				<h:outputText value="#{call.callTime}">

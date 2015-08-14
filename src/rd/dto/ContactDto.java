@@ -1,5 +1,7 @@
 package rd.dto;
 
+import java.util.Date;
+
 public class ContactDto {
 	private int seq;
 	private String name;
@@ -11,6 +13,8 @@ public class ContactDto {
 	private String address;
 	private UserDto assignee;
 	private String contactStatus;
+	private Date createdDate;
+	private Date lastDate;
 
 	public ContactDto() {
 		this.language = "English";
@@ -110,5 +114,21 @@ public class ContactDto {
 
 	public void setContactStatus(String contactStatus) {
 		this.contactStatus = contactStatus;
+	}
+
+	public Date getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
+	}
+
+	public Date getLastDate() {
+		return lastDate;
+	}
+
+	public void setLastDate(Date lastDate) {
+		this.lastDate = lastDate;
 	}
 }

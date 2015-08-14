@@ -40,6 +40,7 @@
 </h:head>
 <h:body>
 	<h:form id="form01">
+		<p:growl autoUpdate="true" />
 		<p:menubar id="menu">
 			<p:menuitem value="Dashboard" url="#{sessionController.dashboardLink}" />
 			<p:submenu label="Products Catalog">
@@ -93,6 +94,7 @@
 			<p:column headerText="Action" rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager')}">
 				<p:commandButton value="Delete" actionListener="#{reportController.remove(invoice)}" update=":form01" />
 				<a href="editInvoice.jsf?seq=#{invoice.seq}" style="color: blue;">Edit</a>
+				<p:commandButton value="Edit" actionListener="#{reportController.startEditInvoice(invoice)}" update=":form01:editInvoiceArea" />
 			</p:column>
 		</p:dataTable>
 
@@ -121,32 +123,45 @@
 
 		</h:panelGrid>
 
-		<h3 style="font-family: Helvetica;">Add new purchase</h3>
-		<p:panelGrid columns="2">
-			<h:outputText value="Company Name"/>
-			<p:autoComplete minQueryLength="3" maxResults="10" value="#{reportController.compSearch}" completeMethod="#{reportController.compSuggest}" validator="#{reportController.validateCompany}">
-			</p:autoComplete>
-			<h:outputText value="Purchase date" />
-			<p:calendar value="#{reportController.newInvoice.purchaseDate}" validator="#{reportController.validateDate}" />
-			<h:outputText value="Product" />
-			<p:outputPanel id="p1">
-				<p:autoComplete id="srch" minQueryLength="3" maxResults="10" value="#{reportController.search}" completeMethod="#{reportController.suggest}" >
-					<p:ajax listener="#{reportController.select}" event="itemSelect" update="p1" />
-				</p:autoComplete>
-				<p:dataTable id="tb1" rowIndexVar="row" value="#{reportController.selectedProducts}" var="prod">
-					<p:column headerText="Select">
-						<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{prod.selected}" />
-					</p:column>
-					<p:column headerText="Name">
-						<h:outputText value="#{prod.name}" />
-					</p:column>
-				</p:dataTable>
-				<p:commandButton value="Delete" actionListener="#{reportController.deleteSelected}" update="p1" />
-			</p:outputPanel>
-		</p:panelGrid>
-		<p:commandButton value="Add new order" actionListener="#{reportController.addNewInvoice}" update="form01" />
-		<br/>
-		<a href="../faces/contactList.jsf" style="font-family: Arial; color: blue; text-decoration: none">Add new customer</a>
+		<p:outputPanel id="editInvoiceArea">
+			<p:dialog id="editInvoiceDialog" closable="false" visible="#{reportController.editInvoiceMode}" width="800px"
+					widgetVar="editInvoiceDialog_w" modal="true" resizable="false" draggable="true" header="Edit Invoice">
+				<p:panelGrid columns="2">
+					<h:outputText value="Customer" />
+					<h:outputText value="#{reportController.editInvoice.contact.name}" />
+
+					<h:outputText value="Products" />
+					<p:outputPanel id="p1">
+						<p:autoComplete id="srch" minQueryLength="3" maxResults="10" value="#{reportController.search}" completeMethod="#{reportController.suggest}" >
+						<p:ajax listener="#{reportController.select}" event="itemSelect" update="p1" />
+						</p:autoComplete>
+						<p:dataTable id="tb1" rowIndexVar="row" value="#{reportController.selectedProducts}" var="prod">
+							<p:column headerText="Select">
+								<p:selectBooleanButton offLabel="Not selected" onLabel="Selected" value="#{prod.selected}" />
+							</p:column>
+							<p:column headerText="Name">
+								<h:outputText value="#{prod.name}" />
+							</p:column>
+							<p:column headerText="License duration">
+								<p:selectOneMenu value="#{prod.duration}">
+									<f:selectItem itemLabel="3 months" itemValue="3" />
+									<f:selectItem itemLabel="6 months" itemValue="6" />
+									<f:selectItem itemLabel="12 months" itemValue="12" />
+									<f:selectItem itemLabel="24 months" itemValue="24" />
+									<f:selectItem itemLabel="Permanent" itemValue="0" />
+								</p:selectOneMenu>
+							</p:column>
+							<p:column headerText="Quantity">
+								<p:spinner min="1" value="#{prod.quantity}" />
+							</p:column>
+						</p:dataTable>
+						<p:commandButton value="Delete" actionListener="#{reportController.deleteSelected}" update="p1" />
+					</p:outputPanel>
+				</p:panelGrid>
+				<p:commandButton value="Confirm" actionListener="#{reportController.editInvoice}" update=":form01:editInvoiceArea" />
+				<p:commandButton value="Cancel" actionListener="#{reportController.cancelEditInvoice}" update=":form01:editInvoiceArea" />
+			</p:dialog>
+		</p:outputPanel>
 	</h:form>
 </h:body>
 </html>

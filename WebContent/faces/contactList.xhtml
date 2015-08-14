@@ -97,7 +97,7 @@
 					<h:outputText value="#{contact.language}" />
 				</p:column>
 				<p:column>
-					<a href="#{salespersonController.callReportLink(contact)}" style="color: blue;">Add call report</a>
+					<h:outputLink value="#{salespersonController.callReportLink(contact)}" style="color: blue;" >Call</h:outputLink>
 					<p:spacer width="7" />
 					<p:commandButton value="Delete" actionListener="#{salespersonController.deleteContact(contact)}" update=":form01:panel1"/>
 					<p:spacer width="7" />

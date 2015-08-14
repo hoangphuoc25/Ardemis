@@ -13,7 +13,7 @@ public class ProductDto {
 	private List<CategoryDto> category;
 
 	private String type;
-	private int duration;
+	private int duration = 0;
 	private int quantity;
 	private int storage;
 

@@ -378,12 +378,17 @@ public class MeetingDaoImpl implements MeetingDao {
 			day.set(Calendar.MILLISECOND, 0);
 
 			Calendar nextDay = new GregorianCalendar();
+			nextDay.setTime(date);
 			nextDay.set(Calendar.HOUR_OF_DAY, 0);
 			nextDay.set(Calendar.MINUTE, 0);
 			nextDay.set(Calendar.SECOND, 0);
 			nextDay.set(Calendar.MILLISECOND, 0);
 			nextDay.add(Calendar.DAY_OF_MONTH, 1);
 
+			System.out.println("MeetingDaoImpl.getMeetingByDayAndUser()");
+			System.out.println(date);
+			System.out.println(day.getTime());
+			System.out.println(nextDay.getTime());
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(GET_MEETING_BY_DAY_AND_USER);
 			prepareStatement.setDate(1, new java.sql.Date(day.getTime().getTime()));

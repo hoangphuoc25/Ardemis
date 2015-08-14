@@ -63,6 +63,16 @@ public class ActivityDto {
 		this.products = products;
 	}
 
+	public ActivityDto(ActivityDto act) {
+		this.seq = act.getSeq();
+		this.contact = act.getContact();
+		this.startDate = act.getStartDate();
+		this.status = act.getStatus();
+		this.remark = act.getRemark();
+		this.salesperson = act.getSalesperson();
+		this.products = act.getProducts();
+	}
+
 	public ActivityDto() {
 		this.startDate = new Date();
 	}

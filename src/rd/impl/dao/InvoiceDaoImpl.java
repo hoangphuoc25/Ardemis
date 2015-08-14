@@ -308,6 +308,8 @@ public class InvoiceDaoImpl implements InvoiceDao {
 	private static String SEARCH_INVOICE_BEFORE_AFTER = "select seq, contact_seq, purchase_date, amount, salesperson from t_invoice where purchase_date >= ? and purchase_date <= ?";
 	private static String FIND_COMPANY_BY_PRODUCT 	= "select distinct i.contact_seq from t_invoice i join t_product_purchase pp on i.seq = pp.invoice_seq where pp.product_seq=?";
 	private static String GET_BY_SALESPERSON 		= "select seq, contact_seq, purchase_date, amount, salesperson from t_invoice where salesperson=? order by purchase_date desc";
+	private static String SEARCH_INVOICE_BY_COMPANY_NAME = "select distinct i.seq from t_invoice i join t_contact c on i.contact_seq=c.seq where lower(c.company) like ?";
+	private static String SEARCH_INVOICE_BY_CUSTOMER_NAME = "select distinct i.seq from t_invoice i join t_contact c on i.contact_seq=c.seq where lower(c.name) like ?";
 
 	public List<InvoiceDto> getByCustomer(Transaction transaction, int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -655,4 +657,76 @@ public class InvoiceDaoImpl implements InvoiceDao {
 												+ " on i.seq = pp.invoice_seq "
 												+ " where add_months(i.purchase_date, pp.duration) - 7 <= current_date"
 												+ " and pp.duration <> 0;";
+	public List<InvoiceDto> searchInvoiceByCustomerName(Transaction transaction, String name) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_INVOICE_BY_CUSTOMER_NAME);
+			prepareStatement.setString(1, "%" + name.toLowerCase() + "%");
+			resultSet = prepareStatement.executeQuery();
+
+			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
+			while (resultSet.next()) {
+				result.add(getById(transaction, resultSet.getInt(1)));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	public List<InvoiceDto> searchInvoiceByCompanyName(Transaction transaction, String name) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_INVOICE_BY_COMPANY_NAME);
+			prepareStatement.setString(1, "%" + name.toLowerCase() + "%");
+			resultSet = prepareStatement.executeQuery();
+
+			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
+			while (resultSet.next()) {
+				result.add(getById(transaction, resultSet.getInt(1)));
+			}
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
 }

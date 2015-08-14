@@ -24,4 +24,6 @@ public interface InvoiceService {
 	public List<CompanyDto> findCompanyByProduct(int seq) throws IOException;
 	public List<InvoiceDto> getBySalesperson(String userId) throws IOException;
 	public List<InvoiceDto> getExpiringPurchase() throws IOException;
+	public List<InvoiceDto> searchInvoiceByCustomerName(String name) throws IOException;
+	public List<InvoiceDto> searchInvoiceByCompanyName(String name) throws IOException;
 }

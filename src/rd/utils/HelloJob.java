@@ -1,9 +1,13 @@
 package rd.utils;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
 
+import javax.ejb.Asynchronous;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.inject.Inject;
@@ -15,6 +19,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.glassfish.api.Async;
 import org.quartz.JobExecutionException;
 
 import rd.dto.ContactDto;
@@ -81,7 +86,7 @@ public class HelloJob {
 				content += tasks.get(i).getCategory() + ": "
 						+ tasks.get(i).getContact().getName() + "("
 						+ tasks.get(i).getContact().getPhone() + ")" + ": "
-						+ tasks.get(i).getDetail();
+						+ tasks.get(i).getDetail() + "\n\n";
 			}
 			content += "\n\nBest regards,";
 			message.setText(content);
@@ -129,6 +134,23 @@ public class HelloJob {
 				System.out.println("Done");
 			} catch (MessagingException e) {
 				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	@Schedule
+	public void moveOverdueTask() throws IOException {
+		List<UserDto> sales = userService.getUserByRole("sale");
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(new Date());
+		cal.add(Calendar.DAY_OF_MONTH, -1);
+		for (UserDto sale : sales) {
+			List<ScheduleTaskDto> tasks = stService.getByUser(sale.getId(), cal.getTime());
+			for (ScheduleTaskDto stDto: tasks) {
+				if (stDto.getStatus().equalsIgnoreCase("Pending")) {
+					stDto.setStatus("Overdue");
+					stService.updateEvent(stDto);
+				}
 			}
 		}
 	}

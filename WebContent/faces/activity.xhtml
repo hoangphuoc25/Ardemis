@@ -8,6 +8,7 @@
 	  >
 	  <f:metadata>
 	  	<f:event listener="#{activityController.reload}" type="preRenderView"></f:event>
+	  	<f:viewParam name="seq" value="#{activityController.dealSeq}"></f:viewParam>
 	  </f:metadata>
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -50,7 +51,7 @@
 					<p:autoComplete value="#{activityController.contactName}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestContact}" forceSelection="true" />
 					<h:outputText value="Start Date" />
 					<p:calendar value="#{activityController.newAct.startDate}" pattern="dd/MM/yyyy" />
-					<h:outputText value="Status" />
+					<h:outputText value="Stage" />
 					<p:selectOneMenu value="#{activityController.newAct.status}">
 						<f:selectItems value="#{activityController.statusOptions}" />
 					</p:selectOneMenu>
@@ -59,6 +60,7 @@
 				</p:panelGrid>
 				<br/>
 				<p:commandButton value="Add" actionListener="#{activityController.addActivity}" update=":form01:newDealArea"/>
+				<p:commandButton value="Cancel" actionListener="#{activityController.cancelAddNewDeal}" update=":form01:newDealArea"/>
 			</p:dialog>
 		</p:outputPanel>
 
@@ -81,7 +83,7 @@
 		<p:fieldset legend="All deals">
 			<p:dataTable id="tbl1" rowIndexVar="row" value="#{activityController.allAct}" var="act"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-					rows="15">
+					rows="10">
 				<p:column headerText="Customer">
 					<h:outputText value="#{act.contact.name}" />
 				</p:column>
@@ -90,7 +92,7 @@
 						<f:convertDateTime pattern="dd/MM/yyyy" />
 					</h:outputText>
 				</p:column>
-				<p:column headerText="Status">
+				<p:column headerText="Stage">
 					<h:outputText value="#{act.status}" />
 				</p:column>
 				<p:column headerText="Products">
@@ -115,11 +117,20 @@
 			</p:dataTable>
 		</p:fieldset>
 
+		<h:panelGrid columns="4">
+			<h:outputText value="Customer name" />
+			<p:inputText value="#{activityController.custNameSearch}" />
+			<p:commandButton value="Search" actionListener="#{activityController.searchByCustomer}" update="tbl1" />
+			<p:commandButton value="Cancel" actionListener="#{activityController.cancelSearchByCustomer}" update="tbl1" />
+		</h:panelGrid>
+
+		<p:commandButton value="Go back" actionListener="#{activityController.goBack}"/>
+
 		<p:dialog id="editDialog" closable="false" visible="#{activityController.editMode}"
 				widgetVar="editDialog_w" modal="true" resizable="false" draggable="true" header="Update Activity" style="width: 500px;">
 			<p:messages />
 			<p:panelGrid columns="2">
-				<h:outputText value="Status" />
+				<h:outputText value="Stage" />
 				<p:selectOneMenu value="#{activityController.selectedAct.status}">
 					<f:selectItems value="#{activityController.statusOptionsEditBox}" />
 				</p:selectOneMenu>
@@ -180,8 +191,18 @@
 				<p:calendar value="#{activityController.newMeeting.from}" pattern="MM/dd/yyyy HH:mm" />
 				<h:outputText value="To" />
 				<p:calendar value="#{activityController.newMeeting.to}" pattern="MM/dd/yyyy HH:mm" />
-				<h:outputText value="Title" />
+				<h:outputText value="Detail" />
 				<p:inputText value="#{activityController.newMeeting.detail}" />
+				<h:outputText value="Meeting location"/>
+				<p:outputPanel id="p4">
+					<p:selectOneRadio value="#{activityController.meetingLocationMode}">
+					 	<f:selectItem itemLabel="At customer office" itemValue="true" />
+			            <f:selectItem itemLabel="Other" itemValue="false" />
+			            <p:ajax update="p4"/>
+					</p:selectOneRadio>
+					<h:outputText value="No customer address recorded" rendered="#{activityController.meetingLocationMode == 'true' and activityController.actContact.address eq null}" style="font-style: italic;" />
+					<p:inputTextarea value="#{activityController.newMeeting.location}" rendered="#{activityController.meetingLocationMode == 'false'}"/>
+				</p:outputPanel>
 			</p:panelGrid>
 			<p:commandButton value="Add" actionListener="#{activityController.addNewMeeting}" update=":form01" />
 			<p:commandButton value="Cancel" actionListener="#{activityController.cancelAddNewMeeting}" update=":form01"/>
@@ -194,7 +215,11 @@
 				<h:outputText value="#{activityController.newTask.contact.name}" />
 
 				<h:outputText value="Action" />
-				<p:inputText value="#{activityController.newTask.category}" />
+				<p:selectOneMenu value="#{activityController.newTask.category}">
+					<f:selectItem itemLabel="Follow-up call" itemValue="Follow-up call"/>
+					<f:selectItem itemLabel="Call again" itemValue="Call again"/>
+					<f:selectItem itemLabel="Email" itemValue="Email"/>
+				</p:selectOneMenu>
 
 				<h:outputText value="Time" />
 				<p:calendar value="#{activityController.newTask.time}" pattern="dd/MM/yyyy HH:mm" />

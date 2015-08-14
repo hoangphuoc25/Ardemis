@@ -30,6 +30,7 @@ import rd.dto.MeetingDto;
 import rd.dto.ProductDto;
 import rd.dto.SaleTargetDto;
 import rd.dto.ScheduleTaskDto;
+import rd.dto.ScriptDto;
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.ActivityService;
@@ -43,6 +44,7 @@ import rd.spec.service.MeetingService;
 import rd.spec.service.ProductService;
 import rd.spec.service.SaleTargetService;
 import rd.spec.service.ScheduleTaskService;
+import rd.spec.service.ScriptService;
 import rd.spec.service.UserService;
 
 @Named
@@ -125,7 +127,14 @@ public class CallReportController implements Serializable {
 	@Inject ActivityService actService;
 
 	public void addNewReport() throws IOException {
-		if (rating.equalsIgnoreCase("follow-up call") || rating.equalsIgnoreCase("call again later")) {
+		if (rating.equalsIgnoreCase("follow-up call") || rating.equalsIgnoreCase("contact again later")) {
+		}
+		int seq = crService.getSeq();
+		CallReportDto cr = new CallReportDto(seq, getCallee(), callTime, callDetail, rating, sessionManager.getLoginUser(), callBackNo, dealId);
+
+		crService.addReport(cr);
+
+		if (cr.getRating().equalsIgnoreCase("contact again later") || cr.getRating().equalsIgnoreCase("follow-up call")) {
 			if (callBackAgainTime != null && (callBackAgainTime.getTime() < (new Date()).getTime())) {
 				sessionManager.addGlobalMessageFatal("Invalid call back time", null);
 				return;
@@ -137,13 +146,6 @@ public class CallReportController implements Serializable {
 			if (callBackUnit.equalsIgnoreCase("month")) {
 				callBackNo *= 30;
 			}
-		}
-		int seq = crService.getSeq();
-		CallReportDto cr = new CallReportDto(seq, getCallee(), callTime, callDetail, rating, sessionManager.getLoginUser(), callBackNo, dealId);
-
-		crService.addReport(cr);
-
-		if (cr.getRating().equalsIgnoreCase("contact again later") || cr.getRating().equalsIgnoreCase("follow-up call")) {
 			Calendar date = new GregorianCalendar();
 			date.setTime(callTime);
 			date.add(Calendar.DAY_OF_YEAR, callBackNo);
@@ -155,7 +157,7 @@ public class CallReportController implements Serializable {
 			}
 			String category = "";
 			if (cr.getRating().equalsIgnoreCase("contact again later"))
-				category = "Call back again";
+				category = "Call again";
 			else if (cr.getRating().equalsIgnoreCase("Follow-up call"))
 				category = "Follow-up call";
 
@@ -165,6 +167,10 @@ public class CallReportController implements Serializable {
 		}
 
 		if (cr.getRating().equalsIgnoreCase("follow-up meeting")) {
+			if (newMeeting.getFrom() == null || newMeeting.getTo() == null) {
+				sessionManager.addGlobalMessageFatal("Please enter meeting start and end time", null);
+				return;
+			}
 			if (getCurrentDeal() == null) {
 				int actSeq = actService.getSeq();
 				ActivityDto act = new ActivityDto(actSeq, callee, new Date(), "Contacted", "Deal started", sessionManager.getLoginUser(), selectedProdList);
@@ -579,6 +585,7 @@ public class CallReportController implements Serializable {
 //			temp.add(cat.getCategory());
 //		}
 		prodSearchList = prodService.searchByCategories(selectedCats);
+		System.out.println(prodSearchList.size());
 	}
 
 	public String getProdDescSearch() {
@@ -837,11 +844,11 @@ public class CallReportController implements Serializable {
 	public void addProdToList() throws NumberFormatException, IOException {
 		ProductDto temp = prodService.getProductById(Integer.parseInt(searchProd.split("[()]")[1]));
 		searchProd = "";
-		for (ProductDto pr: selectedProdList) {
-			if (pr.getSeq() == temp.getSeq()) {
-				return;
-			}
-		}
+//		for (ProductDto pr: selectedProdList) {
+//			if (pr.getSeq() == temp.getSeq()) {
+//				return;
+//			}
+//		}
 		selectedProdList.add(temp);
 	}
 	public void startAddProducts() {
@@ -960,8 +967,15 @@ public class CallReportController implements Serializable {
 	private int taskId;
 	private int budget;
 
-	public void startAddPurchaseRecord() {
+	public void startAddPurchaseRecord() throws IOException {
 		addProdMode = true;
+		selectedProdList = new ArrayList<ProductDto>();
+		if (dealId > 0) {
+			ActivityDto temp = actService.getById(dealId);
+			for (ProductDto dto: temp.getProducts()) {
+				selectedProdList.add(new ProductDto(dto));
+			}
+		}
 	}
 
 	public void searchByBudget() throws IOException {
@@ -1009,7 +1023,7 @@ public class CallReportController implements Serializable {
 	public ActivityDto getCurrentDeal() throws IOException {
 		if (currentDeal == null && dealId > 0) {
 			currentDeal = actService.getById(dealId);
-			selectedProdList = actService.getProductByDeal(dealId);
+//			selectedProdList = actService.getProductByDeal(dealId);
 		}
 		return currentDeal;
 	}
@@ -1032,5 +1046,68 @@ public class CallReportController implements Serializable {
 		this.myTask = myTask;
 	}
 
+	public boolean isViewScriptMode() {
+		return viewScriptMode;
+	}
+
+	public void setViewScriptMode(boolean viewScriptMode) {
+		this.viewScriptMode = viewScriptMode;
+	}
+
 	private List<ScheduleTaskDto> myTask;
+	private boolean viewScriptMode;
+	private String questionList;
+	private int scriptType;
+	private boolean editScriptMode;
+
+	@Inject ScriptService scriptService;
+
+	public void updateQuestionList() throws IOException {
+		questionList = scriptService.getById(scriptType).getDetail();
+	}
+	public void startViewScript() throws IOException {
+		viewScriptMode = true;
+		questionList = scriptService.getById(1).getDetail();
+	}
+
+	public void closeScript() {
+		viewScriptMode = false;
+	}
+
+	public String getQuestionList() {
+		return questionList;
+	}
+
+	public void setQuestionList(String questionList) {
+		this.questionList = questionList;
+	}
+
+	public int getScriptType() {
+		return scriptType;
+	}
+
+	public void setScriptType(int scriptType) {
+		this.scriptType = scriptType;
+	}
+
+	public boolean isEditScriptMode() {
+		return editScriptMode;
+	}
+
+	public void setEditScriptMode(boolean editScriptMode) {
+		this.editScriptMode = editScriptMode;
+	}
+
+	public void startEditScript() {
+		editScriptMode = true;
+	}
+	public void editScript() throws IOException {
+		ScriptDto current = scriptService.getById(scriptType);
+		current.setDetail(questionList);
+		scriptService.editScript(current);
+		editScriptMode = false;
+	}
+	public void cancelEditScript() {
+		editScriptMode = false;
+	}
 }

@@ -116,7 +116,7 @@ public class MeetingServiceImpl implements MeetingService, Serializable {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
 		try {
 			transaction.begin();
-			List<MeetingDto> result = meetingDao.getMeetingToday(transaction);
+			List<MeetingDto> result = meetingDao.getMeetingToday(transaction, username);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {

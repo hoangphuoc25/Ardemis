@@ -207,4 +207,28 @@ public class InvoiceServiceImpl implements InvoiceService, Serializable {
 			throw e;
 		}
 	}
+	public List<InvoiceDto> searchInvoiceByCustomerName(String name) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<InvoiceDto> result = invoiceDao.searchInvoiceByCustomerName(transaction, name);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<InvoiceDto> searchInvoiceByCompanyName(String name) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<InvoiceDto> result = invoiceDao.searchInvoiceByCompanyName(transaction, name );
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }
