@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+	  <f:metadata>
+	  	<f:event listener="#{quotesController.reload}" type="preRenderView"></f:event>
+	  </f:metadata>
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<h:form id="form01">
+		<p:panelGrid columns="2">
+			<h:outputText value="Product" />
+			<p:outputPanel id="p1">
+				<p:autoComplete forceSelection="true" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestProduct}" value="#{quotesController.prodSearch}">
+					<p:ajax update="p1" event="itemSelect" listener="#{quotesController.addProdToList}" />
+				</p:autoComplete>
+
+				<p:dataTable id="prodTable" rowIndexVar="row" value="#{quotesController.prodList}" var="prod">
+					<p:column headerText="Select">
+						<p:selectBooleanCheckbox value="#{prod.selected}" />
+					</p:column>
+					<p:column headerText="Name">
+						<h:outputText value="#{prod.name}" />
+					</p:column>
+					<p:column headerText="Price per month">
+						<h:outputText value="#{prod.price}" />
+					</p:column>
+					<p:column headerText="Permanent price">
+						<h:outputText value="#{prod.permanentPrice}" />
+					</p:column>
+					<p:column headerText="Quantity">
+						<p:spinner value="#{prod.quantity}" min="1">
+							<p:ajax update=":form01:p1" listener="#{quotesController.calculateTotal}" />
+						</p:spinner>
+					</p:column>
+				</p:dataTable>
+				<h:outputText value="Total: $ #{quotesController.total}" />
+				<br/>
+				<p:commandButton value="Delete" actionListener="#{quotesController.removeSelected}" update="p1" />
+			</p:outputPanel>
+		</p:panelGrid>
+
+	</h:form>
+</h:body>
+</html>

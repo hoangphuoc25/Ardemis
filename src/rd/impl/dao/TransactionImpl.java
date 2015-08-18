@@ -9,6 +9,9 @@ import javax.annotation.PreDestroy;
 import javax.ejb.Stateful;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,14 +39,19 @@ public class TransactionImpl implements Transaction, Serializable {
 	@Override
 	public void begin() throws TransactionException {
 		if(connection == null){
+			DataSource dataSource = null;
 			try {
-				//This usage is irregular. Only on the STM. Normaly use 'getConnection()'.
-				connection = resourceHolder.getResource().getConnection(YOUR_STM_ID, YOUR_STM_ID);
+				// This usage is irregular. Only on the STM. Normaly use 'getConnection()'.
+				// connection = resourceHolder.getResource().getConnection(YOUR_STM_ID, YOUR_STM_ID);
+				dataSource = InitialContext.doLookup("jdbc/testdb");
+				connection = dataSource.getConnection(YOUR_STM_ID, YOUR_STM_ID);
 				connection.setAutoCommit(false);
-			} catch (IOException e) {
-				throw new TransactionException(e);
+
 			} catch (SQLException e) {
 				throw new TransactionException(e);
+			} catch (NamingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

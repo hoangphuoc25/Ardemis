@@ -27,14 +27,14 @@ public class ContactDaoImpl implements ContactDao {
 
 	private static final String GET_SEQ 			= "select max(seq)+1 from t_contact";
 	private static final String DELETE_CONTACT 		= "delete from t_contact where seq=?";
-	private static final String UPDATE_CONTACT 		= "update t_contact set name=?, gender=?, phone=?, email=?, company=?, language=?, address=?, salesperson=?, contact_status=? where seq=?";
-	private static final String GET_CONTACT_BY_ID 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where seq=?";
-	private static final String ADD_CONTACT 		= "insert into t_contact (seq, name, gender, phone, email, company, language, address, salesperson, contact_status) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	private static final String GET_BY_COMPANY 		= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where company=? order by seq desc";
-	private static final String SEARCH_CONTACT_BY_NAME 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(name) like ? order by seq desc";
-	private static final String GET_ALL 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact order by seq desc";
-	private static String GET_BY_STATUS_AND_USER 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(contact_status)=? and salesperson=? order by seq desc";
-	private static String GET_BY_STATUS 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status from t_contact where lower(contact_status)=? order by seq desc";
+	private static final String UPDATE_CONTACT 		= "update t_contact set name=?, gender=?, phone=?, email=?, company=?, language=?, address=?, salesperson=?, contact_status=?, source=? where seq=?";
+	private static final String GET_CONTACT_BY_ID 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status, source from t_contact where seq=?";
+	private static final String ADD_CONTACT 		= "insert into t_contact (seq, name, gender, phone, email, company, language, address, salesperson, contact_status, source) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	private static final String GET_BY_COMPANY 		= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status, source from t_contact where company=? order by seq desc";
+	private static final String SEARCH_CONTACT_BY_NAME 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status, source from t_contact where lower(name) like ? order by seq desc";
+	private static final String GET_ALL 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status, source from t_contact order by seq desc";
+	private static String GET_BY_STATUS_AND_USER 	= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status, source from t_contact where lower(contact_status)=? and salesperson=? order by seq desc";
+	private static String GET_BY_STATUS 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status, source from t_contact where lower(contact_status)=? order by seq desc";
 	private static String GET_NUMBER_OF_CONTACT_PER_SALE = "select count(*) from t_contact where lower(contact_status)='new' and salesperson=?";
 	private static String ADD_COMPANY_CONTACT 		= "insert into t_company_contact (company_seq, contact_seq) values (?, ?)";
 
@@ -64,6 +64,7 @@ public class ContactDaoImpl implements ContactDao {
 			prepareStatement.setString(8, contact.getAddress());
 			prepareStatement.setString(9, contact.getAssignee().getId());
 			prepareStatement.setString(10, contact.getContactStatus());
+			prepareStatement.setString(11, contact.getSource());
 
 			resultSet = prepareStatement.executeQuery();
 
@@ -177,7 +178,8 @@ public class ContactDaoImpl implements ContactDao {
 			prepareStatement.setString(7, contact.getAddress());
 			prepareStatement.setString(8, contact.getAssignee().getId());
 			prepareStatement.setString(9, contact.getContactStatus());
-			prepareStatement.setInt(10, contact.getSeq());
+			prepareStatement.setString(10, contact.getSource());
+			prepareStatement.setInt(11, contact.getSeq());
 
 			resultSet = prepareStatement.executeQuery();
 
@@ -280,8 +282,9 @@ public class ContactDaoImpl implements ContactDao {
 		String address = resultSet.getString(8);
 		UserDto sale = userDao.findUser(transaction, resultSet.getString(9));
 		String contactStatus = resultSet.getString(10);
+		String source = resultSet.getString(11);
 
-		return new ContactDto(seq, name, gender, phone, email, company, language, address, sale, contactStatus);
+		return new ContactDto(seq, name, gender, phone, email, company, language, address, sale, contactStatus, source);
 	}
 	public List<ContactDto> searchContactByName(Transaction transaction, String partial) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE

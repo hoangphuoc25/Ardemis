@@ -42,6 +42,7 @@ import rd.dto.PromotionDto;
 import rd.dto.SaleExpenseDto;
 import rd.dto.SaleTargetDto;
 import rd.dto.UserDto;
+import rd.dto.WrStatisticsDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.ActivityService;
 import rd.spec.service.CompanyService;
@@ -580,6 +581,7 @@ public class ManagerController implements Serializable {
 	public void viewActivity(UserDto sale) throws IOException {
 		viewActivityMode = true;
 		allAct = actService.getByUser(sale.getId());
+		selectedSale = sale;
 	}
 
 	public List<ActivityDto> getAllAct() {
@@ -691,5 +693,33 @@ public class ManagerController implements Serializable {
 		} else if (currentTarget.getAction().equalsIgnoreCase("Close deals with")) {
 			currentTarget.setUnit("customers");
 		}
+	}
+
+	public String getActivityShowingMode() {
+		return activityShowingMode;
+	}
+
+	public void setActivityShowingMode(String activityShowingMode) {
+		this.activityShowingMode = activityShowingMode;
+	}
+
+	private String activityShowingMode = "all";
+
+	public void updateAllAct() throws IOException {
+		if (activityShowingMode.equalsIgnoreCase("all")) {
+			allAct = actService.getByUser(selectedSale.getId());
+		} else if (activityShowingMode.equalsIgnoreCase("active")) {
+			allAct = actService.findByStatus("Qualified", selectedSale.getId());
+			allAct.addAll(actService.findByStatus("Negotiating", selectedSale.getId()));
+		} else if (activityShowingMode.equalsIgnoreCase("Completed")) {
+			allAct = actService.findByStatus("Completed", selectedSale.getId());
+		} else if (activityShowingMode.equalsIgnoreCase("Failed")) {
+			allAct = actService.findByStatus("Failed", selectedSale.getId());
+		}
+	}
+
+	public void startAssignTargetToAll() {
+		assignTargetMode = true;
+		currentTarget = new SaleTargetDto();
 	}
 }

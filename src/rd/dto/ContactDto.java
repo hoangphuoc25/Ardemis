@@ -15,15 +15,18 @@ public class ContactDto {
 	private String contactStatus;
 	private Date createdDate;
 	private Date lastDate;
+	private String source;
+	private String jobTitle;
 
 	public ContactDto() {
 		this.language = "English";
 		this.gender = "Male";
-		setContactStatus("New");
+		this.contactStatus = "New";
+		this.source = "Personal contact";
 	}
 
 	public ContactDto(int seq, String name, String gender, String phone,
-			String email, String company, String language, String address, UserDto assignee, String contactStatus) {
+			String email, String company, String language, String address, UserDto assignee, String contactStatus, String source) {
 		this.seq = seq;
 		this.name = name;
 		this.company = company;
@@ -34,6 +37,7 @@ public class ContactDto {
 		this.address = address;
 		this.assignee = assignee;
 		this.setContactStatus(contactStatus);
+		this.source = source;
 	}
 
 	public int getSeq() {
@@ -130,5 +134,21 @@ public class ContactDto {
 
 	public void setLastDate(Date lastDate) {
 		this.lastDate = lastDate;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public String getJobTitle() {
+		return jobTitle;
+	}
+
+	public void setJobTitle(String jobTitle) {
+		this.jobTitle = jobTitle;
 	}
 }

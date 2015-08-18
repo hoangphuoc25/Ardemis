@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  >
+	  <f:metadata>
+	  	<f:event listener="#{statisticsController.reload}" type="preRenderView"></f:event>
+	  </f:metadata>
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title></title>
+</h:head>
+<h:body>
+	<h:form id="form01">
+		<p:growl />
+		<p:messages />
+		<h:panelGrid columns="2">
+			<h:outputText value="From" />
+			<p:calendar value="#{statisticsController.fromDate}" pattern="dd/MM/yyyy" />
+			<h:outputText value="To" />
+			<p:calendar value="#{statisticsController.toDate}" pattern="dd/MM/yyyy" />
+			<h:outputText value="Containing products" />
+			<p:autoComplete value="#{statisticsController.product}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestProd}" forceSelection="true" />
+		</h:panelGrid>
+		<p:commandButton value="Search" actionListener="#{statisticsController.search}" update=":form01" />
+
+		<p:tabView>
+			<p:tab title="By employee">
+				<p:dataTable id="tbl1" rowIndexVar="row" value="#{statisticsController.stats}" var="emp">
+					<p:column headerText="Employee">
+						<h:outputText value="#{emp.salesperson.name}" />
+					</p:column>
+					<p:column headerText="Revenue generated">
+						<h:outputText value="#{emp.total}" />
+					</p:column>
+					<p:column headerText="Deals started">
+						<h:outputText value="#{emp.deals}" />
+					</p:column>
+					<p:column headerText="Calls made">
+						<h:outputText value="#{emp.calls}" />
+					</p:column>
+				</p:dataTable>
+			</p:tab>
+			<p:tab title="By team">
+				<p:dataTable id="tbl2" rowIndexVar="row" value="#{statisticsController.teamstats}" var="emp">
+					<p:column headerText="Team">
+						<h:outputText value="#{emp.team.name}" />
+					</p:column>
+					<p:column headerText="Revenue generated">
+						<h:outputText value="#{emp.total}" />
+					</p:column>
+					<p:column headerText="Deals started">
+						<h:outputText value="#{emp.deals}" />
+					</p:column>
+					<p:column headerText="Calls made">
+						<h:outputText value="#{emp.calls}" />
+					</p:column>
+				</p:dataTable>
+			</p:tab>
+		</p:tabView>
+		<p:ajaxStatus style="text-align: center;">
+			<f:facet name="start">
+				<h:outputText value="#{dictionaryControler.dictionary['Loading']}"/><br/>
+				<p:graphicImage value="/images/loading.gif" />
+			</f:facet>
+			<f:facet name="complete">
+				<h:outputText value=""/>
+			</f:facet>
+		</p:ajaxStatus>
+	</h:form>
+</h:body>
+</html>

@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -53,6 +54,7 @@ import rd.spec.service.InvoiceService;
 import rd.spec.service.ProductService;
 import rd.spec.service.TeamService;
 import rd.spec.service.UserService;
+import rd.utils.AppUtil;
 import rd.utils.DatabaseUtil;
 
 @Named
@@ -443,6 +445,7 @@ public class SalespersonController implements Serializable {
 			newContact.setAssignee(assignee);
 		}
 		newContact.setSeq(contactService.getSeq());
+		newContact.setContactStatus(AppUtil.getStatus(newContact.getSource()));
 		contactService.addContact(newContact);
 		addContactMode = false;
 		newContact = new ContactDto();
@@ -460,6 +463,10 @@ public class SalespersonController implements Serializable {
 	public List<ContactDto> getContactList() throws IOException {
 		if (contactList == null && (status == null || status.isEmpty())) {
 			contactList = contactService.getAll();
+		} else if (contactList == null && !status.isEmpty() && status.equalsIgnoreCase("new")) {
+			contactList = contactService.getByStatusAndUser("new", sessionManager.getLoginUser().getId());
+			contactList.addAll(contactService.getByStatusAndUser("pre-qualified", sessionManager.getLoginUser().getId()));
+			showingMode = status;
 		} else if (contactList == null && !status.isEmpty()) {
 			contactList = contactService.getByStatusAndUser(status, sessionManager.getLoginUser().getId());
 			showingMode = status;
@@ -613,6 +620,15 @@ public class SalespersonController implements Serializable {
 			String email = row.getCell(3).getStringCellValue();
 			String gender = row.getCell(4).getStringCellValue();
 			String address = row.getCell(5).getStringCellValue();
+			String source = row.getCell(6).getStringCellValue();
+			String status = "";
+			List<String> newQualifier = new ArrayList<String>(Arrays.asList("name card", "advertisement"));
+			List<String> preQualifiedQualifier = new ArrayList<String>(Arrays.asList("conference", "trade show", "web", "personal contact"));
+			if (newQualifier.contains(source.toLowerCase())) {
+				status = "New";
+			} else if (preQualifiedQualifier.contains(source.toLowerCase())) {
+				status = "Pre-qualified";
+			}
 
 			if (name.isEmpty()) {
 				msg += "Row " + (r+2) + ": Name is required";
@@ -625,7 +641,7 @@ public class SalespersonController implements Serializable {
 				continue;
 			}
 
-			ContactDto contact = new ContactDto(contactService.getSeq(), name, gender, phone, email, company, "English", address, sessionManager.getLoginUser(), "New");
+			ContactDto contact = new ContactDto(contactService.getSeq(), name, gender, phone, email, company, "English", address, sessionManager.getLoginUser(), status, source);
 			contacts.add(contact);
 			//contactService.addContact(contact);
 		}

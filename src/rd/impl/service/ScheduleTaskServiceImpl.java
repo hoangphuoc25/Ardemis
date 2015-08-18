@@ -183,4 +183,16 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService, Serializabl
 			throw e;
 		}
 	}
+	public List<ScheduleTaskDto> getByIntervalAndUser(Date fromDate, Date toDate, String username) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ScheduleTaskDto> result = seDao.getByIntervalAndUser(transaction, fromDate, toDate, username);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

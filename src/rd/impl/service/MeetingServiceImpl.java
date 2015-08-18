@@ -138,4 +138,16 @@ public class MeetingServiceImpl implements MeetingService, Serializable {
 			throw e;
 		}
 	}
+	public List<MeetingDto> getByIntervalAndUser(Date startDate, Date endDate, String username) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<MeetingDto> result = meetingDao.getByIntervalAndUser(transaction, startDate, endDate, username);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

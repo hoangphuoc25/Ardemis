@@ -80,10 +80,16 @@
 			</p:selectOneMenu>
 		</h:panelGrid>
 
+
 		<p:fieldset legend="All deals">
 			<p:dataTable id="tbl1" rowIndexVar="row" value="#{activityController.allAct}" var="act"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="10">
+				<p:column width="60">
+					<p:selectBooleanCheckbox value="#{act.selected}">
+						<p:ajax update=":form01:dealButtons" listener="#{activityController.updateActivitySelected}" />
+					</p:selectBooleanCheckbox>
+				</p:column>
 				<p:column headerText="Customer">
 					<h:outputText value="#{act.contact.name}" />
 				</p:column>
@@ -115,7 +121,11 @@
 					</p:menuButton>
 				</p:column>
 			</p:dataTable>
+			<p:outputPanel id="dealButtons">
+				<p:commandButton value="Reassign" actionListener="#{activityController.startReassignActivity}" update=":form01:reassignArea" rendered="#{activityController.someDealSelected}" />
+			</p:outputPanel>
 		</p:fieldset>
+
 
 		<h:panelGrid columns="4">
 			<h:outputText value="Customer name" />
@@ -125,6 +135,17 @@
 		</h:panelGrid>
 
 		<p:commandButton value="Go back" actionListener="#{activityController.goBack}"/>
+
+		<p:ajaxStatus style="text-align: center;">
+			<f:facet name="start">
+				<h:outputText value="Loading" />
+				<br />
+				<p:graphicImage value="/images/loading.gif" />
+			</f:facet>
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
 
 		<p:dialog id="editDialog" closable="false" visible="#{activityController.editMode}"
 				widgetVar="editDialog_w" modal="true" resizable="false" draggable="true" header="Update Activity" style="width: 500px;">
@@ -276,6 +297,18 @@
 						</p:dataTable>
 					</p:fieldset>
 				</p:panelGrid>
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:outputPanel id="reassignArea">
+			<p:dialog id="reassignDialog" closable="false" visible="#{activityController.reassignMode}"
+					widgetVar="reassignDialog_w" modal="true" resizable="false" draggable="true" header="Reassign to other salesperson">
+				<p:panelGrid columns="2">
+					<h:outputText value="Salesperson" />
+					<p:autoComplete value="#{activityController.reassigneeName}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestUser}" />
+				</p:panelGrid>
+				<p:commandButton value="Confirm" actionListener="#{activityController.confirmReassignment}" update=":form01" rendered="#{activityController.someDealSelected}" />
+				<p:commandButton value="Cancel" actionListener="#{activityController.cancelReassignment}" update=":form01:reassignArea" />
 			</p:dialog>
 		</p:outputPanel>
 	</h:form>

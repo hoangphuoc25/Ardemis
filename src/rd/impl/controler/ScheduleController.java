@@ -12,8 +12,6 @@ import java.util.List;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -36,9 +34,9 @@ import rd.spec.service.CompanyService;
 import rd.spec.service.ContactService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.NoteService;
-import rd.spec.service.ProductService;
 import rd.spec.service.SaleTargetService;
 import rd.spec.service.ScheduleTaskService;
+import rd.spec.service.UserService;
 import rd.utils.Pair;
 
 @Named
@@ -54,6 +52,7 @@ public class ScheduleController implements Serializable {
 	@Inject SaleTargetService stService;
 	@Inject ScheduleTaskService taskService;
 	@Inject ActivityService actService;
+	@Inject UserService userService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -714,11 +713,8 @@ public class ScheduleController implements Serializable {
 	private List<MeetingDto> searchedMeetings;
 
 	public void searchSchedule() throws IOException {
-		searchedMeetings = meetingService.getMeetingByDayAndUser(sessionManager.getLoginUser().getId(), dateSearch);
-		System.out.println(dateSearch);
-		System.out.println(sessionManager.getLoginUser().getId());
-		System.out.println("ScheduleController.searchSchedule()");
-		System.out.println(searchedMeetings.size());
+		// searchedMeetings = meetingService.getMeetingByDayAndUser(sessionManager.getLoginUser().getId(), dateSearch);
+		searchedMeetings = meetingService.getByIntervalAndUser(dateSearch, dateSearchTo, sessionManager.getLoginUser().getId());
 		scheduleSearchMode = true;
 	}
 	public void resetSearchSchedule() {
@@ -750,13 +746,23 @@ public class ScheduleController implements Serializable {
 		this.taskSearchMode = taskSearchMode;
 	}
 
+	public Date getTaskDateTo() {
+		return taskDateTo;
+	}
+
+	public void setTaskDateTo(Date taskDateTo) {
+		this.taskDateTo = taskDateTo;
+	}
+
+	private Date taskDateTo;
 	private Date taskDateSearch;
 	private boolean taskSearchMode;
 	private List<ScheduleTaskDto> searchedTasks;
 
 	public void searchTask() throws IOException {
-		setSearchedTasks(taskService.getByUser(sessionManager.getLoginUser().getId(), taskDateSearch));
+		// setSearchedTasks(taskService.getByUser(sessionManager.getLoginUser().getId(), taskDateSearch));
 		taskSearchMode = true;
+		searchedTasks = taskService.getByIntervalAndUser(taskDateSearch, taskDateTo, sessionManager.getLoginUser().getId());
 	}
 	public void resetSearchTask() {
 		taskSearchMode = false;
@@ -811,5 +817,162 @@ public class ScheduleController implements Serializable {
 		this.reminder = reminder;
 	}
 
+	public Date getDateSearchTo() {
+		return dateSearchTo;
+	}
+
+	public void setDateSearchTo(Date dateSearchTo) {
+		this.dateSearchTo = dateSearchTo;
+	}
+
+	public boolean isSomeMeetingSelected() {
+		return someMeetingSelected;
+	}
+
+	public void setSomeMeetingSelected(boolean someMeetingSelected) {
+		this.someMeetingSelected = someMeetingSelected;
+	}
+
 	private String reminder;
+	private Date dateSearchTo;
+
+	private boolean someMeetingSelected;
+
+	public void updateButtons() {
+		someMeetingSelected = false;
+		if (scheduleSearchMode)
+			for (MeetingDto dto: searchedMeetings) {
+				if (dto.isSelected()) {
+					someMeetingSelected = true;
+					break;
+				}
+			}
+		else
+			for (MeetingDto dto: events) {
+				if (dto.isSelected()) {
+					someMeetingSelected = true;
+					break;
+				}
+			}
+	}
+
+	public String getReassigneeName() {
+		return reassigneeName;
+	}
+
+	public void setReassigneeName(String reassigneeName) {
+		this.reassigneeName = reassigneeName;
+	}
+
+	public boolean isReassignMode() {
+		return reassignMode;
+	}
+
+	public void setReassignMode(boolean reassignMode) {
+		this.reassignMode = reassignMode;
+	}
+
+	private boolean reassignMode;
+	private String reassigneeName;
+	private boolean someTaskSelected;
+
+	public void startReassign() {
+		reassignMode = true;
+	}
+	public void confirmReassignment() throws IOException {
+		UserDto newAssignee = userService.findUserById(reassigneeName.split("[()]")[1]);
+		if (scheduleSearchMode) {
+			for (MeetingDto meeting: searchedMeetings) {
+				if (meeting.isSelected()) {
+					meeting.setSalesperson(newAssignee);
+					meetingService.editMeeting(meeting);
+				}
+			}
+			for (int i = searchedMeetings.size() - 1; i >= 0; i--) {
+				if (searchedMeetings.get(i).isSelected()) {
+					searchedMeetings.remove(i);
+				}
+			}
+		} else {
+			for (MeetingDto meeting: events) {
+				if (meeting.isSelected()) {
+					meeting.setSalesperson(newAssignee);
+					meetingService.editMeeting(meeting);
+				}
+			}
+			for (int i = events.size() - 1; i >= 0; i--) {
+				if (events.get(i).isSelected()) {
+					events.remove(i);
+				}
+			}
+		}
+		sessionManager.addGlobalMessageInfo("Reassigned meetings", null);
+		reassignMode = false;
+	}
+	public void cancelReassignment() {
+		reassignMode = false;
+	}
+
+	public void startReassignTask() {
+		reassignMode = true;
+		someMeetingSelected = false;
+	}
+
+	public boolean isSomeTaskSelected() {
+		return someTaskSelected;
+	}
+
+	public void setSomeTaskSelected(boolean someTaskSelected) {
+		this.someTaskSelected = someTaskSelected;
+	}
+	public void updateTaskButtons() {
+		someTaskSelected = false;
+		if (taskSearchMode) {
+			for (ScheduleTaskDto dto: searchedTasks) {
+				if (dto.isSelected()) {
+					someTaskSelected = true;
+					break;
+				}
+			}
+		} else {
+			for (ScheduleTaskDto dto: tasks) {
+				if (dto.isSelected()) {
+					someTaskSelected = true;
+					break;
+				}
+			}
+		}
+		System.out.println("ScheduleController.updateTaskButtons()");
+		System.out.println(someTaskSelected);
+	}
+
+	public void confirmTaskReassignment() throws IOException {
+		UserDto newAssignee = userService.findUserById(reassigneeName.split("[()]")[1]);
+		if (taskSearchMode) {
+			for (ScheduleTaskDto dto: searchedTasks) {
+				if (dto.isSelected()) {
+					dto.setUsername(newAssignee.getId());
+					taskService.updateEvent(dto);
+				}
+			}
+			for (int i = searchedTasks.size() - 1; i >= 0; i--) {
+				if (searchedTasks.get(i).isSelected()) {
+					searchedTasks.remove(i);
+				}
+			}
+		} else {
+			for (ScheduleTaskDto dto: tasks) {
+				if (dto.isSelected()) {
+					dto.setUsername(newAssignee.getId());
+					taskService.updateEvent(dto);
+				}
+			}
+			for (int i = tasks.size() - 1; i >= 0; i--) {
+				if (tasks.get(i).isSelected()) {
+					tasks.remove(i);
+				}
+			}
+		}
+		reassignMode = false;
+	}
 }

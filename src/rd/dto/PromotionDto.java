@@ -9,6 +9,7 @@ public class PromotionDto {
 	private Date endDate;
 	private List<ProductDto> productList;
 	private int discount;
+	private String name;
 
 	public int getSeq() {
 		return seq;
@@ -50,7 +51,8 @@ public class PromotionDto {
 		this.discount = discount;
 	}
 
-	public PromotionDto(int seq, Date startDate, Date endDate, List<ProductDto> productList, int discount) {
+	public PromotionDto(int seq, String name, Date startDate, Date endDate, List<ProductDto> productList, int discount) {
+		this.name = name;
 		this.seq = seq;
 		this.startDate = startDate;
 		this.endDate = endDate;
@@ -59,5 +61,13 @@ public class PromotionDto {
 	}
 
 	public PromotionDto() {
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

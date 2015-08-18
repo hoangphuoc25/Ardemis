@@ -1,6 +1,7 @@
 package rd.spec.dao;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import rd.dto.CallReportDto;
@@ -15,4 +16,5 @@ public interface CallReportDao {
 	public List<CallReportDto> getByCompanyId(Transaction transaction, int seq) throws IOException;
 	public List<CallReportDto> getByContact(Transaction transaction, int seq) throws IOException;
 	public List<CallReportDto> getByDeal(Transaction transaction, int seq) throws IOException;
+	public int countReportByUserAndTime(Transaction transaction, String username, Date startDate, Date endDate) throws IOException;
 }

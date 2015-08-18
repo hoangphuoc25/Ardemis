@@ -72,6 +72,9 @@
 		.overdue {
 			color: red;
 		}
+		.myTable td:nth-child(1) {
+			width: 50px;
+		}
 	</style>
 </h:head>
 <h:body>
@@ -85,14 +88,12 @@
 				<p:menuitem style="color: blue;" value="Stormworks" url="../products/Stormworks.jsf" />
 			</p:submenu>
 			<p:menuitem value="Products" url="../faces/products.jsf" />
-			<p:menuitem value="Feedback" url="../customers/customers.jsf" />
 			<p:menuitem value="Customers" url="../faces/contactList.jsf" />
 			<p:menuitem value="Expense" url="../faces/expense.jsf" />
 			<p:submenu label="Reports">
 				<p:menuitem value="Call Report" url="../faces/calls.jsf" />
 				<p:menuitem value="Add call report" url="../faces/callReport.jsf" />
 			</p:submenu>
-			<p:menuitem value="Notes" url="../faces/notes.jsf" />
 			<p:menuitem value="LOG OUT" style="float: right" action="#{scheduleController.logout}" immediate="true" update="form01" />
 		</p:menubar>
 
@@ -108,11 +109,15 @@
 
 		<p:fieldset legend="Your sale misson">
 			<p:panelGrid columns="3">
-				<h:outputText value="Your sale target" />
+				<h:outputText value="Your sale goal" />
 				<h:outputText value="#{scheduleController.std.target} #{scheduleController.std.unit}" />
 				<h:outputText value="" />
 				<h:outputText value="Your current sale record" />
 				<h:outputText value="#{scheduleController.std.current} #{scheduleController.std.unit} (#{scheduleController.percentage} %)" />
+				<h:outputText value="" />
+				<h:outputText value="Remaining " />
+				<h:outputText value="#{scheduleController.std.target - scheduleController.std.current} #{scheduleController.std.unit}" />
+
 				<p:menuButton value="Actions">
 					<p:menuitem value="See all active deals" url="activity.jsf" />
 					<p:menuitem value="Find new customer" url="contactList.jsf?status=new" target="_blank" />
@@ -133,19 +138,28 @@
 		</p:fieldset>
 
 		<p:panel id="toggleable" header="Your meeting schedule" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px">
-			<h:panelGrid columns="4" >
-				<h:outputText value="Search my schedule on" />
+			<h:panelGrid columns="6" >
+				<h:outputText value="Search my schedule from" />
 				<p:calendar value="#{scheduleController.dateSearch}" pattern="dd/MM/yyyy" />
+				<h:outputText value="to" />
+				<p:calendar value="#{scheduleController.dateSearchTo}" pattern="dd/MM/yyyy" />
 				<p:commandButton value="Search" actionListener="#{scheduleController.searchSchedule}" update="toggleable" />
 				<p:commandButton value="Reset" actionListener="#{scheduleController.resetSearchSchedule}" update="toggleable" />
 			</h:panelGrid>
-			<p:dataTable id="tbl1" rowIndexVar="row" value="#{scheduleController.searchedMeetings}" var="event" rendered="#{scheduleController.scheduleSearchMode}" >
-				<p:column headerText="From">
+			<p:dataTable id="tbl1" rowIndexVar="row" value="#{scheduleController.searchedMeetings}" var="event" rendered="#{scheduleController.scheduleSearchMode}"
+					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+					rows="8"  sortBy="#{event.from}">
+				<p:column width="80">
+					<p:selectBooleanCheckbox value="#{event.selected}">
+						<p:ajax update=":form01:buttons" listener="#{scheduleController.updateButtons}" />
+					</p:selectBooleanCheckbox>
+				</p:column>
+
+				<p:column headerText="Time">
 					<h:outputText value="#{event.from}">
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 					</h:outputText>
-				</p:column>
-				<p:column headerText="To">
+					<h:outputText value=" - " />
 					<h:outputText value="#{event.to}">
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 					</h:outputText>
@@ -162,8 +176,13 @@
 			</p:dataTable>
 			<p:dataTable id="tbl2" rowIndexVar="row" value="#{scheduleController.events}" var="event" rendered="#{not scheduleController.scheduleSearchMode}"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-					rows="8">
-				<p:column headerText="From">
+					rows="8" styleClass="myTable" sortBy="#{event.from}">
+				<p:column width="80">
+					<p:selectBooleanCheckbox value="#{event.selected}">
+						<p:ajax update=":form01:buttons" listener="#{scheduleController.updateButtons}" />
+					</p:selectBooleanCheckbox>
+				</p:column>
+				<p:column headerText="Time">
 					<h:outputText value="#{event.from}">
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 					</h:outputText>
@@ -200,10 +219,27 @@
 	        </f:facet>
 	        <br/>
 	        <p:commandButton value="Add new meeting" actionListener="#{scheduleController.startAddMeeting}" update=":form01"/>
+	        <p:outputPanel id="buttons">
+	        	<p:commandButton value="Reassign" actionListener="#{scheduleController.startReassign}" update=":form01:reassignArea" rendered="#{scheduleController.someMeetingSelected}" />
+	        </p:outputPanel>
     	</p:panel>
 
 		<p:panel id="tasks" header="Your task today" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="tasksPanel" style="margin-bottom:20px">
+			<h:panelGrid columns="6" >
+				<h:outputText value="Search my schedule from" />
+				<p:calendar value="#{scheduleController.taskDateSearch}" pattern="dd/MM/yyyy" />
+				<h:outputText value=" to " />
+				<p:calendar value="#{scheduleController.taskDateTo}" pattern="dd/MM/yyyy" />
+				<p:commandButton value="Search" actionListener="#{scheduleController.searchTask}" update="tasks" />
+				<p:commandButton value="Reset" actionListener="#{scheduleController.resetSearchTask}" update="tasks" />
+			</h:panelGrid>
+
 			<p:dataTable id="tbl4" rowIndexVar="row" value="#{scheduleController.searchedTasks}" var="task" rendered="#{scheduleController.taskSearchMode}" >
+				<p:column>
+					<p:selectBooleanCheckbox value="#{task.selected}">
+						<p:ajax listener="#{scheduleController.updateTaskButtons}" update=":form01:taskButtons" />
+					</p:selectBooleanCheckbox>
+				</p:column>
 				<p:column headerText="Action">
 					<h:outputText value="#{task.category}" />
 				</p:column>
@@ -228,6 +264,11 @@
 			<p:dataTable id="taskTbl" rowIndexVar="row" value="#{scheduleController.tasks}" var="task" rendered="#{not scheduleController.taskSearchMode}"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="15">
+				<p:column>
+					<p:selectBooleanCheckbox value="#{task.selected}">
+						<p:ajax listener="#{scheduleController.updateTaskButtons}" update=":form01:taskButtons" />
+					</p:selectBooleanCheckbox>
+				</p:column>
 				<p:column headerText="Action">
 					<h:outputText value="#{task.category}" />
 				</p:column>
@@ -260,14 +301,11 @@
 					<p:commandButton value="Mask as done" actionListener="#{scheduleController.markAsDone(task)}" upate=":form01:tasks" rendered="#{task.status != 'Done' and task.category == 'Email'}" />
 				</p:column>
 			</p:dataTable>
-			<h:panelGrid columns="4" >
-				<h:outputText value="Search my schedule on" />
-				<p:calendar value="#{scheduleController.taskDateSearch}" pattern="dd/MM/yyyy" />
-				<p:commandButton value="Search" actionListener="#{scheduleController.searchTask}" update="tasks" />
-				<p:commandButton value="Reset" actionListener="#{scheduleController.resetSearchTask}" update="tasks" />
-			</h:panelGrid>
 			<br/>
 			<p:commandButton value="Add new task" actionListener="#{scheduleController.startAddTask}" update=":form01"/>
+			<p:outputPanel id="taskButtons">
+				<p:commandButton value="Reassign" actionListener="#{scheduleController.startReassignTask}" update=":form01:reassignArea" rendered="#{scheduleController.someTaskSelected}" />
+			</p:outputPanel>
 		</p:panel>
 
 		<p:overlayPanel widgetVar="carOP" showEffect="fade" hideEffect="fade" dismissable="false" showCloseIcon="true" style="max-width: 700px">
@@ -432,6 +470,19 @@
 					<h:outputText value="Contact number" />
 					<h:outputText value="#{scheduleController.contactNumber}" />
 				</p:panelGrid>
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:outputPanel id="reassignArea">
+			<p:dialog id="reassignDialog" closable="false" visible="#{scheduleController.reassignMode}"
+					widgetVar="reassignDialog_w" modal="true" resizable="false" draggable="true" header="Reassign to other salesperson">
+				<p:panelGrid columns="2">
+					<h:outputText value="Salesperson" />
+					<p:autoComplete value="#{scheduleController.reassigneeName}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestUser}" />
+				</p:panelGrid>
+				<p:commandButton value="Confirm" actionListener="#{scheduleController.confirmReassignment}" update=":form01" rendered="#{scheduleController.someMeetingSelected}" />
+				<p:commandButton value="Confirm" actionListener="#{scheduleController.confirmTaskReassignment}" update=":form01" rendered="#{scheduleController.someTaskSelected}" />
+				<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelReassignment}" update=":form01:reassignArea" />
 			</p:dialog>
 		</p:outputPanel>
 	</h:form>

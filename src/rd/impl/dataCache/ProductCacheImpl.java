@@ -19,24 +19,24 @@ public class ProductCacheImpl implements ProductCache, Serializable {
 
 	@Override
 	public ProductDto getProduct(int seq) {
-		if (productMap.containsKey(seq))
-			return productMap.get(seq);
-		else
+//		if (productMap.containsKey(seq))
+//			return productMap.get(seq);
+//		else
 			return null;
 	}
 
 	@Override
 	public void putProduct(ProductDto product) {
-		productMap.put(product.getSeq(), product);
+		// productMap.put(product.getSeq(), product);
 	}
 
 	@Override
 	public void clear() {
-		productMap.clear();
+		// productMap.clear();
 	}
 
 	@Override
 	public void removeProduct(int seq) {
-		productMap.remove(seq);
+		// productMap.remove(seq);
 	}
 }

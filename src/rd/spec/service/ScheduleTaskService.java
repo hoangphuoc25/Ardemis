@@ -20,4 +20,5 @@ public interface ScheduleTaskService {
 	public List<ScheduleTaskDto> getTaskNextWeekByUser(String userId) throws IOException;
 	public List<ScheduleTaskDto> getByUser(String userId, Date date) throws IOException;
 	public List<ScheduleTaskDto> getByUserAndStatus(String userId, String status) throws IOException;
+	public List<ScheduleTaskDto> getByIntervalAndUser(Date fromDate, Date toDate, String username) throws IOException;
 }

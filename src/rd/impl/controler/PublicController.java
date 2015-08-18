@@ -71,7 +71,9 @@ public class PublicController implements Serializable {
 			return;
 		}
 
+		newCustomer.setContactStatus("Pre-qualified");
 		newCustomer.setAssignee(getWrSales().get(0).getSale());
+		newCustomer.setSource("Web");
 		contactService.addContact(newCustomer);
 		wrSales.get(0).current++;
 		Collections.sort(wrSales, new Comparator<WrUserDto>() {

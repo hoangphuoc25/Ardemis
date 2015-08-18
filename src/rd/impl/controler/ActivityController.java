@@ -24,6 +24,7 @@ import rd.dto.MeetingDto;
 import rd.dto.ProductDto;
 import rd.dto.SaleTargetDto;
 import rd.dto.ScheduleTaskDto;
+import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
 import rd.spec.service.ActivityService;
 import rd.spec.service.CallReportService;
@@ -34,6 +35,7 @@ import rd.spec.service.MeetingService;
 import rd.spec.service.ProductService;
 import rd.spec.service.SaleTargetService;
 import rd.spec.service.ScheduleTaskService;
+import rd.spec.service.UserService;
 
 @Named
 @ConversationScoped
@@ -48,6 +50,7 @@ public class ActivityController implements Serializable {
 	@Inject ProductService prodService;
 	@Inject SaleTargetService stService;
 	@Inject MeetingService meetingService;
+	@Inject UserService userService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -638,7 +641,64 @@ public class ActivityController implements Serializable {
 		this.actContact = actContact;
 	}
 
+	public boolean isReassignMode() {
+		return reassignMode;
+	}
+
+	public void setReassignMode(boolean reassignMode) {
+		this.reassignMode = reassignMode;
+	}
+
 	private String meetingLocationMode = "true";
 	private ContactDto actContact;
+	private boolean reassignMode;
+	private boolean someDealSelected = false;
+	private String reassigneeName = "";
+
+	public void startReassignActivity() {
+		reassignMode = true;
+	}
+
+	public void updateActivitySelected() {
+		someDealSelected = false;
+		for (ActivityDto act: allAct) {
+			if (act.isSelected()) {
+				someDealSelected = true;
+				break;
+			}
+		}
+	}
+
+	public boolean isSomeDealSelected() {
+		return someDealSelected;
+	}
+
+	public void setSomeDealSelected(boolean someDealSelected) {
+		this.someDealSelected = someDealSelected;
+	}
+
+
+	public void confirmReassignment() throws IOException {
+		UserDto newAssignee = userService.findUserById(getReassigneeName().split("[()]")[1]);
+		for (ActivityDto act: allAct) {
+			if (act.isSelected()) {
+				act.setSalesperson(newAssignee);
+				actService.updateActivity(act);
+			}
+		}
+		reassignMode = false;
+		sessionManager.addGlobalMessageInfo("Deals reassigned", null);
+	}
+	public void cancelReassignment() {
+		reassignMode = false;
+	}
+
+	public String getReassigneeName() {
+		return reassigneeName;
+	}
+
+	public void setReassigneeName(String reassigneeName) {
+		this.reassigneeName = reassigneeName;
+	}
 }
 

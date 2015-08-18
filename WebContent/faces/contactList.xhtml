@@ -96,6 +96,9 @@
 				<p:column headerText="Language">
 					<h:outputText value="#{contact.language}" />
 				</p:column>
+				<p:column headerText="Source">
+					<h:outputText value="#{contact.source}" />
+				</p:column>
 				<p:column>
 					<h:outputLink value="#{salespersonController.callReportLink(contact)}" style="color: blue;" >Call</h:outputLink>
 					<p:spacer width="7" />
@@ -111,6 +114,7 @@
 			<p:selectOneMenu value="#{salespersonController.showingMode}">
 				<f:selectItem itemLabel="All customers" itemValue="all" />
 				<f:selectItem itemLabel="Uncontacted customers" itemValue="new" />
+				<f:selectItem itemLabel="Pre-qualified customers" itemValue="pre-qualified" />
 				<f:selectItem itemLabel="Qualified customers" itemValue="qualified" />
 				<f:selectItem itemLabel="Unqualified customers" itemValue="unqualified" />
 				<f:selectItem itemLabel="Unresponsive customers" itemValue="unresponsive" />
@@ -158,6 +162,15 @@
 					<h:outputText value="Assignee" />
 					<p:autoComplete value="#{salespersonController.assigneeName}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestUser}" forceSelection="true" />
 
+					<h:outputText value="Source" />
+					<p:selectOneMenu value="#{salespersonController.newContact.source}">
+						<f:selectItem itemLabel="Personal contact" itemValue="Personal contact" />
+						<f:selectItem itemLabel="Web" itemValue="Web" />
+						<f:selectItem itemLabel="Trade show" itemValue="Trade show" />
+						<f:selectItem itemLabel="Software conference" itemValue="Software conference" />
+						<f:selectItem itemLabel="Advertisement" itemValue="Advertisement" />
+						<f:selectItem itemLabel="Name card" itemValue="Name card" />
+					</p:selectOneMenu>
 				</p:panelGrid>
 
 				<p:commandButton value="Add" actionListener="#{salespersonController.addNewContact}" update=":form01:contactArea, :form01:panel1" rendered="#{salespersonController.addContactMode}" />

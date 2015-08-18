@@ -12,6 +12,7 @@ public class MeetingDto {
 	private String location;
 	private ContactDto contact;
 	private int actId;
+	private boolean selected;
 
 	public Date getFrom() {
 		return from;
@@ -97,5 +98,13 @@ public class MeetingDto {
 
 	public void setActId(int actId) {
 		this.actId = actId;
+	}
+
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void setSelected(boolean selected) {
+		this.selected = selected;
 	}
 }

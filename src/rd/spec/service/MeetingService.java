@@ -16,4 +16,5 @@ public interface MeetingService {
 	public List<MeetingDto> getMeetingToday() throws IOException;
 	public List<MeetingDto> getMeetingToday(String username) throws IOException;
 	public List<MeetingDto> getMeetingByDayAndUser(String userId, Date date) throws IOException;
+	public List<MeetingDto> getByIntervalAndUser(Date startDate, Date endDate, String username) throws IOException;
 }

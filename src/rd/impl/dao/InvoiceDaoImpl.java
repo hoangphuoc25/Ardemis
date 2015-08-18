@@ -188,8 +188,10 @@ public class InvoiceDaoImpl implements InvoiceDao {
 
 			List<ProductDto> result = new ArrayList<ProductDto>();
 			while (resultSet.next()) {
-				result.add(productDao.getProductById(transaction,
-						resultSet.getInt(1)));
+				ProductDto temp = productDao.getProductById(transaction, resultSet.getInt(1));
+				temp.setDuration(resultSet.getInt(2));
+				temp.setQuantity(resultSet.getInt(3));
+				result.add(temp);
 			}
 
 			return result;
@@ -292,7 +294,7 @@ public class InvoiceDaoImpl implements InvoiceDao {
 	}
 
 	private static String ADD_INVOICE 				= "insert into t_invoice (seq, contact_seq, purchase_date, amount, salesperson) values (?, ?, ?, ?, ?)";
-	private static String GET_PRODUCT_BY_INVOICE_ID = "select product_seq from t_product_purchase where invoice_seq=?";
+	private static String GET_PRODUCT_BY_INVOICE_ID = "select product_seq, duration, quantity from t_product_purchase where invoice_seq=?";
 	private static String GET_BY_ID 				= "select seq, contact_seq, purchase_date, amount, salesperson from t_invoice where seq=?";
 	private static String GET_BY_CUSTOMER 			= "select seq, contact_seq, purchase_date, amount, salesperson from t_invoice where contact_seq=?";
 	private static String UPDATE_INVOICE 			= "update t_invoice set contact_seq=?, purchase_date=?, amount=?, salesperson=? where seq=?";
@@ -310,6 +312,8 @@ public class InvoiceDaoImpl implements InvoiceDao {
 	private static String GET_BY_SALESPERSON 		= "select seq, contact_seq, purchase_date, amount, salesperson from t_invoice where salesperson=? order by purchase_date desc";
 	private static String SEARCH_INVOICE_BY_COMPANY_NAME = "select distinct i.seq from t_invoice i join t_contact c on i.contact_seq=c.seq where lower(c.company) like ?";
 	private static String SEARCH_INVOICE_BY_CUSTOMER_NAME = "select distinct i.seq from t_invoice i join t_contact c on i.contact_seq=c.seq where lower(c.name) like ?";
+	private static String SEARCH_INVOICE_BY_PRODUCT = "select distinct i.seq from t_invoice i join t_product_purchase pp on i.seq=pp.invoice_seq where pp.product_seq=?";
+	private static String COUNT_INVOICE_BY_USER_AND_TIME = "select count(distinct i.seq) from t_invoice i where i.salesperson=? and i.purchase_date>=? and i.purchase_date<?";
 
 	public List<InvoiceDto> getByCustomer(Transaction transaction, int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -324,7 +328,7 @@ public class InvoiceDaoImpl implements InvoiceDao {
 
 			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
 			while (resultSet.next()) {
-				result.add(makeInvoiceDto(transaction, resultSet));
+				result.add(makeInvoiceDtoComplete(transaction, resultSet));
 			}
 			return result;
 		} catch (SQLException e) {
@@ -449,7 +453,7 @@ public class InvoiceDaoImpl implements InvoiceDao {
 
 			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
 			while (resultSet.next()) {
-				result.add(makeInvoiceDto(transaction, resultSet));
+				result.add(makeInvoiceDtoComplete(transaction, resultSet));
 			}
 			return result;
 		} catch (SQLException e) {
@@ -485,7 +489,7 @@ public class InvoiceDaoImpl implements InvoiceDao {
 
 			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
 			while (resultSet.next()) {
-				result.add(makeInvoiceDto(transaction, resultSet));
+				result.add(makeInvoiceDtoComplete(transaction, resultSet));
 			}
 			return result;
 		} catch (SQLException e) {
@@ -522,7 +526,7 @@ public class InvoiceDaoImpl implements InvoiceDao {
 
 			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
 			while (resultSet.next()) {
-				result.add(makeInvoiceDto(transaction, resultSet));
+				result.add(makeInvoiceDtoComplete(transaction, resultSet));
 			}
 			return result;
 		} catch (SQLException e) {
@@ -710,6 +714,83 @@ public class InvoiceDaoImpl implements InvoiceDao {
 				result.add(getById(transaction, resultSet.getInt(1)));
 			}
 			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	public List<InvoiceDto> getInvoiceByProduct(Transaction transaction, int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_INVOICE_BY_PRODUCT);
+			prepareStatement.setInt(1, seq);
+			resultSet = prepareStatement.executeQuery();
+
+
+			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
+			while (resultSet.next()) {
+				result.add(getById(transaction, resultSet.getInt(1)));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	public int countInvoiceByUserAndTime(Transaction transaction, String username, Date startDate, Date endDate) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+
+
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(COUNT_INVOICE_BY_USER_AND_TIME);
+			prepareStatement.setString(1, username);
+			prepareStatement.setDate(2, new java.sql.Date(startDate.getTime()));
+			prepareStatement.setDate(3, new java.sql.Date(endDate.getTime()));
+			resultSet = prepareStatement.executeQuery();
+
+			int result = 0;
+			if (resultSet.next()) {
+				result = resultSet.getInt(1);
+			}
+			return result;
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {

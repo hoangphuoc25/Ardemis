@@ -32,16 +32,16 @@ public class PromotionDaoImpl implements PromotionDao {
 		this.prodDao = prodDao;
 	}
 
-	private static String GET_SEQ = "select max(seq)+1 from t_promo";
-	private static String GET_ALL = "select seq, start_date, end_date, discount from t_promo";
-	private static String ADD_PROMOTION = "insert into t_promo (seq, start_date, end_date, discount) values (?, ?, ?, ?)";
+	private static String GET_SEQ 			= "select max(seq)+1 from t_promo";
+	private static String GET_ALL 			= "select seq, start_date, end_date, discount, name from t_promo";
+	private static String ADD_PROMOTION 	= "insert into t_promo (seq, start_date, end_date, discount, name) values (?, ?, ?, ?, ?)";
 	private static String ADD_PROMO_PRODUCT = "insert into t_promo_product (promo_seq, product_seq) values (?, ?)";
-	private static String GET_BY_ID = "select seq, start_date, end_date, discount from t_promo where seq=?";
-	private static String GET_BY_PRODUCT = "select distinct p.seq from t_promo p join t_promo_product pp on p.seq=pp.promo_seq where pp.product_seq=?";
-	private static String DELETE_PROMOTION = "delete from t_promo where seq=?";
+	private static String GET_BY_ID 		= "select seq, start_date, end_date, discount, name from t_promo where seq=?";
+	private static String GET_BY_PRODUCT 	= "select distinct p.seq from t_promo p join t_promo_product pp on p.seq=pp.promo_seq where pp.product_seq=?";
+	private static String DELETE_PROMOTION 	= "delete from t_promo where seq=?";
 	private static String DELETE_PROMO_PRODUCT = "delete from t_promo_product where promo_seq=?";
-	private static String GET_ACTIVE = "select seq, start_date, end_date, discount from t_promo where start_date <= ? and end_date >= ?";
-	private static String GET_PRODUCT_LIST = "select product_seq from t_promo_product where promo_seq=?";
+	private static String GET_ACTIVE 		= "select seq, start_date, end_date, discount, name from t_promo where start_date <= ? and end_date >= ?";
+	private static String GET_PRODUCT_LIST 	= "select product_seq from t_promo_product where promo_seq=?";
 
 	public void addPromotion(Transaction transaction, PromotionDto promo) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -56,6 +56,7 @@ public class PromotionDaoImpl implements PromotionDao {
 			prepareStatement.setDate(2, new java.sql.Date(promo.getStartDate().getTime()));
 			prepareStatement.setDate(3, new java.sql.Date(promo.getEndDate().getTime()));
 			prepareStatement.setInt(4, promo.getDiscount());
+			prepareStatement.setString(5, promo.getName());
 			resultSet = prepareStatement.executeQuery();
 
 			for (ProductDto prod: promo.getProductList()) {
@@ -345,7 +346,8 @@ public class PromotionDaoImpl implements PromotionDao {
 		Date startDate = new Date(resultSet.getDate(2).getTime());
 		Date endDate = new Date(resultSet.getDate(3).getTime());
 		int discount = resultSet.getInt(4);
-		return new PromotionDto(seq, startDate, endDate, null, discount);
+		String name = resultSet.getString(5);
+		return new PromotionDto(seq, name, startDate, endDate, null, discount);
 	}
 	public List<ProductDto> getProductList(Transaction transaction, int seq) throws IOException {
 		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE

@@ -16,6 +16,7 @@ public class ProductDto {
 	private int duration = 0;
 	private int quantity;
 	private int storage;
+	private int timeLeft;
 
 	public ProductDto(int seq, String name, String summary, String target, double price2) {
 		this.seq = seq;
@@ -149,5 +150,13 @@ public class ProductDto {
 
 	public void setStorage(int storage) {
 		this.storage = storage;
+	}
+
+	public int getTimeLeft() {
+		return timeLeft;
+	}
+
+	public void setTimeLeft(int timeLeft) {
+		this.timeLeft = timeLeft;
 	}
 }

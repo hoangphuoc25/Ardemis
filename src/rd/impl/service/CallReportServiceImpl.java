@@ -2,6 +2,7 @@ package rd.impl.service;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -126,6 +127,18 @@ public class CallReportServiceImpl implements CallReportService, Serializable {
 		try{
 			transaction.begin();
 			List<CallReportDto> result = callReportDao.getByDeal(transaction, seq);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public int countReportByUserAndTime(String username, Date startDate, Date endDate) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			int result = callReportDao.countReportByUserAndTime(transaction, username, startDate, endDate);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {

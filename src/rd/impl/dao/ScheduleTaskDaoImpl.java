@@ -591,4 +591,61 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 			}
 		}
 	}
+	public List<ScheduleTaskDto> getByIntervalAndUser(Transaction transaction, Date fromDate, Date toDate, String username) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Calendar day = new GregorianCalendar();
+			day.setTime(fromDate);
+			day.set(Calendar.HOUR_OF_DAY, 0);
+			day.set(Calendar.MINUTE, 0);
+			day.set(Calendar.SECOND, 0);
+			day.set(Calendar.MILLISECOND, 0);
+
+			Calendar nextDay = new GregorianCalendar();
+			nextDay.setTime(toDate);
+			nextDay.set(Calendar.HOUR_OF_DAY, 0);
+			nextDay.set(Calendar.MINUTE, 0);
+			nextDay.set(Calendar.SECOND, 0);
+			nextDay.set(Calendar.MILLISECOND, 0);
+			nextDay.add(Calendar.DAY_OF_MONTH, 1);
+
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_INTERVAL_AND_USER);
+
+			prepareStatement.setString(1, username);
+			prepareStatement.setDate(2, new java.sql.Date(day.getTime().getTime()));
+			prepareStatement.setDate(3, new java.sql.Date(nextDay.getTime().getTime()));
+
+
+			resultSet = prepareStatement.executeQuery();
+
+			List<ScheduleTaskDto> result = new ArrayList<ScheduleTaskDto>();
+			while (resultSet.next()) {
+				result.add(makeScheduleTaskDto(transaction, resultSet));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_BY_INTERVAL_AND_USER = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where username=? and time>=? and time<? order by time asc";
 }

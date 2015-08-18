@@ -231,4 +231,28 @@ public class InvoiceServiceImpl implements InvoiceService, Serializable {
 			throw e;
 		}
 	}
+	public List<InvoiceDto> getInvoiceByProduct(int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<InvoiceDto> result = invoiceDao.getInvoiceByProduct(transaction, seq);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public int countInvoiceByUserAndTime(String username, Date startDate, Date endDate) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			int result = invoiceDao.countInvoiceByUserAndTime(transaction, username, startDate, endDate);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

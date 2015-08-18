@@ -11,6 +11,7 @@ public class ScheduleTaskDto {
 	private ContactDto contact;
 	private int actId;
 	private String status;
+	private boolean selected;
 
 	public String getCategory() {
 		return category;
@@ -97,6 +98,14 @@ public class ScheduleTaskDto {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void setSelected(boolean selected) {
+		this.selected = selected;
 	}
 
 	private String detail;

@@ -12,6 +12,7 @@ public class ActivityDto {
 	private UserDto salesperson;
 	private CompanyDto customer;
 	private List<ProductDto> products;
+	private boolean selected;
 
 	public int getSeq() {
 		return seq;
@@ -99,5 +100,13 @@ public class ActivityDto {
 
 	public void setProducts(List<ProductDto> products) {
 		this.products = products;
+	}
+
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void setSelected(boolean selected) {
+		this.selected = selected;
 	}
 }

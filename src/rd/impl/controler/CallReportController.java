@@ -1110,4 +1110,89 @@ public class CallReportController implements Serializable {
 	public void cancelEditScript() {
 		editScriptMode = false;
 	}
+
+	public boolean isViewQuotesMode() {
+		return viewQuotesMode;
+	}
+
+	public void setViewQuotesMode(boolean viewQuotesMode) {
+		this.viewQuotesMode = viewQuotesMode;
+	}
+
+	private boolean viewQuotesMode;
+
+	public void startViewQuotes() {
+		viewQuotesMode = true;
+	}
+
+	public void closeQuotes() {
+		viewQuotesMode = false;
+	}
+
+	public List<InvoiceDto> getCustomerInvoiceList() {
+		return customerInvoiceList;
+	}
+
+	public void setCustomerInvoiceList(List<InvoiceDto> customerInvoiceList) {
+		this.customerInvoiceList = customerInvoiceList;
+	}
+
+	public String getSearchingCustomer() {
+		return searchingCustomer;
+	}
+
+	public void setSearchingCustomer(String searchingCustomer) {
+		this.searchingCustomer = searchingCustomer;
+	}
+
+	public boolean isSearchContactMode() {
+		return searchContactMode;
+	}
+
+	public void setSearchContactMode(boolean searchContactMode) {
+		this.searchContactMode = searchContactMode;
+	}
+
+	private boolean searchContactMode;
+	private String searchingCustomer;
+	private List<InvoiceDto> customerInvoiceList = new ArrayList<InvoiceDto>();
+
+	public void startSearchContact() {
+		searchContactMode = true;
+	}
+
+	public void updateInvoiceOfCustomer() throws NumberFormatException, IOException {
+		searchedContact = contactService.getContactById(Integer.parseInt(searchingCustomer.split("[()]")[1]));
+		customerInvoiceList = invoiceService.getByCustomer(Integer.parseInt(searchingCustomer.split("[()]")[1]));
+		for (InvoiceDto invoice: customerInvoiceList) {
+			for (ProductDto prod: invoice.getProducts()) {
+				if (prod.getDuration() != 0) {
+					Calendar cal = new GregorianCalendar();
+					cal.setTime(invoice.getPurchaseDate());
+					cal.add(Calendar.MONTH, prod.getDuration());
+					int remaining = (int) ((cal.getTimeInMillis() - (new Date()).getTime()) / 86400000 / 30);
+					prod.setTimeLeft(remaining);
+					System.out.println(prod.hashCode());
+				}
+			}
+		}
+	}
+	public void startExtendPurchase() throws NumberFormatException, IOException {
+		callee = contactService.getContactById(Integer.parseInt(searchingCustomer.split("[()]")[1]));
+		contactName = callee.getName() + " - " + callee.getCompany() + "(" + callee.getSeq() + ")";
+		searchContactMode = false;
+	}
+	public void closeSearchContact() {
+		searchContactMode = false;
+	}
+
+	public ContactDto getSearchedContact() {
+		return searchedContact;
+	}
+
+	public void setSearchedContact(ContactDto searchedContact) {
+		this.searchedContact = searchedContact;
+	}
+
+	private ContactDto searchedContact;
 }

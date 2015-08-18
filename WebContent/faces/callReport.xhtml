@@ -77,6 +77,7 @@
 						<h:outputText value="Customer status" rendered="#{callReportController.callee != null}"/>
 						<p:selectOneMenu value="#{callReportController.callee.contactStatus}" rendered="#{callReportController.callee != null}">
 							<f:selectItem itemLabel="New" itemValue="New" />
+							<f:selectItem itemLabel="Pre-qualified" itemValue="Pre-qualified"/>
 							<f:selectItem itemLabel="Qualified" itemValue="Qualified" />
 							<f:selectItem itemLabel="Unqualified" itemValue="Unqualified" />
 							<f:selectItem itemLabel="Unresponsive" itemValue="Unresponsive" />
@@ -117,8 +118,8 @@
 						<h:outputText value="Call back again on" rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and callReportController.callee.contactStatus == 'Qualified'}"/>
 						<p:calendar value="#{callReportController.callBackAgainTime}" pattern="dd/MM/yyyy HH:mm" rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and callReportController.callee.contactStatus == 'Qualified'}" />
 
-						<h:outputText value="Purchase record" rendered="#{callReportController.rating == 'close' and callReportController.callee.contactStatus == 'Qualified'}"/>
-						<p:commandButton value="Add purchase record" actionListener="#{callReportController.startAddPurchaseRecord}" update=":form01" rendered="#{callReportController.rating == 'close' and callReportController.callee.contactStatus == 'Qualified'}" />
+						<h:outputText value="Purchase" rendered="#{callReportController.rating == 'close' and callReportController.callee.contactStatus == 'Qualified'}"/>
+						<p:commandButton value="Add purchase order" actionListener="#{callReportController.startAddPurchaseRecord}" update=":form01" rendered="#{callReportController.rating == 'close' and callReportController.callee.contactStatus == 'Qualified'}" />
 
 					</p:panelGrid>
 
@@ -126,12 +127,17 @@
 						<p:commandButton value="Submit" actionListener="#{callReportController.addNewReport}" update=":form01:panel" />
 						<p:commandButton value="Back" action="#{callReportController.goBack}" rendered="#{callReportController.back or callReportController.backMain}" />
 					</h:panelGrid>
-					<p:commandButton value="Add contact" actionListener="#{callReportController.startAddNewContact}" update=":form01:contactArea"/>
+
+					<h:panelGrid columns="2">
+						<p:commandButton value="Add contact" actionListener="#{callReportController.startAddNewContact}" update=":form01:contactArea"/>
+						<p:commandButton value="Search contact" actionListener="#{callReportController.startSearchContact}" update=":form01:searchContactArea" />
+					</h:panelGrid>
 
 					<br/>
 					<p:commandButton value="Scripts" actionListener="#{callReportController.startViewScript}" update=":form01:scriptArea"/>
 				</div>
 		        <div class="ui-grid-col-8">
+		        	<p:commandButton value="Quotes" actionListener="#{callReportController.startViewQuotes}" update=":form01:quotesArea" />
 		        	<p:outputPanel id="p1">
 		        		<h3>Product search</h3>
 			        	<p:panelGrid columns="3">
@@ -350,6 +356,16 @@
 						<f:selectItem itemLabel="Male" itemValue="Male" />
 						<f:selectItem itemLabel="Female" itemValue="Female" />
 					</p:selectOneRadio>
+
+					<h:outputText value="Source" />
+					<p:selectOneMenu value="#{salespersonController.newContact.source}">
+						<f:selectItem itemLabel="Personal contact" itemValue="Personal contact" />
+						<f:selectItem itemLabel="Web" itemValue="Web" />
+						<f:selectItem itemLabel="Trade show" itemValue="Trade show" />
+						<f:selectItem itemLabel="Software conference" itemValue="Software conference" />
+						<f:selectItem itemLabel="Advertisement" itemValue="Advertisement" />
+						<f:selectItem itemLabel="Name card" itemValue="Name card" />
+					</p:selectOneMenu>
 				</p:panelGrid>
 
 				<p:commandButton value="Add" actionListener="#{callReportController.addNewContact}" update=":form01:contactArea, :form01:panel" />
@@ -391,7 +407,7 @@
 							<p:ajax listener="#{callReportController.addProdToList}" event="itemSelect" update="p5" />
 						</p:autoComplete>
 						<p:dataTable id="productsTbl" rowIndexVar="row" value="#{callReportController.selectedProdList}" var="prod">
-							<p:column headerText="">
+							<p:column headerText="" width="60">
 								<p:selectBooleanCheckbox offLabel="Not selected" onLabel="selected" value="#{prod.selected}" />
 							</p:column>
 							<p:column headerText="Product">
@@ -472,6 +488,121 @@
 				<p:commandButton value="Cancel" actionListener="#{callReportController.cancelEditScript}" update=":form01:scriptArea" rendered="#{callReportController.editScriptMode}"/>
 				<p:commandButton value="Close" actionListener="#{callReportController.closeScript}" update=":form01:scriptArea" />
 				<p:commandButton value="Edit" actionListener="#{callReportController.startEditScript}" update=":form01:scriptArea" rendered="#{not callReportController.editScriptMode}"/>
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:outputPanel id="quotesArea">
+			<p:dialog id="quotesDialog" closable="false" visible="#{callReportController.viewQuotesMode}" width="850px"
+					widgetVar="quotesDialog_w" modal="true" resizable="false" draggable="true" header="Get quotes">
+				<p:panelGrid columns="2">
+					<h:outputText value="Product" />
+					<p:outputPanel id="p7">
+						<p:autoComplete forceSelection="true" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestProduct}" value="#{quotesController.prodSearch}">
+							<p:ajax update="p7" event="itemSelect" listener="#{quotesController.addProdToList}" />
+						</p:autoComplete>
+
+						<p:dataTable rowIndexVar="row" value="#{quotesController.prodList}" var="prod">
+							<p:column headerText="Select" width="30">
+								<p:selectBooleanCheckbox value="#{prod.selected}" />
+							</p:column>
+							<p:column headerText="Name">
+								<h:outputText value="#{prod.name}" />
+							</p:column>
+							<p:column headerText="Price per month">
+								<h:outputText value="#{prod.price}" />
+							</p:column>
+							<p:column headerText="Permanent price">
+								<h:outputText value="#{prod.permanentPrice}" />
+							</p:column>
+							<p:column headerText="License duration">
+								<p:selectOneMenu value="#{prod.duration}">
+									<f:selectItem itemLabel="3 months" itemValue="3" />
+									<f:selectItem itemLabel="6 months" itemValue="6" />
+									<f:selectItem itemLabel="12 months" itemValue="12" />
+									<f:selectItem itemLabel="24 months" itemValue="24" />
+									<f:selectItem itemLabel="Permanent" itemValue="0" />
+									<p:ajax update=":form01:p7" listener="#{quotesController.calculateTotal}" />
+								</p:selectOneMenu>
+							</p:column>
+							<p:column headerText="Quantity">
+								<p:spinner value="#{prod.quantity}" min="1">
+									<p:ajax update=":form01:p7" listener="#{quotesController.calculateTotal}" />
+								</p:spinner>
+							</p:column>
+						</p:dataTable>
+						<h:outputText value="Total: $" />
+						<h:outputText value="#{quotesController.total}">
+							<f:convertNumber pattern="###,###" />
+						</h:outputText>
+						<br/>
+						<p:commandButton value="Delete" actionListener="#{quotesController.removeSelected}" update="p7" />
+					</p:outputPanel>
+				</p:panelGrid>
+				<p:commandButton value="Close" actionListener="#{callReportController.closeQuotes}" update=":form01:quotesArea" />
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:outputPanel id="searchContactArea">
+			<p:dialog id="searchContactDialog" closable="false" visible="#{callReportController.searchContactMode}" width="900"
+					widgetVar="searchContactDialog_w" modal="true" resizable="false" draggable="true" header="Search customer">
+				<p:panelGrid columns="3">
+					<h:outputText value="Customer name" />
+					<p:autoComplete value="#{callReportController.searchingCustomer}" minQueryLength="3" maxResults="10" forceSelection="true" completeMethod="#{searchController.suggestContact}">
+						<p:ajax update=":form01:searchContactArea" listener="#{callReportController.updateInvoiceOfCustomer}" event="itemSelect"/>
+					</p:autoComplete>
+				</p:panelGrid>
+
+				<h4>Contact detail</h4>
+				<p:panelGrid columns="4" rendered="#{callReportController.searchedContact ne null}">
+					<h:outputText value="Name" style="font-weight: bold" />
+					<h:outputText value="Company" style="font-weight: bold" />
+					<h:outputText value="Email" style="font-weight: bold" />
+					<h:outputText value="Phone" style="font-weight: bold" />
+					<h:outputText value="#{callReportController.searchedContact.name}" />
+					<h:outputText value="#{callReportController.searchedContact.company}" />
+					<h:outputText value="#{callReportController.searchedContact.email}" />
+					<h:outputText value="#{callReportController.searchedContact.phone}" />
+
+					<h:outputText value="Status" style="font-weight: bold" />
+					<h:outputText value="Address" style="font-weight: bold" />
+					<h:outputText value="Job title" style="font-weight: bold" />
+					<h:outputText value="Source" style="font-weight: bold" />
+					<h:outputText value="#{callReportController.searchedContact.contactStatus}" />
+					<h:outputText value="#{callReportController.searchedContact.address}" />
+					<h:outputText value="#{callReportController.searchedContact.jobTitle}" />
+					<h:outputText value="#{callReportController.searchedContact.source}" />
+				</p:panelGrid>
+
+				<h4>Purchase Order</h4>
+				<p:dataTable id="tbl7" rowIndexVar="row" value="#{callReportController.customerInvoiceList}" var="invoice"
+						paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+						rows="7">
+					<p:column headerText="ID" width="70">
+						<h:outputText value="#{invoice.seq}" />
+					</p:column>
+					<p:column headerText="Customer" width="150">
+						<h:outputText value="#{invoice.contact.name}" />
+					</p:column>
+					<p:column headerText="Purchase date" width="100">
+						<h:outputText value="#{invoice.purchaseDate}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="Products">
+						<p:dataList value="#{invoice.products}" var="prod">#{prod.name} -
+							<h:outputText value="#{prod.duration} months" rendered="#{prod.duration ne 0}" />
+							<h:outputText value="Permanent" rendered="#{prod.duration == 0}" />
+							- #{prod.quantity} license(s)
+							<h:outputText value="- #{prod.timeLeft} months left" rendered="#{prod.duration ne 0 and prod.timeLeft > 0}" />
+							<h:outputText value="- Expiring soon" rendered="#{prod.duration ne 0 and prod.timeLeft == 0}" style="color: red;"/>
+							<h:outputText value="- Expired" rendered="#{prod.duration ne 0 and prod.timeLeft lt 0}" style="color: red;"/>
+						</p:dataList>
+					</p:column>
+					<p:column headerText="Actions" width="150">
+						<p:commandButton value="Extend purchase" actionListener="#{callReportController.startExtendPurchase}" update=":form01" />
+					</p:column>
+				</p:dataTable>
+				<p:commandButton value="Close" actionListener="#{callReportController.closeSearchContact}" update=":form01:searchContactArea" />
 			</p:dialog>
 		</p:outputPanel>
 	</h:form>

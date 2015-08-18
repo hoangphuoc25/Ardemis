@@ -431,4 +431,61 @@ public class MeetingDaoImpl implements MeetingDao {
 	private static String GET_SEQ 				 = "select max(seq)+1 from t_meeting";
 	private static String GET_MEETING_TODAY 	 = "select seq, user_id, from_date, to_date, detail, location, contact_seq, activity_seq from t_meeting where from_date >= ? and from_date < ? order by from_date asc";
 	private static String GET_MEETING_TODAY_USER = "select seq, user_id, from_date, to_date, detail, location, contact_seq, activity_seq from t_meeting where from_date >= ? and from_date < ? and user_id=?";
+	private static String GET_BY_INTERVAL_AND_USER = "select seq, user_id, from_date, to_date, detail, location, contact_seq, activity_seq from t_meeting where from_date >= ? and from_date < ? and user_id=?";
+
+	public List<MeetingDto> getByIntervalAndUser(Transaction transaction, Date startDate, Date endDate, String username) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Calendar day = new GregorianCalendar();
+			day.setTime(startDate);
+			day.set(Calendar.HOUR_OF_DAY, 0);
+			day.set(Calendar.MINUTE, 0);
+			day.set(Calendar.SECOND, 0);
+			day.set(Calendar.MILLISECOND, 0);
+
+			Calendar nextDay = new GregorianCalendar();
+			nextDay.setTime(endDate);
+			nextDay.set(Calendar.HOUR_OF_DAY, 0);
+			nextDay.set(Calendar.MINUTE, 0);
+			nextDay.set(Calendar.SECOND, 0);
+			nextDay.set(Calendar.MILLISECOND, 0);
+			nextDay.add(Calendar.DAY_OF_MONTH, 1);
+
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_BY_INTERVAL_AND_USER);
+			prepareStatement.setDate(1, new java.sql.Date(day.getTime().getTime()));
+			prepareStatement.setDate(2, new java.sql.Date(nextDay.getTime().getTime()));
+			prepareStatement.setString(3, username);
+
+			resultSet = prepareStatement.executeQuery();
+
+			List<MeetingDto> result = new ArrayList<MeetingDto>();
+			while (resultSet.next()) {
+				result.add(makeMeetingDto(transaction, resultSet));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
 }
