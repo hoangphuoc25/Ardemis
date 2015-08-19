@@ -110,7 +110,7 @@
 		<p:fieldset legend="Your sale misson">
 			<p:panelGrid columns="3">
 				<h:outputText value="Your sale goal" />
-				<h:outputText value="#{scheduleController.std.target} #{scheduleController.std.unit}" />
+				<h:outputText value="#{scheduleController.std.action} #{scheduleController.std.target} #{scheduleController.std.unit}" />
 				<h:outputText value="" />
 				<h:outputText value="Your current sale record" />
 				<h:outputText value="#{scheduleController.std.current} #{scheduleController.std.unit} (#{scheduleController.percentage} %)" />
@@ -154,7 +154,6 @@
 						<p:ajax update=":form01:buttons" listener="#{scheduleController.updateButtons}" />
 					</p:selectBooleanCheckbox>
 				</p:column>
-
 				<p:column headerText="Time">
 					<h:outputText value="#{event.from}">
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
@@ -218,8 +217,9 @@
 	            </p:menu>
 	        </f:facet>
 	        <br/>
-	        <p:commandButton value="Add new meeting" actionListener="#{scheduleController.startAddMeeting}" update=":form01"/>
+
 	        <p:outputPanel id="buttons">
+	        	<p:commandButton value="Add new meeting" actionListener="#{scheduleController.startAddMeeting}" update=":form01"/>
 	        	<p:commandButton value="Reassign" actionListener="#{scheduleController.startReassign}" update=":form01:reassignArea" rendered="#{scheduleController.someMeetingSelected}" />
 	        </p:outputPanel>
     	</p:panel>
@@ -234,8 +234,10 @@
 				<p:commandButton value="Reset" actionListener="#{scheduleController.resetSearchTask}" update="tasks" />
 			</h:panelGrid>
 
-			<p:dataTable id="tbl4" rowIndexVar="row" value="#{scheduleController.searchedTasks}" var="task" rendered="#{scheduleController.taskSearchMode}" >
-				<p:column>
+			<p:dataTable id="tbl4" rowIndexVar="row" value="#{scheduleController.searchedTasks}" var="task" rendered="#{scheduleController.taskSearchMode}"
+					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+					rows="8">
+				<p:column width="80">
 					<p:selectBooleanCheckbox value="#{task.selected}">
 						<p:ajax listener="#{scheduleController.updateTaskButtons}" update=":form01:taskButtons" />
 					</p:selectBooleanCheckbox>
@@ -251,7 +253,7 @@
 				</p:column>
 				<p:column headerText="Time">
 					<h:outputText value="#{task.time}">
-						<f:convertDateTime pattern="HH:mm" />
+						<f:convertDateTime pattern="dd/M/yyyy HH:mm" />
 					</h:outputText>
 				</p:column>
 				<p:column headerText="Detail">
@@ -263,8 +265,8 @@
 			</p:dataTable>
 			<p:dataTable id="taskTbl" rowIndexVar="row" value="#{scheduleController.tasks}" var="task" rendered="#{not scheduleController.taskSearchMode}"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-					rows="15">
-				<p:column>
+					rows="10">
+				<p:column width="80">
 					<p:selectBooleanCheckbox value="#{task.selected}">
 						<p:ajax listener="#{scheduleController.updateTaskButtons}" update=":form01:taskButtons" />
 					</p:selectBooleanCheckbox>
@@ -287,7 +289,7 @@
 					<h:outputText value="#{task.detail}" />
 				</p:column>
 				<p:column headerText="Status" styleClass="#{task.status == 'Overdue'? 'newMsg' : null}" >
-					<h:outputText value="#{task.status}" styleClass="#{task.status == 'Overdue'? 'overdue' : task.status=='Done'? 'completed' : null}"/>
+					<h:outputText value="#{task.status}" styleClass="#{task.status == 'Overdue'? 'overdue' : (task.status=='Done'? 'completed' : null)}"/>
 				</p:column>
 				<p:column headerText="Deal detail">
 					<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
@@ -302,8 +304,9 @@
 				</p:column>
 			</p:dataTable>
 			<br/>
-			<p:commandButton value="Add new task" actionListener="#{scheduleController.startAddTask}" update=":form01"/>
+
 			<p:outputPanel id="taskButtons">
+				<p:commandButton value="Add new task" actionListener="#{scheduleController.startAddTask}" update=":form01"/>
 				<p:commandButton value="Reassign" actionListener="#{scheduleController.startReassignTask}" update=":form01:reassignArea" rendered="#{scheduleController.someTaskSelected}" />
 			</p:outputPanel>
 		</p:panel>
@@ -324,8 +327,36 @@
 
 					<h:outputText value="Products" />
 					<p:dataList value="#{scheduleController.tempAct.products}" var="prod">#{prod.name}</p:dataList>
+
+					<h:outputText value="Related promotions" />
+					<p:dataList value="#{scheduleController.relatedPromotions}" var="promo">
+						#{promo.name}
+						<p:commandButton update=":form01:promoDetail" oncomplete="PF('promoOP').show('#{component.clientId}')"
+							actionListener="#{scheduleController.startViewPromoDetail(promo)}" icon="ui-icon-search" title="View" />
+					</p:dataList>
+
+					<h:outputText value="Related products" />
+					<p:outputPanel>
+						<h:outputText value="Customer purchased those products also bought: " />
+						<p:dataList value="#{scheduleController.relatedProducts}" var="prod">
+							#{prod.name}
+						</p:dataList>
+					</p:outputPanel>
 		        </p:panelGrid>
 		    </p:outputPanel>
+		</p:overlayPanel>
+
+		<p:overlayPanel widgetVar="promoOP" showEffect="fade" hideEffect="fade" dismissable="false" showCloseIcon="true" style="max-width: 700px">
+			<p:outputPanel id="promoDetail" style="text-align:center;">
+				<p:panelGrid columns="2">
+					<h:outputText value="Products" />
+					<p:dataList value="#{scheduleController.selectedPromo.productList}" var="prod">
+						#{prod.name}
+					</p:dataList>
+					<h:outputText value="Discount" />
+					<h:outputText value="#{scheduleController.selectedPromo.discount} %" />
+				</p:panelGrid>
+			</p:outputPanel>
 		</p:overlayPanel>
 
 

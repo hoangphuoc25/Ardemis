@@ -12,6 +12,7 @@ public class ActivityDto {
 	private UserDto salesperson;
 	private CompanyDto customer;
 	private List<ProductDto> products;
+	private Date closingDate;
 	private boolean selected;
 
 	public int getSeq() {
@@ -108,5 +109,13 @@ public class ActivityDto {
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
+	}
+
+	public Date getClosingDate() {
+		return closingDate;
+	}
+
+	public void setClosingDate(Date closingDate) {
+		this.closingDate = closingDate;
 	}
 }

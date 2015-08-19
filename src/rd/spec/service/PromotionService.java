@@ -16,4 +16,5 @@ public interface PromotionService {
 	public List<PromotionDto> getActive() throws IOException;
 	public int getSeq() throws IOException;
 	public List<ProductDto> getProductList(int seq) throws IOException;
+	public List<PromotionDto> getActivePromotionByProduct(int seq) throws IOException;
 }

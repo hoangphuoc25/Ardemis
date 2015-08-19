@@ -70,4 +70,22 @@ public class PromotionDto {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof PromotionDto) {
+			if (((PromotionDto) o).getSeq() == this.seq) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		return this.seq;
+	}
 }

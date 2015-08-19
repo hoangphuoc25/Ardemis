@@ -29,4 +29,5 @@ public interface InvoiceDao {
 	public List<InvoiceDto> searchInvoiceByCompanyName(Transaction transaction, String name) throws IOException;
 	public List<InvoiceDto> getInvoiceByProduct(Transaction transaction, int seq) throws IOException;
 	public int countInvoiceByUserAndTime(Transaction transaction, String username, Date startDate, Date endDate) throws IOException;
+	public List<ProductDto> getProductsByCustomer(Transaction transaction, int seq) throws IOException;
 }

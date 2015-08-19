@@ -3,12 +3,15 @@ package rd.impl.controler;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
@@ -25,6 +28,7 @@ import rd.dto.ContactDto;
 import rd.dto.MeetingDto;
 import rd.dto.NoteDto;
 import rd.dto.ProductDto;
+import rd.dto.PromotionDto;
 import rd.dto.SaleTargetDto;
 import rd.dto.ScheduleTaskDto;
 import rd.dto.UserDto;
@@ -34,6 +38,8 @@ import rd.spec.service.CompanyService;
 import rd.spec.service.ContactService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.NoteService;
+import rd.spec.service.PromotionService;
+import rd.spec.service.RelatedProductService;
 import rd.spec.service.SaleTargetService;
 import rd.spec.service.ScheduleTaskService;
 import rd.spec.service.UserService;
@@ -53,6 +59,8 @@ public class ScheduleController implements Serializable {
 	@Inject ScheduleTaskService taskService;
 	@Inject ActivityService actService;
 	@Inject UserService userService;
+	@Inject PromotionService promoService;
+	@Inject RelatedProductService rpService;
 
 	public void conversationBegin() {
 		if (conversation.isTransient()) {
@@ -690,6 +698,22 @@ public class ScheduleController implements Serializable {
 		tempAct = actService.getById(task.getActId());
 		List<ProductDto> prods = actService.getProductByDeal(task.getActId());
 		tempAct.setProducts(prods);
+
+		relatedPromotions = new ArrayList<PromotionDto>();
+		Set<PromotionDto> tempSet = new HashSet<PromotionDto>();
+		List<PromotionDto> tempList = new ArrayList<PromotionDto>();
+		relatedProducts = new ArrayList<ProductDto>();
+		Set<ProductDto> tempSet2 = new HashSet<ProductDto>();
+		List<ProductDto> tempList2 = new ArrayList<ProductDto>();
+
+		for (ProductDto dto: tempAct.getProducts()) {
+			tempList.addAll(promoService.getByProduct(dto.getSeq()));
+			tempList2.addAll(rpService.getRelatedProduct(dto.getSeq()));
+		}
+		tempSet.addAll(tempList);
+		tempSet2.addAll(tempList2);
+		relatedPromotions.addAll(tempSet);
+		relatedProducts.addAll(tempSet2);
 	}
 
 	public Date getDateSearch() {
@@ -779,9 +803,30 @@ public class ScheduleController implements Serializable {
 
 	public void startViewDetail(MeetingDto meeting) throws IOException {
 		tempAct = actService.getById(meeting.getActId());
-		System.out.println(tempAct.getProducts().size());
+		System.out.println("tempact: " + tempAct.getProducts().size());
 		List<ProductDto> prods = actService.getProductByDeal(meeting.getActId());
 		tempAct.setProducts(prods);
+		relatedPromotions = new ArrayList<PromotionDto>();
+		Set<PromotionDto> tempSet = new HashSet<PromotionDto>();
+		List<PromotionDto> tempList = new ArrayList<PromotionDto>();
+		relatedProducts = new ArrayList<ProductDto>();
+		Set<ProductDto> tempSet2 = new HashSet<ProductDto>();
+		List<ProductDto> tempList2 = new ArrayList<ProductDto>();
+
+		for (ProductDto dto: tempAct.getProducts()) {
+			System.out.println("dto: " + dto.getSeq());
+			tempList.addAll(promoService.getByProduct(dto.getSeq()));
+			tempList2.addAll(rpService.getRelatedProduct(dto.getSeq()));
+		}
+		tempSet.addAll(tempList);
+		tempSet2.addAll(tempList2);
+
+		for (PromotionDto pro: tempSet) {
+			System.out.println(pro.getSeq() + " " +pro.getName());
+		}
+		relatedPromotions.addAll(tempSet);
+		relatedProducts.addAll(tempSet2);
+
 	}
 
 	public void markAsDone(ScheduleTaskDto task) throws IOException {
@@ -906,7 +951,7 @@ public class ScheduleController implements Serializable {
 				}
 			}
 		}
-		sessionManager.addGlobalMessageInfo("Reassigned meetings", null);
+		sessionManager.addGlobalMessageInfo("Meetings assigned", null);
 		reassignMode = false;
 	}
 	public void cancelReassignment() {
@@ -973,6 +1018,41 @@ public class ScheduleController implements Serializable {
 				}
 			}
 		}
+		sessionManager.addGlobalMessageInfo("Tasks assigned", null);
 		reassignMode = false;
+	}
+
+	public List<PromotionDto> getRelatedPromotions() {
+		return relatedPromotions;
+	}
+
+	public void setRelatedPromotions(List<PromotionDto> relatedPromotions) {
+		this.relatedPromotions = relatedPromotions;
+	}
+
+	public List<ProductDto> getRelatedProducts() {
+		return relatedProducts;
+	}
+
+	public void setRelatedProducts(List<ProductDto> relatedProducts) {
+		this.relatedProducts = relatedProducts;
+	}
+
+	private List<PromotionDto> relatedPromotions;
+	private List<ProductDto> relatedProducts;
+	private PromotionDto selectedPromo;
+
+	public void startViewPromoDetail(PromotionDto promo) throws IOException {
+		this.selectedPromo = promo;
+		List<ProductDto> list = promoService.getProductList(promo.getSeq());
+		selectedPromo.setProductList(list);
+	}
+
+	public PromotionDto getSelectedPromo() {
+		return selectedPromo;
+	}
+
+	public void setSelectedPromo(PromotionDto selectedPromo) {
+		this.selectedPromo = selectedPromo;
 	}
 }

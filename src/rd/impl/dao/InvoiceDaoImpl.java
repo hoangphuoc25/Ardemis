@@ -810,4 +810,41 @@ public class InvoiceDaoImpl implements InvoiceDao {
 			}
 		}
 	}
+	public List<ProductDto> getProductsByCustomer(Transaction transaction, int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_PRODUCTS_BY_CUSTOMER);
+			prepareStatement.setInt(1, seq);
+			resultSet = prepareStatement.executeQuery();
+
+			List<ProductDto> result = new ArrayList<ProductDto>();
+			while (resultSet.next()) {
+				result.add(productDao.getProductById(transaction, resultSet.getInt(1)));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_PRODUCTS_BY_CUSTOMER = "select distinct pp.product_seq from t_invoice i join t_product_purchase pp on i.seq=pp.invoice_seq where i.contact_seq=?";
 }

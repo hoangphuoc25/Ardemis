@@ -629,6 +629,7 @@ public class ManagerController implements Serializable {
 	}
 	public void cancelAssignToOther() {
 		assignToOtherMode = false;
+		bulkReassignMode = false;
 	}
 
 	public ActivityDto getSelectedAct() {
@@ -722,4 +723,53 @@ public class ManagerController implements Serializable {
 		assignTargetMode = true;
 		currentTarget = new SaleTargetDto();
 	}
+
+	public boolean isBulkReassignMode() {
+		return bulkReassignMode;
+	}
+
+	public void setBulkReassignMode(boolean bulkReassignMode) {
+		this.bulkReassignMode = bulkReassignMode;
+	}
+
+	public boolean isSomeDealSelected() {
+		return someDealSelected;
+	}
+
+	public void setSomeDealSelected(boolean someDealSelected) {
+		this.someDealSelected = someDealSelected;
+	}
+
+	private boolean someDealSelected;
+	private boolean bulkReassignMode;
+
+	public void startBulkReassign() {
+		bulkReassignMode = true;
+	}
+	public void updateSomeDealSelected() {
+		someDealSelected = false;
+		for (ActivityDto dto: allDeal) {
+			if (dto.isSelected()) {
+				someDealSelected = true;
+				break;
+			}
+		}
+	}
+
+	public void confirmBulkReassign() throws IOException {
+		if (otherSalesperson == null || otherSalesperson.isEmpty()) {
+			sessionManager.addGlobalMessageInfo("Invalid info", null);
+			return;
+		}
+		UserDto newSale = userService.findUserById(otherSalesperson.split("[()]")[1]);
+		for (ActivityDto dto: allDeal) {
+			if (dto.isSelected()) {
+				dto.setSalesperson(newSale);
+				actService.updateActivity(dto);
+			}
+		}
+		bulkReassignMode = false;
+		sessionManager.addGlobalMessageInfo("Deals assigned", null);
+	}
+
 }

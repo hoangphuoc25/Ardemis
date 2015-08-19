@@ -255,4 +255,16 @@ public class InvoiceServiceImpl implements InvoiceService, Serializable {
 			throw e;
 		}
 	}
+	public List<ProductDto> getProductsByCustomer(int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ProductDto> result = invoiceDao.getProductsByCustomer(transaction, seq);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

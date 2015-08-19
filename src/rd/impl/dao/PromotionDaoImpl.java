@@ -98,8 +98,8 @@ public class PromotionDaoImpl implements PromotionDao {
 			resultSet = prepareStatement.executeQuery();
 
 			PromotionDto result = null;
-			while (resultSet.next()) {
-				result = new PromotionDto();
+			if (resultSet.next()) {
+				result = makePromoDto(transaction, resultSet);
 			}
 			return result;
 
@@ -384,4 +384,43 @@ public class PromotionDaoImpl implements PromotionDao {
 			}
 		}
 	}
+	public List<PromotionDto> getActivePromotionByProduct(Transaction transaction, int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_ACTIVE_PROMOTION_BY_PRODUCT);
+			prepareStatement.setInt(1, seq);
+			prepareStatement.setDate(2, new java.sql.Date((new Date()).getTime()));
+			prepareStatement.setDate(3, new java.sql.Date((new Date()).getTime()));
+			resultSet = prepareStatement.executeQuery();
+
+			List<PromotionDto> result = new ArrayList<PromotionDto>();
+			while (resultSet.next()) {
+				result.add(getById(transaction, resultSet.getInt(1)));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_ACTIVE_PROMOTION_BY_PRODUCT = "select distinct p.seq from t_promo p join t_promo_product pp on p.seq=pp.promo_seq where pp.product_seq=? and p.start_date>? and p.end_date<=?";
 }

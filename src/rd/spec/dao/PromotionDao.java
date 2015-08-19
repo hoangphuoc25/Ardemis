@@ -16,4 +16,5 @@ public interface PromotionDao {
 	public List<PromotionDto> getActive(Transaction transaction) throws IOException;
 	public int getSeq(Transaction transaction) throws IOException;
 	public List<ProductDto> getProductList(Transaction transaction, int seq) throws IOException;
+	public List<PromotionDto> getActivePromotionByProduct(Transaction transaction, int seq) throws IOException;
 }

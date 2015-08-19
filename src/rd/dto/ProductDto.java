@@ -159,4 +159,14 @@ public class ProductDto {
 	public void setTimeLeft(int timeLeft) {
 		this.timeLeft = timeLeft;
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		ProductDto a = (ProductDto) o;
+		return (this.seq == a.getSeq());
+	}
+	@Override
+	public int hashCode() {
+		return this.seq;
+	}
 }
