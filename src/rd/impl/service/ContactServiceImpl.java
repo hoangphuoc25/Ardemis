@@ -196,4 +196,16 @@ public class ContactServiceImpl implements ContactService, Serializable {
 			throw e;
 		}
 	}
+	public ContactDto getContactByUserId(String id) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			ContactDto result = contactDao.getContactByUserId(transaction, id);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

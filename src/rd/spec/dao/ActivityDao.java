@@ -17,4 +17,7 @@ public interface ActivityDao {
 	public List<ActivityDto> getActiveDeal(Transaction transaction) throws IOException;
 	public List<ProductDto> getProductByDeal(Transaction transaction, int seq) throws IOException;
 	public List<ActivityDto> searchByCustomerName(Transaction transaction, String name) throws IOException;
+	public List<ActivityDto> getActiveDealByContact(Transaction transaction, int seq) throws IOException;
+	public List<ActivityDto> getActiveDealByCompany(Transaction transaction, String company) throws IOException;
+	public List<ActivityDto> getActiveDealBySalesperson(Transaction transaction, String userId) throws IOException;
 }

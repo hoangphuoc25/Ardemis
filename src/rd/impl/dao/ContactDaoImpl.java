@@ -64,6 +64,7 @@ public class ContactDaoImpl implements ContactDao {
 			prepareStatement.setString(8, contact.getAddress());
 			prepareStatement.setString(9, contact.getAssignee().getId());
 			prepareStatement.setString(10, contact.getContactStatus());
+			System.out.println(contact.getSource());
 			prepareStatement.setString(11, contact.getSource());
 
 			resultSet = prepareStatement.executeQuery();
@@ -533,4 +534,41 @@ public class ContactDaoImpl implements ContactDao {
 		}
 	}
 	private static String REGISTER_INTEREST = "insert into t_contact_product (contact_seq, product_seq) values (?, ?)";
+	public ContactDto getContactByUserId(Transaction transaction, String id) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_CONTACT_BY_USER_ID);
+			prepareStatement.setString(1, id);
+			resultSet = prepareStatement.executeQuery();
+
+			ContactDto result = null;
+			if (resultSet.next()) {
+				result = makeContactDto(transaction, resultSet);
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_CONTACT_BY_USER_ID = "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status, source from t_contact c join t_client_account ca on c.seq=ca.contact_seq where ca.username=?";
 }

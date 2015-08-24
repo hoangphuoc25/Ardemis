@@ -21,6 +21,7 @@ import rd.spec.dao.TeamDao;
 import rd.spec.dao.Transaction;
 import rd.spec.dao.UserDao;
 import rd.spec.dao.UserRoleDao;
+import rd.spec.dataCache.UserCache;
 import rd.utils.PasswordHash;
 
 public class UserDaoImpl implements UserDao {
@@ -28,11 +29,13 @@ public class UserDaoImpl implements UserDao {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private TeamDao teamDao;
 	private UserRoleDao userRoleDao;
+	private UserCache userCache;
 
 	@Inject
-	public UserDaoImpl(TeamDao teamDao, UserRoleDao userRoleDao) {
+	public UserDaoImpl(TeamDao teamDao, UserRoleDao userRoleDao, UserCache userCache) {
 		this.teamDao = teamDao;
 		this.userRoleDao = userRoleDao;
+		this.userCache = userCache;
 	}
 
 	@Override
@@ -49,6 +52,7 @@ public class UserDaoImpl implements UserDao {
 			while (resultSet.next()) {
 				UserDto userDto = makeUserDto(transaction, resultSet);
 				items.add(userDto);
+				userCache.put(userDto);
 			}
 			return items;
 		} catch (SQLException e) {
@@ -87,6 +91,11 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public UserDto findUser(Transaction transaction, String id)
 			throws IOException {
+
+		if (userCache.getUser(id) != null) {
+			return userCache.getUser(id);
+		}
+
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 
@@ -99,6 +108,7 @@ public class UserDaoImpl implements UserDao {
 			UserDto result = null;
 			if(resultSet.next()) {
 				result = makeUserDto(transaction, resultSet);
+				userCache.put(result);
 			}
 			return result;
 		} catch (SQLException e) {
@@ -146,6 +156,8 @@ public class UserDaoImpl implements UserDao {
 				resultSet = prepareStatement.executeQuery();
 			}
 
+			userCache.put(userDto);
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {
@@ -189,6 +201,8 @@ public class UserDaoImpl implements UserDao {
 				userRoleDao.addUserRole(transaction, userDto.getId(), userDto.getRoles());
 			}
 
+			userCache.put(userDto);
+
 		} catch (SQLException e) {
 			throw new IOException(e);
 		} finally {
@@ -213,6 +227,7 @@ public class UserDaoImpl implements UserDao {
 			prepareStatement = connection.prepareStatement(DELETE_USER);
 			prepareStatement.setString(1, id);
 			resultSet = prepareStatement.executeQuery();
+
 
 		} catch (SQLException e) {
 			throw new IOException(e);
@@ -248,6 +263,7 @@ public class UserDaoImpl implements UserDao {
 			List<UserDto> result = new ArrayList<UserDto>();
 			while (resultSet.next()) {
 				result.add(makeUserDto(transaction, resultSet));
+				userCache.put(makeUserDto(transaction, resultSet));
 			}
 			logger.error("result: " + result.size());
 			return result;

@@ -3,6 +3,7 @@ package rd.impl.service;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -157,6 +158,30 @@ public class ProductServiceImpl implements ProductService, Serializable {
 		try{
 			transaction.begin();
 			List<ProductDto> result = productDao.searchByPrice(transaction, budget);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<ProductDto> getProductByDeal(int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ProductDto> result = productDao.getProductByDeal(transaction, seq);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public Map<Integer,ProductDto> getProductByUserAndStatus(String userId, String status) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			Map<Integer,ProductDto> result = productDao.getProductByUserAndStatus(transaction, userId, status);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {

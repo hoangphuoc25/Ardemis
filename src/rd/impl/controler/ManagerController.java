@@ -87,9 +87,6 @@ public class ManagerController implements Serializable {
 	}
 
 	public List<UserDto> getTeamRoster() throws IOException {
-		if (team >= 0) {
-			teamRoster = userService.getUserByTeamLazy(team);
-		}
 		return teamRoster;
 	}
 
@@ -630,6 +627,7 @@ public class ManagerController implements Serializable {
 	public void cancelAssignToOther() {
 		assignToOtherMode = false;
 		bulkReassignMode = false;
+		bulkEmpDealReassignMode = false;
 	}
 
 	public ActivityDto getSelectedAct() {
@@ -769,7 +767,209 @@ public class ManagerController implements Serializable {
 			}
 		}
 		bulkReassignMode = false;
+		allDealSelect = false;
 		sessionManager.addGlobalMessageInfo("Deals assigned", null);
 	}
 
+	public boolean isAllDealSelect() {
+		return allDealSelect;
+	}
+
+	public void setAllDealSelect(boolean allDealSelect) {
+		this.allDealSelect = allDealSelect;
+	}
+
+	public boolean isSomeEmpDealSelect() {
+		return someEmpDealSelect;
+	}
+
+	public void setSomeEmpDealSelect(boolean someEmpDealSelect) {
+		this.someEmpDealSelect = someEmpDealSelect;
+	}
+
+	public boolean isAllEmpDealSelect() {
+		return allEmpDealSelect;
+	}
+
+	public void setAllEmpDealSelect(boolean allEmpDealSelect) {
+		this.allEmpDealSelect = allEmpDealSelect;
+	}
+
+	public boolean isBulkEmpDealReassignMode() {
+		return bulkEmpDealReassignMode;
+	}
+
+	public void setBulkEmpDealReassignMode(boolean bulkEmpDealReassignMode) {
+		this.bulkEmpDealReassignMode = bulkEmpDealReassignMode;
+	}
+
+	private boolean allDealSelect;
+	private boolean allEmpDealSelect;
+	private boolean someEmpDealSelect;
+	private boolean bulkEmpDealReassignMode;
+
+	public void updateAllDealSelect() {
+		if (isAllDealSelect()) {
+			for (ActivityDto dto: allDeal) {
+				dto.setSelected(true);
+			}
+			someDealSelected = true;
+		} else {
+			for (ActivityDto dto: allDeal) {
+				dto.setSelected(false);
+			}
+			someDealSelected = false;
+		}
+	}
+
+	public void updateAllEmpDealSelected() {
+		if (isAllEmpDealSelect()) {
+			for (ActivityDto dto: allAct) {
+				if (!dto.getStatus().equalsIgnoreCase("Completed"))
+					dto.setSelected(true);
+			}
+			setSomeEmpDealSelect(true);
+		} else {
+			for (ActivityDto dto: allAct) {
+				dto.setSelected(false);
+			}
+			setSomeEmpDealSelect(false);
+		}
+	}
+
+	public void confirmReassignEmpDealGroup() throws IOException {
+		if (otherSalesperson == null || otherSalesperson.isEmpty()) {
+			sessionManager.addGlobalMessageInfo("Invalid info", null);
+			return;
+		}
+		UserDto newSale = userService.findUserById(otherSalesperson.split("[()]")[1]);
+		for (ActivityDto dto: allAct) {
+			if (dto.isSelected()) {
+				dto.setSalesperson(newSale);
+				actService.updateActivity(dto);
+			}
+		}
+		for (int i = allAct.size() - 1; i >=0; i--) {
+			if (allAct.get(i).isSelected()) {
+				allAct.remove(i);
+			}
+		}
+		bulkEmpDealReassignMode = false;
+		allEmpDealSelect = false;
+		sessionManager.addGlobalMessageInfo("Deals assigned", null);
+	}
+
+	public void startReassignEmpDeal() {
+		bulkEmpDealReassignMode = true;
+	}
+
+	public void updateTeamRoster() throws IOException {
+		if (team > 0) {
+			teamRoster = userService.getUserByTeamLazy(team);
+		}
+	}
+
+	public void updateTeamRosterSingle() throws IOException {
+		teamRoster = new ArrayList<UserDto>();
+		teamRoster.add(userService.findUserById(otherSalesperson.split("[()]")[1]));
+	}
+
+	public int getTargetTeam() {
+		return targetTeam;
+	}
+
+	public void setTargetTeam(int targetTeam) {
+		this.targetTeam = targetTeam;
+	}
+
+	public String getContactNameSearch() {
+		return contactNameSearch;
+	}
+
+	public void setContactNameSearch(String contactNameSearch) {
+		this.contactNameSearch = contactNameSearch;
+	}
+
+	public String getCompanyNameSearch() {
+		return companyNameSearch;
+	}
+
+	public void setCompanyNameSearch(String companyNameSearch) {
+		this.companyNameSearch = companyNameSearch;
+	}
+
+	public String getSalespersonName() {
+		return salespersonName;
+	}
+
+	public void setSalespersonName(String salespersonName) {
+		this.salespersonName = salespersonName;
+	}
+
+	private int targetTeam = -1;
+
+	private String contactNameSearch;
+	private String companyNameSearch;
+	private String salespersonName;
+	private ActivityDto tempAct;
+
+	public void searchDealByContact() throws NumberFormatException, IOException {
+		allDeal = actService.getActiveDealByContact(Integer.parseInt(contactNameSearch.split("[()]")[1]));
+	}
+
+	public void searchDealByCompany() throws IOException {
+		allDeal = actService.getActiveDealByCompany(companyNameSearch);
+	}
+
+	public void searchDealBySalesperson() throws IOException {
+		allDeal = actService.getActiveDealBySalesperson(salespersonName.split("[()]")[1]);
+	}
+
+	public void resetAllDeal() throws IOException {
+		allDeal = actService.getActiveDeal();
+	}
+
+	public ActivityDto getTempAct() {
+		return tempAct;
+	}
+
+	public void setTempAct(ActivityDto tempAct) {
+		this.tempAct = tempAct;
+	}
+
+	public void startViewDealDetail(MeetingDto meeting) throws IOException {
+		tempAct = actService.getById(meeting.getActId());
+		if (meeting.getActId() > 0) {
+			List<ProductDto> prods = actService.getProductByDeal(tempAct.getSeq());
+			tempAct.setProducts(prods);
+		}
+	}
+
+	public boolean isViewEmpScheduleMode() {
+		return viewEmpScheduleMode;
+	}
+
+	public void setViewEmpScheduleMode(boolean viewEmpScheduleMode) {
+		this.viewEmpScheduleMode = viewEmpScheduleMode;
+	}
+
+	public List<MeetingDto> getEmpMeeting() {
+		return empMeeting;
+	}
+
+	public void setEmpMeeting(List<MeetingDto> empMeeting) {
+		this.empMeeting = empMeeting;
+	}
+
+	private boolean viewEmpScheduleMode;
+	private List<MeetingDto> empMeeting;
+
+	public void startViewMeeting(UserDto sale) throws IOException {
+		viewEmpScheduleMode = true;
+		empMeeting = meetingService.getMeetingByUser(sale.getId());
+	}
+
+	public void closeViewMeeting() {
+		viewEmpScheduleMode = false;
+	}
 }

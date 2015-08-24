@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -162,6 +164,8 @@ public class StatisticsController implements Serializable {
 	public void buildModels2() throws IOException {
 		empMap = new HashMap<String, Double>();
 		teamMap = new HashMap<Integer, Double>();
+		calculateTotal(invoices);
+
 		List<UserDto> sales = userService.getUserByRole("sale");
 		for (UserDto sale: sales) {
 			double amount = 0;
@@ -172,7 +176,8 @@ public class StatisticsController implements Serializable {
 			}
 			int deals = invoiceService.countInvoiceByUserAndTime(sale.getId(), fromDate, toDate);
 			int calls = crService.countReportByUserAndTime(sale.getId(), fromDate, toDate);
-			stats.add(new WrStatisticsDto(sale, amount, deals, calls, null));
+			double percent = Math.round(((double) amount / (double) total) * 10000) / 100;
+			stats.add(new WrStatisticsDto(sale, amount, deals, calls, null, percent));
 		}
 
 		List<TeamDto> teams = teamService.getAll();
@@ -191,11 +196,10 @@ public class StatisticsController implements Serializable {
 				deals += invoiceService.countInvoiceByUserAndTime(user.getId(), fromDate, toDate);
 				calls += crService.countReportByUserAndTime(user.getId(), fromDate, toDate);
 			}
-			getTeamstats().add(new WrStatisticsDto(null, amount, deals, calls, team));
+			double percent = Math.round(((double) amount / (double) total) * 10000) / 100;
+			getTeamstats().add(new WrStatisticsDto(null, amount, deals, calls, team, percent));
 		}
 		// setTeamStats(new ArrayList<Entry<Integer, Double>>(teamMap.entrySet()));
-
-		calculateTotal(invoices);
 
 		showing = true;
 		System.out.println("DONE");
@@ -378,8 +382,6 @@ public class StatisticsController implements Serializable {
 
 	public void assignSaleTargetAllTeam() throws IOException {
 		SaleTargetDto currentTarget = manController.getCurrentTarget();
-		System.out.println("StatisticsController.assignSaleTargetAllTeam()");
-		System.out.println(currentTarget.getTarget());
 
 		if (currentTarget.getFromDate().getTime() > (new Date()).getTime() ||
 				currentTarget.getToDate().getTime() <= (new Date()).getTime()) {
@@ -394,6 +396,14 @@ public class StatisticsController implements Serializable {
 			sessionManager.addGlobalMessageFatal("Invalid target amount.", null);
 			return;
 		}
+
+		toDate = new Date();
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(toDate);
+		cal.add(Calendar.MONTH, -3);
+		fromDate = cal.getTime();
+
+		search();
 
 		int totalCalls = 0, totalDeals = 0;
 		for (WrStatisticsDto wsd: teamstats) {
@@ -425,6 +435,8 @@ public class StatisticsController implements Serializable {
 				noteService.addNote(message);
 			}
 		}
+		manController.setAssignTargetMode(false);
+		sessionManager.addGlobalMessageInfo("Sale goals assigned", null);
 	}
 
 }

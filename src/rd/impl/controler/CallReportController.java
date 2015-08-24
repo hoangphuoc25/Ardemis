@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
@@ -28,6 +30,7 @@ import rd.dto.FaqDto;
 import rd.dto.InvoiceDto;
 import rd.dto.MeetingDto;
 import rd.dto.ProductDto;
+import rd.dto.PromotionDto;
 import rd.dto.SaleTargetDto;
 import rd.dto.ScheduleTaskDto;
 import rd.dto.ScriptDto;
@@ -42,6 +45,8 @@ import rd.spec.service.FaqService;
 import rd.spec.service.InvoiceService;
 import rd.spec.service.MeetingService;
 import rd.spec.service.ProductService;
+import rd.spec.service.PromotionService;
+import rd.spec.service.RelatedProductService;
 import rd.spec.service.SaleTargetService;
 import rd.spec.service.ScheduleTaskService;
 import rd.spec.service.ScriptService;
@@ -1194,5 +1199,92 @@ public class CallReportController implements Serializable {
 		this.searchedContact = searchedContact;
 	}
 
+	public List<PromotionDto> getRelatedPromotions() {
+		return relatedPromotions;
+	}
+
+	public void setRelatedPromotions(List<PromotionDto> relatedPromotions) {
+		this.relatedPromotions = relatedPromotions;
+	}
+
+	public List<ProductDto> getRelatedProducts() {
+		return relatedProducts;
+	}
+
+	public void setRelatedProducts(List<ProductDto> relatedProducts) {
+		this.relatedProducts = relatedProducts;
+	}
+
 	private ContactDto searchedContact;
+
+	private List<ProductDto> relatedProducts;
+	private List<PromotionDto> relatedPromotions;
+	private PromotionDto selectedPromo;
+
+	@Inject PromotionService promoService;
+	@Inject RelatedProductService rpService;
+
+	public void startViewDealDetail() throws IOException {
+		currentDeal = actService.getById(dealId);
+		List<ProductDto> prods = actService.getProductByDeal(dealId);
+		currentDeal.setProducts(prods);
+		relatedPromotions = new ArrayList<PromotionDto>();
+		Set<PromotionDto> tempSet = new HashSet<PromotionDto>();
+		List<PromotionDto> tempList = new ArrayList<PromotionDto>();
+		relatedProducts = new ArrayList<ProductDto>();
+		Set<ProductDto> tempSet2 = new HashSet<ProductDto>();
+		List<ProductDto> tempList2 = new ArrayList<ProductDto>();
+
+		for (ProductDto dto: currentDeal.getProducts()) {
+			System.out.println("dto: " + dto.getSeq());
+			tempList.addAll(promoService.getByProduct(dto.getSeq()));
+			tempList2.addAll(rpService.getRelatedProduct(dto.getSeq()));
+		}
+		tempSet.addAll(tempList);
+		tempSet2.addAll(tempList2);
+
+		for (PromotionDto pro: tempSet) {
+			System.out.println(pro.getSeq() + " " +pro.getName());
+		}
+		relatedPromotions.addAll(tempSet);
+		relatedProducts.addAll(tempSet2);
+	}
+
+	public void startViewPromoDetail(PromotionDto promo) throws IOException {
+		this.setSelectedPromo(promo);
+		List<ProductDto> list = promoService.getProductList(promo.getSeq());
+		getSelectedPromo().setProductList(list);
+	}
+
+	public PromotionDto getSelectedPromo() {
+		return selectedPromo;
+	}
+
+	public void setSelectedPromo(PromotionDto selectedPromo) {
+		this.selectedPromo = selectedPromo;
+	}
+
+	public List<CallReportDto> getRelatedCallRecords() {
+		return relatedCallRecords;
+	}
+
+	public void setRelatedCallRecords(List<CallReportDto> relatedCallRecords) {
+		this.relatedCallRecords = relatedCallRecords;
+	}
+
+	public List<ScheduleTaskDto> getRelatedTasks() {
+		return relatedTasks;
+	}
+
+	public void setRelatedTasks(List<ScheduleTaskDto> relatedTasks) {
+		this.relatedTasks = relatedTasks;
+	}
+
+	private List<CallReportDto> relatedCallRecords;
+	private List<ScheduleTaskDto> relatedTasks;
+
+	public void findRelatedTasks() throws IOException {
+		relatedCallRecords = crService.getByContact(callee.getSeq());
+		relatedTasks = stService.getByContact(callee.getSeq());
+	}
 }

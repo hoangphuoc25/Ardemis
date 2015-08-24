@@ -17,4 +17,6 @@ public interface FeedbackDao {
 	public double getAverageUserIn(Transaction transaction, int seq) throws IOException;
 	public double getAverageUsability(Transaction transaction, int seq) throws IOException;
 	public double getAverageStability(Transaction transaction, int seq) throws IOException;
+	public String getHappiness(Transaction transaction, int contactSeq, int prodSeq) throws IOException;
+	public void addClientHappiness(Transaction transaction, int contactSeq, int productSeq, String happiness) throws IOException;
 }

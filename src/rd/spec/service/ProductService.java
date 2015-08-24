@@ -2,6 +2,7 @@ package rd.spec.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import rd.dto.CategoryDto;
 import rd.dto.ProductDto;
@@ -19,4 +20,6 @@ public interface ProductService {
 	public List<ProductDto> searchByCategories(List<String> categories) throws IOException;
 	public List<ProductDto> searchByProductDesc(String keyword) throws IOException;
 	public List<ProductDto> searchByPrice(int budget) throws IOException;
+	public List<ProductDto> getProductByDeal(int seq) throws IOException;
+	public Map<Integer,ProductDto> getProductByUserAndStatus(String userId, String status) throws IOException;
 }

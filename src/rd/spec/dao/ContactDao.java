@@ -30,4 +30,5 @@ public interface ContactDao {
 	public int getNumberOfContactPerSale(Transaction transaction, String saleId) throws IOException;
 	public void addCompanyContact(Transaction transaction, ContactDto contact,CompanyDto company) throws IOException;
 	public void registerInterest(Transaction transaction, ContactDto contact,List<ProductDto> products) throws IOException;
+	public ContactDto getContactByUserId(Transaction transaction, String id) throws IOException;
 }

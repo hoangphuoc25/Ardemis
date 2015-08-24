@@ -137,7 +137,7 @@
 			</p:panelGrid>
 		</p:fieldset>
 
-		<p:panel id="toggleable" header="Your meeting schedule" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px">
+		<p:panel id="toggleable" header="Your meeting schedule" toggleable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px">
 			<h:panelGrid columns="6" >
 				<h:outputText value="Search my schedule from" />
 				<p:calendar value="#{scheduleController.dateSearch}" pattern="dd/MM/yyyy" />
@@ -150,6 +150,11 @@
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="8"  sortBy="#{event.from}">
 				<p:column width="80">
+					<f:facet name="header">
+						<p:selectBooleanCheckbox value="#{scheduleController.allSearchedMeetingsSelect}">
+							<p:ajax update=":form01:tbl1, :form01:buttons" listener="#{scheduleController.updateAllSearchedMeetingsSelect}" />
+						</p:selectBooleanCheckbox>
+					</f:facet>
 					<p:selectBooleanCheckbox value="#{event.selected}">
 						<p:ajax update=":form01:buttons" listener="#{scheduleController.updateButtons}" />
 					</p:selectBooleanCheckbox>
@@ -177,6 +182,11 @@
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="8" styleClass="myTable" sortBy="#{event.from}">
 				<p:column width="80">
+					<f:facet name="header">
+						<p:selectBooleanCheckbox value="#{scheduleController.allEventsSelect}">
+							<p:ajax update=":form01:tbl2, :form01:buttons" listener="#{scheduleController.updateAllEventsSelect}" />
+						</p:selectBooleanCheckbox>
+					</f:facet>
 					<p:selectBooleanCheckbox value="#{event.selected}">
 						<p:ajax update=":form01:buttons" listener="#{scheduleController.updateButtons}" />
 					</p:selectBooleanCheckbox>
@@ -202,7 +212,7 @@
 				</p:column>
 				<p:column headerText="Deal detail">
 					<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
-							actionListener="#{scheduleController.startViewDetail(event)}" icon="ui-icon-search" title="View" />
+							actionListener="#{scheduleController.startViewDetail(event)}" icon="ui-icon-search" title="View" rendered="#{event.actId > 0}" />
 				</p:column>
 				<p:column headerText="Action">
 					<p:commandButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01" />
@@ -224,7 +234,7 @@
 	        </p:outputPanel>
     	</p:panel>
 
-		<p:panel id="tasks" header="Your task today" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="tasksPanel" style="margin-bottom:20px">
+		<p:panel id="tasks" header="Your task today" toggleable="true" toggleSpeed="500" closeSpeed="500" widgetVar="tasksPanel" style="margin-bottom:20px">
 			<h:panelGrid columns="6" >
 				<h:outputText value="Search my schedule from" />
 				<p:calendar value="#{scheduleController.taskDateSearch}" pattern="dd/MM/yyyy" />
@@ -238,6 +248,11 @@
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="8">
 				<p:column width="80">
+					<f:facet name="header">
+						<p:selectBooleanCheckbox value="#{scheduleController.allSearchedTasksSelect}">
+							<p:ajax update=":form01:tbl4, :form01:taskButtons" listener="#{scheduleController.updateAllSearchedTasksSelect}" />
+						</p:selectBooleanCheckbox>
+					</f:facet>
 					<p:selectBooleanCheckbox value="#{task.selected}">
 						<p:ajax listener="#{scheduleController.updateTaskButtons}" update=":form01:taskButtons" />
 					</p:selectBooleanCheckbox>
@@ -267,6 +282,11 @@
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="10">
 				<p:column width="80">
+					<f:facet name="header">
+						<p:selectBooleanCheckbox value="#{scheduleController.allTasksSelect}">
+							<p:ajax update=":form01:taskTbl, :form01:taskButtons" listener="#{scheduleController.updateAllTasksSelect}" />
+						</p:selectBooleanCheckbox>
+					</f:facet>
 					<p:selectBooleanCheckbox value="#{task.selected}">
 						<p:ajax listener="#{scheduleController.updateTaskButtons}" update=":form01:taskButtons" />
 					</p:selectBooleanCheckbox>
@@ -299,7 +319,7 @@
 					<p:commandButton value="Delete" actionListener="#{scheduleController.deleteTask(task)}" update=":form01:tasks" rendered="#{task.status != 'Done'}" />
 					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditTask(task)}" update=":form01" rendered="#{task.status != 'Done'}" />
 					<h:outputLink value="callReport.jsf?contactSeq=#{task.contact.seq}&amp;backMain=true&amp;dealId=#{task.actId}&amp;taskId=#{task.seq}"
-							style="color: blue;" rendered="#{(task.category == 'Follow-up call' or task.category == 'Call again') and task.status != 'Done'}">Call</h:outputLink>
+							style="color: blue;" rendered="#{(task.category == 'Follow-up call' or task.category == 'Call again' or task.category == 'Call') and task.status != 'Done'}">Call</h:outputLink>
 					<p:commandButton value="Mask as done" actionListener="#{scheduleController.markAsDone(task)}" upate=":form01:tasks" rendered="#{task.status != 'Done' and task.category == 'Email'}" />
 				</p:column>
 			</p:dataTable>

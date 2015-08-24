@@ -25,4 +25,5 @@ public interface ContactService {
 	public int getNumberOfContactPerSale(String saleId) throws IOException;
 	public void addCompanyContact(ContactDto contact,CompanyDto company) throws IOException;
 	public void registerInterest(ContactDto contact,List<ProductDto> products) throws IOException;
+	public ContactDto getContactByUserId(String id) throws IOException;
 }

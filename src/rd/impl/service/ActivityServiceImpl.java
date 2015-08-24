@@ -146,4 +146,40 @@ public class ActivityServiceImpl implements ActivityService, Serializable {
 			throw e;
 		}
 	}
+	public List<ActivityDto> getActiveDealByContact(int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ActivityDto> result = activityDao.getActiveDealByContact(transaction, seq);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<ActivityDto> getActiveDealByCompany(String company) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ActivityDto> result = activityDao.getActiveDealByCompany(transaction, company);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<ActivityDto> getActiveDealBySalesperson(String userId) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<ActivityDto> result = activityDao.getActiveDealBySalesperson(transaction, userId);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

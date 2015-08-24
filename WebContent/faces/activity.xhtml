@@ -90,6 +90,10 @@
 						<p:ajax update=":form01:dealButtons" listener="#{activityController.updateActivitySelected}" />
 					</p:selectBooleanCheckbox>
 				</p:column>
+				<p:column headerText="ID" width="30">
+					<h:outputText value="#{act.seq}" />
+				</p:column>
+
 				<p:column headerText="Customer">
 					<h:outputText value="#{act.contact.name}" />
 				</p:column>

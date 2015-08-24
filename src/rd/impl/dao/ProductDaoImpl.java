@@ -6,7 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -45,7 +47,7 @@ public class ProductDaoImpl implements ProductDao {
 	private static String REMOVE_PRODUCT_CATEGORY 	= "delete from t_prod_category where product_seq=?";
 	private static String SEARCH_BY_PRODUCT_DESC 	= "select seq, name, summary, target, price, permanent_price from t_product where summary like ?";
 	private static String SEARCH_BY_PRICE 			= "select seq, name, summary, target, price, permanent_price from t_product where price<? or permanent_price<?";
-
+	private static String GET_PRODUCT_BY_DEAL 		= "select seq, name, summary, target, price, permanent_price from t_product where seq in (select product_seq from t_deal_product where deal_seq=?)";
 
 	public void addProduct (Transaction transaction, ProductDto product) throws IOException {
 		// ATTENTION: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
@@ -545,4 +547,84 @@ public class ProductDaoImpl implements ProductDao {
 			}
 		}
 	}
+	public List<ProductDto> getProductByDeal(Transaction transaction, int seq) throws IOException {
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_PRODUCT_BY_DEAL);
+			prepareStatement.setInt(1, seq);
+			resultSet = prepareStatement.executeQuery();
+
+			List<ProductDto> result = new ArrayList<ProductDto>();
+			while (resultSet.next()) {
+				result.add(makeProductDto(transaction, resultSet));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	public Map<Integer,ProductDto> getProductByUserAndStatus(Transaction transaction, String userId, String status) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_PRODUCT_BY_USER_AND_STATUS);
+			prepareStatement.setString(1, userId);
+			prepareStatement.setString(2, status.toLowerCase());
+
+			resultSet = prepareStatement.executeQuery();
+
+			return makeProductMap(resultSet);
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	private Map<Integer, ProductDto> makeProductMap(ResultSet resultSet) throws SQLException, IOException {
+		Map<Integer, ProductDto> result = new Hashtable<Integer, ProductDto>();
+		while (resultSet.next()) {
+			int seq = resultSet.getInt(1);
+			ProductDto a = makeProductDto(null, resultSet);
+			result.put(seq, a);
+		}
+		return result;
+	}
+	private static String GET_PRODUCT_BY_USER_AND_STATUS = "select seq, name, summary, target, price, permanent_price from t_product where seq in (select distinct dp.product_seq from t_deal_product dp join t_activity a on dp.deal_seq=a.seq where a.salesperson=? and lower(a.status)=?)";
 }

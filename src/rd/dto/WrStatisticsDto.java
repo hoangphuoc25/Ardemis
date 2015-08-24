@@ -6,6 +6,7 @@ public class WrStatisticsDto {
 	private int deals;
 	private int calls;
 	private TeamDto team;
+	private double revenuePercent;
 
 	public UserDto getSalesperson() {
 		return salesperson;
@@ -47,11 +48,20 @@ public class WrStatisticsDto {
 		this.team = team;
 	}
 
-	public WrStatisticsDto(UserDto user, double total, int deals, int calls, TeamDto team) {
+	public WrStatisticsDto(UserDto user, double total, int deals, int calls, TeamDto team, double percent) {
 		this.salesperson = user;
 		this.total = total;
 		this.deals = deals;
 		this.calls = calls;
 		this.team = team;
+		this.revenuePercent = percent;
+	}
+
+	public double getRevenuePercent() {
+		return revenuePercent;
+	}
+
+	public void setRevenuePercent(double revenuePercent) {
+		this.revenuePercent = revenuePercent;
 	}
 }

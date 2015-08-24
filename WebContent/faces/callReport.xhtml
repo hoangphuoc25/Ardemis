@@ -84,6 +84,10 @@
 							<p:ajax update="panel" process="panel" />
 						</p:selectOneMenu>
 
+						<h:outputText value="Deal detail" rendered="#{callReportController.dealId > 0}" />
+						<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
+							actionListener="#{callReportController.startViewDealDetail}" icon="ui-icon-search" title="View" rendered="#{callReportController.dealId > 0}" />
+
 						<h:outputText value="Deal stage" rendered="#{callReportController.dealId > 0}" />
 						<p:selectOneMenu value="#{callReportController.currentDeal.status}" rendered="#{callReportController.dealId > 0}">
 							<f:selectItem itemLabel="Customer qualified" itemValue="Customer qualified" />
@@ -92,8 +96,8 @@
 							<f:selectItem itemLabel="Failed" itemValue="Failed" />
 						</p:selectOneMenu>
 
-						<h:outputText value="Action" rendered="#{callReportController.callee.contactStatus == 'Qualified'}"/>
-						<p:selectOneMenu value="#{callReportController.rating}" rendered="#{callReportController.callee.contactStatus == 'Qualified'}" >
+						<h:outputText value="Action" rendered="#{callReportController.callee.contactStatus == 'Qualified' or callReportController.callee.contactStatus == 'Pre-qualified'}"/>
+						<p:selectOneMenu value="#{callReportController.rating}" rendered="#{callReportController.callee.contactStatus == 'Qualified' or callReportController.callee.contactStatus == 'Pre-qualified'}" >
 							<f:selectItems value="#{callReportController.ratings}" />
 							<f:selectItem itemLabel="Close deal" itemValue="close"/>
 							<p:ajax update="panel" process="panel" />
@@ -105,8 +109,8 @@
 						<h:outputText value="New meeting" rendered="#{callReportController.rating == 'Follow-up meeting' and callReportController.callee.contactStatus == 'Qualified'}" />
 						<p:commandButton value="Edit detail" actionListener="#{callReportController.startAddNewMeeting}" update=":form01:newMeetingArea" rendered="#{callReportController.rating == 'Follow-up meeting' and callReportController.callee.contactStatus == 'Qualified'}" />
 
-						<h:outputText value="Call back after" rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and callReportController.callee.contactStatus == 'Qualified'}"/>
-						<p:outputPanel rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and callReportController.callee.contactStatus == 'Qualified'}">
+						<h:outputText value="Call back after" rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and (callReportController.callee.contactStatus == 'Qualified' or callReportController.callee.contactStatus == 'Pre-qualified')}"/>
+						<p:outputPanel rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and (callReportController.callee.contactStatus == 'Qualified' or callReportController.callee.contactStatus == 'Pre-qualified')}">
 							<h:panelGrid columns="2">
 								<p:spinner min="0" value="#{callReportController.callBackNo}" />
 								<p:selectOneMenu value="#{callReportController.callBackUnit}">
@@ -115,8 +119,8 @@
 							</h:panelGrid>
 						</p:outputPanel>
 
-						<h:outputText value="Call back again on" rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and callReportController.callee.contactStatus == 'Qualified'}"/>
-						<p:calendar value="#{callReportController.callBackAgainTime}" pattern="dd/MM/yyyy HH:mm" rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and callReportController.callee.contactStatus == 'Qualified'}" />
+						<h:outputText value="Call back again on" rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and (callReportController.callee.contactStatus == 'Qualified' or callReportController.callee.contactStatus == 'Pre-qualified')}"/>
+						<p:calendar value="#{callReportController.callBackAgainTime}" pattern="dd/MM/yyyy HH:mm" rendered="#{(callReportController.rating == 'Follow-up call' or callReportController.rating=='Contact again later') and (callReportController.callee.contactStatus == 'Qualified' or callReportController.callee.contactStatus == 'Pre-qualified')}" />
 
 						<h:outputText value="Purchase" rendered="#{callReportController.rating == 'close' and callReportController.callee.contactStatus == 'Qualified'}"/>
 						<p:commandButton value="Add purchase order" actionListener="#{callReportController.startAddPurchaseRecord}" update=":form01" rendered="#{callReportController.rating == 'close' and callReportController.callee.contactStatus == 'Qualified'}" />
@@ -135,6 +139,58 @@
 
 					<br/>
 					<p:commandButton value="Scripts" actionListener="#{callReportController.startViewScript}" update=":form01:scriptArea"/>
+
+					<p:overlayPanel widgetVar="carOP" showEffect="fade" hideEffect="fade" dismissable="false" showCloseIcon="true" style="max-width: 700px">
+						<p:outputPanel id="carDetail" style="text-align:center;">
+						    <p:panelGrid  columns="2" rendered="#{not empty callReportController.currentDeal}" columnClasses="label,value">
+						        <h:outputText value="Start Date" />
+						        <h:outputText value="#{callReportController.currentDeal.startDate}">
+						        	<f:convertDateTime pattern="dd/MM/yyyy" />
+						        </h:outputText>
+
+						        <h:outputText value="Status" />
+						        <h:outputText value="#{callReportController.currentDeal.status}" />
+
+						        <h:outputText value="Note" />
+						        <h:outputText value="#{callReportController.currentDeal.remark}" escaped="false" />
+
+								<h:outputText value="Products" />
+								<p:dataList value="#{callReportController.currentDeal.products}" var="prod">#{prod.name}</p:dataList>
+
+								<h:outputText value="Related promotions" />
+								<p:dataList value="#{callReportController.relatedPromotions}" var="promo">
+									#{promo.name}
+									<p:commandButton update=":form01:promoDetail" oncomplete="PF('promoOP').show('#{component.clientId}')"
+										actionListener="#{callReportController.startViewPromoDetail(promo)}" icon="ui-icon-search" title="View" />
+								</p:dataList>
+
+								<h:outputText value="Related products" />
+								<p:outputPanel>
+									<h:outputText value="Customer purchased those products also bought: " />
+									<p:dataList value="#{callReportController.relatedProducts}" var="prod">
+										#{prod.name}
+									</p:dataList>
+								</p:outputPanel>
+
+								<h:outputText value="Related calls and task"/>
+								<p:commandButton update=":form01:relatedCallDetail" oncomplete="PF('relatedCallOP').show('#{component.clientId}')"
+									actionListener="#{callReportController.findRelatedTasks}" icon="ui-icon-search" title="View"/>
+					        </p:panelGrid>
+					    </p:outputPanel>
+					</p:overlayPanel>
+
+					<p:overlayPanel widgetVar="promoOP" showEffect="fade" hideEffect="fade" dismissable="false" showCloseIcon="true" style="max-width: 700px">
+						<p:outputPanel id="promoDetail" style="text-align:center;">
+							<p:panelGrid columns="2">
+								<h:outputText value="Products" />
+								<p:dataList value="#{callReportController.selectedPromo.productList}" var="prod">
+									#{prod.name}
+								</p:dataList>
+								<h:outputText value="Discount" />
+								<h:outputText value="#{callReportController.selectedPromo.discount} %" />
+							</p:panelGrid>
+						</p:outputPanel>
+					</p:overlayPanel>
 				</div>
 		        <div class="ui-grid-col-8">
 		        	<p:commandButton value="Quotes" actionListener="#{callReportController.startViewQuotes}" update=":form01:quotesArea" />
@@ -358,7 +414,7 @@
 					</p:selectOneRadio>
 
 					<h:outputText value="Source" />
-					<p:selectOneMenu value="#{salespersonController.newContact.source}">
+					<p:selectOneMenu value="#{callReportController.newContact.source}">
 						<f:selectItem itemLabel="Personal contact" itemValue="Personal contact" />
 						<f:selectItem itemLabel="Web" itemValue="Web" />
 						<f:selectItem itemLabel="Trade show" itemValue="Trade show" />
@@ -485,9 +541,10 @@
 					</p:panelGrid>
 				</p:outputPanel>
 				<p:commandButton value="Confirm" actionListener="#{callReportController.editScript}" update=":form01:scriptArea" rendered="#{callReportController.editScriptMode}" />
+				<p:commandButton value="Edit" actionListener="#{callReportController.startEditScript}" update=":form01:scriptArea" rendered="#{not callReportController.editScriptMode}"/>
 				<p:commandButton value="Cancel" actionListener="#{callReportController.cancelEditScript}" update=":form01:scriptArea" rendered="#{callReportController.editScriptMode}"/>
 				<p:commandButton value="Close" actionListener="#{callReportController.closeScript}" update=":form01:scriptArea" />
-				<p:commandButton value="Edit" actionListener="#{callReportController.startEditScript}" update=":form01:scriptArea" rendered="#{not callReportController.editScriptMode}"/>
+
 			</p:dialog>
 		</p:outputPanel>
 
@@ -605,6 +662,34 @@
 				<p:commandButton value="Close" actionListener="#{callReportController.closeSearchContact}" update=":form01:searchContactArea" />
 			</p:dialog>
 		</p:outputPanel>
+
+		<p:overlayPanel widgetVar="relatedCallOP" showEffect="fade" hideEffect="fade" dismissable="false" showCloseIcon="true" style="max-width: 700px">
+			<p:outputPanel id="relatedCallDetail" style="text-align:center;">
+				<p:panelGrid columns="2">
+					<p:fieldset legend="Call records">
+						<p:dataTable id="tbl3" rowIndexVar="row" value="#{callReportController.relatedCallRecords}" var="call"
+								paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+								rows="8">
+							<p:column headerText="Caller">
+								<h:outputText value="#{call.salesperson.name}" />
+							</p:column>
+							<p:column headerText="Call time">
+								<h:outputText value="#{call.callTime}">
+									<f:convertDateTime pattern="dd/MM/yyyy DD:mm" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="Action">
+								<h:outputText value="#{call.rating}" />
+							</p:column>
+							<p:column headerText="Detail">
+								<h:outputText value="#{call.detail}" />
+							</p:column>
+
+						</p:dataTable>
+					</p:fieldset>
+				</p:panelGrid>
+			</p:outputPanel>
+		</p:overlayPanel>
 	</h:form>
 </h:body>
 </html>

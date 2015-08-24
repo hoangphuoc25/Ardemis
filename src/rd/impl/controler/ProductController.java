@@ -780,4 +780,78 @@ public class ProductController implements Serializable {
 	public void setFaqProd(ProductDto faqProd) {
 		this.faqProd = faqProd;
 	}
+
+	public double getAvgFeature() {
+		return avgFeature;
+	}
+
+	public void setAvgFeature(double avgFeature) {
+		this.avgFeature = avgFeature;
+	}
+
+	public double getAvgThirdPartySupport() {
+		return avgThirdPartySupport;
+	}
+
+	public void setAvgThirdPartySupport(double avgThirdPartySupport) {
+		this.avgThirdPartySupport = avgThirdPartySupport;
+	}
+
+	public double getAvgUserEx() {
+		return avgUserEx;
+	}
+
+	public void setAvgUserEx(double avgUserEx) {
+		this.avgUserEx = avgUserEx;
+	}
+
+	public double getAvgUserIn() {
+		return avgUserIn;
+	}
+
+	public void setAvgUserIn(double avgUserIn) {
+		this.avgUserIn = avgUserIn;
+	}
+
+	public double getAvgperformance() {
+		return avgperformance;
+	}
+
+	public void setAvgperformance(double avgperformance) {
+		this.avgperformance = avgperformance;
+	}
+
+	public double getAvgUsability() {
+		return avgUsability;
+	}
+
+	public void setAvgUsability(double avgUsability) {
+		this.avgUsability = avgUsability;
+	}
+
+	public double getAvgStability() {
+		return avgStability;
+	}
+
+	public void setAvgStability(double avgStability) {
+		this.avgStability = avgStability;
+	}
+
+	private double avgFeature;
+	private double avgThirdPartySupport;
+	private double avgUserEx;
+	private double avgUserIn;
+	private double avgperformance;
+	private double avgUsability;
+	private double avgStability;
+
+	public void startViewFeedback(ProductDto prod) throws IOException {
+		avgFeature = Math.ceil(fbService.getAverageFeature(prod.getSeq()) * 100) / 100;
+		avgThirdPartySupport = Math.ceil(fbService.getAverageThirdPartySupport(prod.getSeq()) * 100) / 100;
+		avgUserEx = Math.ceil(fbService.getAverageUserEx(prod.getSeq()) * 100) / 100;
+		avgUserIn = Math.ceil(fbService.getAverageUserIn(prod.getSeq()) * 100) / 100;
+		avgperformance = Math.ceil(fbService.getAveragePerformance(prod.getSeq()) * 100) / 100;
+		avgUsability = Math.ceil(fbService.getAverageUsability(prod.getSeq()) * 100) / 100;
+		avgStability = Math.ceil(fbService.getAverageUsability(prod.getSeq()) * 100) / 100;
+	}
 }

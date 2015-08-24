@@ -71,7 +71,7 @@
 				<p:column headerText="Price">
 					<h:outputText value="#{productController.deducePrice(prod)}" />
 				</p:column>
-				<p:column headerText="Link">
+				<p:column headerText="Action">
 					<a href="../faces/productdetail.jsf?seq=#{prod.seq}" style="color: blue; text-decoration: none;">Detail Page</a>
 					<p:spacer width="10px" />
 					<p:commandLink value="Edit" style="color: blue" actionListener="#{productController.showDialog(prod)}" update=":form01" />
@@ -79,11 +79,46 @@
 					<a href="#{productController.catalogLink(prod)}" target="_blank" style="color: blue;">Catalog</a>
 					<p:spacer width="10px" />
 					<p:commandButton value="FAQs" actionListener="#{productController.startViewFaq(prod)}" update=":form01:faqArea" />
+					<p:spacer width="10px" />
+					<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
+							actionListener="#{productController.startViewFeedback(prod)}" icon="ui-icon-search" title="View" />
 				</p:column>
 			</p:dataTable>
 			<p:commandButton value="Add new Product" actionListener="#{productController.startAdd}" update="form01"
 					rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager') or facesContext.externalContext.isUserInRole('support') }"/>
 		</p:fieldset>
+
+		<p:overlayPanel widgetVar="carOP" showEffect="fade" hideEffect="fade" dismissable="false" showCloseIcon="true" style="max-width: 700px">
+			<p:outputPanel id="carDetail" style="text-align:center;">
+				<h4>Average score from user feedbacks</h4>
+			    <p:panelGrid  columns="2" columnClasses="label,value">
+			        <h:outputText value="Performance" />
+			        <h:outputText value="#{productController.avgperformance} / 5">
+			        	<f:convertNumber pattern="#.##" />
+			        </h:outputText>
+
+			        <h:outputText value="Third Party Support" />
+			        <h:outputText value="#{productController.avgThirdPartySupport} / 5">
+			        			        	<f:convertNumber pattern="#.##" />
+			        </h:outputText>
+
+			        <h:outputText value="User Experience" />
+			        <h:outputText value="#{productController.avgUserEx} / 5" />
+
+					<h:outputText value="User Interface" />
+					<h:outputText value="#{productController.avgUserIn} / 5" />
+
+					<h:outputText value="Usability" />
+					<h:outputText value="#{productController.avgUsability} / 5" />
+
+					<h:outputText value="Stability" />
+					<h:outputText value="#{productController.avgStability} / 5" />
+
+					<h:outputText value="Feature" />
+					<h:outputText value="#{productController.avgFeature} / 5" />
+		        </p:panelGrid>
+		    </p:outputPanel>
+		</p:overlayPanel>
 
 		<p:panelGrid columns="4">
 			<h:outputText value="Product name" />

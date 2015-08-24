@@ -469,4 +469,76 @@ public class FeedbackDaoImpl implements FeedbackDao {
 		}
 	}
 
+	public String getHappiness(Transaction transaction, int contactSeq, int prodSeq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_HAPPINESS);
+			prepareStatement.setInt(1, contactSeq);
+			prepareStatement.setInt(2, prodSeq);
+			resultSet = prepareStatement.executeQuery();
+
+			String result = null;
+			if (resultSet.next()) {
+				result = resultSet.getString(1);
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_HAPPINESS = "select happiness from t_client_happiness where contact_seq=? and product_seq=?";
+	public void addClientHappiness(Transaction transaction, int contactSeq, int productSeq, String happiness) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(ADD_CLIENT_HAPPINESS);
+			prepareStatement.setInt(1, contactSeq);
+			prepareStatement.setInt(2, productSeq);
+			prepareStatement.setString(3, happiness);
+
+			resultSet = prepareStatement.executeQuery();
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String ADD_CLIENT_HAPPINESS = "insert into t_client_happiness (contact_seq, product_seq, happiness) values (?, ?, ?)";
 }

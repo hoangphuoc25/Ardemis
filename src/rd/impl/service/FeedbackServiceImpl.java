@@ -156,4 +156,27 @@ public class FeedbackServiceImpl implements FeedbackService, Serializable {
 			throw e;
 		}
 	}
+	public String getHappiness(int contactSeq, int prodSeq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			String result = feedbackDao.getHappiness(transaction, contactSeq, prodSeq);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public void addClientHappiness(int contactSeq, int productSeq, String happiness) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			feedbackDao.addClientHappiness(transaction, contactSeq, productSeq, happiness);
+			transaction.commit();
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

@@ -132,6 +132,16 @@
 		<p:fileUpload fileUploadListener="#{salespersonController.handleFileUpload}" mode="advanced" dragDropSupport="false"
 				sizeLimit="1000000" fileLimit="1" allowTypes="/(\.|\/)(xls)$/" update=":form01" />
 
+		<p:ajaxStatus style="text-align: center;">
+			<f:facet name="start">
+				<h:outputText value="Loading"/><br/>
+				<p:graphicImage value="/images/loading.gif" />
+			</f:facet>
+			<f:facet name="complete">
+				<h:outputText value=""/>
+			</f:facet>
+		</p:ajaxStatus>
+
 		<p:outputPanel id="contactArea">
 			<p:dialog id="contactDialog" closable="false" visible="#{salespersonController.addContactMode or salespersonController.editContactMode}"
 					widgetVar="contactDialog_w" modal="true" resizable="false" draggable="true" header="Contact Detail">

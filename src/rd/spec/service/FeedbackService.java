@@ -17,4 +17,6 @@ public interface FeedbackService {
 	public double getAverageUserIn(int seq) throws IOException;
 	public double getAverageUsability(int seq) throws IOException;
 	public double getAverageStability(int seq) throws IOException;
+	public String getHappiness(int contactSeq, int prodSeq) throws IOException;
+	public void addClientHappiness(int contactSeq, int productSeq, String happiness) throws IOException;
 }

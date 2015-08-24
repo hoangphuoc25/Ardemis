@@ -1055,4 +1055,97 @@ public class ScheduleController implements Serializable {
 	public void setSelectedPromo(PromotionDto selectedPromo) {
 		this.selectedPromo = selectedPromo;
 	}
+
+	public boolean isAllSearchedMeetingsSelect() {
+		return allSearchedMeetingsSelect;
+	}
+
+	public void setAllSearchedMeetingsSelect(boolean allSearchedMeetingsSelect) {
+		this.allSearchedMeetingsSelect = allSearchedMeetingsSelect;
+	}
+
+	private boolean allSearchedMeetingsSelect;
+	private boolean allEventsSelect;
+	private boolean allSearchedTasksSelect;
+	private boolean allTasksSelect;
+
+	public void updateAllSearchedMeetingsSelect() {
+		if (isAllSearchedMeetingsSelect()) {
+			for (MeetingDto dto: searchedMeetings) {
+				dto.setSelected(true);
+			}
+			someMeetingSelected = true;
+		} else {
+			for (MeetingDto dto: searchedMeetings) {
+				dto.setSelected(false);
+			}
+			someMeetingSelected = false;
+		}
+	}
+
+	public void updateAllEventsSelect() {
+		if (isAllEventsSelect()) {
+			for (MeetingDto dto: events) {
+				dto.setSelected(true);
+			}
+			someMeetingSelected = true;
+		} else {
+			for (MeetingDto dto: events) {
+				dto.setSelected(false);
+			}
+			someMeetingSelected = false;
+		}
+	}
+
+	public void updateAllSearchedTasksSelect() {
+		if (isAllSearchedTasksSelect()) {
+			for (ScheduleTaskDto dto: searchedTasks) {
+				dto.setSelected(true);
+			}
+			someTaskSelected = true;
+		} else {
+			for (ScheduleTaskDto dto: searchedTasks) {
+				dto.setSelected(false);
+			}
+			someTaskSelected = false;
+		}
+	}
+
+	public void updateAllTasksSelect() {
+		if (isAllTasksSelect()) {
+			for (ScheduleTaskDto dto: tasks) {
+				dto.setSelected(true);
+			}
+			someTaskSelected = true;
+		} else {
+			for (ScheduleTaskDto dto: tasks) {
+				dto.setSelected(false);
+			}
+			someTaskSelected = false;
+		}
+	}
+
+	public boolean isAllTasksSelect() {
+		return allTasksSelect;
+	}
+
+	public void setAllTasksSelect(boolean allTasksSelect) {
+		this.allTasksSelect = allTasksSelect;
+	}
+
+	public boolean isAllSearchedTasksSelect() {
+		return allSearchedTasksSelect;
+	}
+
+	public void setAllSearchedTasksSelect(boolean allSearchedTasksSelect) {
+		this.allSearchedTasksSelect = allSearchedTasksSelect;
+	}
+
+	public boolean isAllEventsSelect() {
+		return allEventsSelect;
+	}
+
+	public void setAllEventsSelect(boolean allEventsSelect) {
+		this.allEventsSelect = allEventsSelect;
+	}
 }

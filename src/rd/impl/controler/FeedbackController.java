@@ -20,14 +20,17 @@ import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import rd.dto.ContactDto;
 import rd.dto.FeedbackDto;
 import rd.dto.NoteDto;
 import rd.dto.ProductDto;
 import rd.dto.UserDto;
 import rd.spec.manager.SessionManager;
+import rd.spec.service.ContactService;
 import rd.spec.service.FeedbackService;
 import rd.spec.service.NoteService;
 import rd.spec.service.ProductService;
+import rd.spec.service.UserService;
 
 @Named
 @ConversationScoped
@@ -79,6 +82,8 @@ public class FeedbackController implements Serializable {
 		sessionManager.addGlobalMessageInfo("Thanks for your feedback", null);
 	}
 
+	@Inject ContactService contactService;
+
 	public void addFeedback() throws IOException {
 		System.out.println("FeedbackController.addFeedback()");
 		int seq = fbService.getSeq();
@@ -87,6 +92,56 @@ public class FeedbackController implements Serializable {
 		FeedbackDto newFeedback = new FeedbackDto(seq, prod, rating, user, feedback);
 		fbService.addFeedback(newFeedback);
 		submit();
+
+		ContactDto contact = contactService.getContactByUserId(user.getId());
+		String happiness = calculateFeedbackAverate(newFeedback);
+		fbService.addClientHappiness(contact.getSeq(), product, happiness);
+	}
+
+	private String calculateFeedbackAverate(FeedbackDto newFeedback) {
+		int total = 0;
+		if (newFeedback.getRating() != 0) {
+			if (newFeedback.getRating() >= 3) {
+				return "happy";
+			} else if (newFeedback.getRating() < 2) {
+				return "unhappy";
+			} else {
+				return "neutral";
+			}
+		} else {
+			total += newFeedback.getFeature() + newFeedback.getPerformance() + newFeedback.getThirdPartySupport() +
+				newFeedback.getUserExperience() + newFeedback.getUserInterface() + newFeedback.getStability() + newFeedback.getUsability();
+			int count = 0;
+			if (newFeedback.getFeature() != 0) {
+				count ++;
+			}
+			if (newFeedback.getPerformance() != 0) {
+				count ++;
+			}
+			if (newFeedback.getThirdPartySupport() != 0) {
+				count ++;
+			}
+			if (newFeedback.getUserExperience() != 0) {
+				count ++;
+			}
+			if (newFeedback.getUserInterface() != 0) {
+				count ++;
+			}
+			if (newFeedback.getStability() != 0) {
+				count ++;
+			}
+			if (newFeedback.getUsability() != 0) {
+				count ++;
+			}
+			double avg = (double) total / (double) count;
+			if (avg > 3) {
+				return "happy";
+			} else if (avg <2) {
+				return "unhappy";
+			} else {
+				return "neutral";
+			}
+		}
 	}
 
 	public void validateProduct(FacesContext context, UIComponent component, Object value) {
@@ -199,6 +254,23 @@ public class FeedbackController implements Serializable {
 	}
 
 	public void cancelFeedback() {
+		feedbackMode = false;
+		fb = new FeedbackDto();
+	}
+
+	@Inject UserService userService;
+
+	public void sendFeedbackAnonymous() throws IOException {
+		System.out.println("FeedbackController.addFeedback()");
+		int seq = fbService.getSeq();
+		ProductDto prod = prodService.getProductById(product);
+		UserDto user = userService.findUserById("anon");
+		fb.setSeq(seq);
+		fb.setProduct(prod);
+		fb.setFeedback(feedback);
+		fb.setCustomer(user);
+		fbService.addFeedback(fb);
+		submit();
 		feedbackMode = false;
 		fb = new FeedbackDto();
 	}

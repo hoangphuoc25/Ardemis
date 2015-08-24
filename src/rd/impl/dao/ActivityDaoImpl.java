@@ -6,9 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -274,9 +279,27 @@ public class ActivityDaoImpl implements ActivityDao {
 		String status = resultSet.getString(4);
 		String remark = resultSet.getString(5);
 		UserDto salesperson = userDao.findUser(transaction, resultSet.getString(6));
-		List<ProductDto> prods = getProductByDeal(transaction, resultSet.getInt(1));
+		// List<ProductDto> prods = getProductByDeal(transaction, resultSet.getInt(1));
+		List<ProductDto> prods = prodDao.getProductByDeal(transaction, seq);
 
 		return new ActivityDto(seq, contact, startDate, status, remark, salesperson, prods);
+	}
+
+	private ActivityDto makeActivityDto(Transaction transaction, ResultSet resultSet, Map<Integer, ProductDto> prods, Map<Integer, List<Integer>> dealProd) throws IOException, SQLException {
+		int seq = resultSet.getInt(1);
+		ContactDto contact = contactDao.getContactById(transaction, resultSet.getInt(2));
+		Date startDate = new Date(resultSet.getDate(3).getTime());
+		String status = resultSet.getString(4);
+		String remark = resultSet.getString(5);
+		UserDto salesperson = userDao.findUser(transaction, resultSet.getString(6));
+
+		List<ProductDto> temp = new ArrayList<ProductDto>();
+		if (dealProd.containsKey(seq)) {
+			for (int i: dealProd.get(seq)) {
+				temp.add(prods.get(i));
+			}
+		}
+		return new ActivityDto(seq, contact, startDate, status, remark, salesperson, temp);
 	}
 
 	public int getSeq(Transaction transaction) throws IOException {
@@ -325,9 +348,22 @@ public class ActivityDaoImpl implements ActivityDao {
 			prepareStatement.setString(2, status.toLowerCase());
 			resultSet = prepareStatement.executeQuery();
 
+			System.out.println("ActivityDaoImpl.findByStatus()");
+			Map<Integer, ProductDto> prods = prodDao.getProductByUserAndStatus(transaction, username, status);
+			System.out.println(prods.size());
+			for (Entry<Integer, ProductDto> entry : prods.entrySet()) {
+			    System.out.println(entry.getValue().getName());
+			}
+
+			Map<Integer, List<Integer>> dealProds = getDealProducts(transaction, username, status);
+			System.out.println(username);
+			System.out.println(status);
+			System.out.println("DEALPRODS : " +dealProds.size());
+
+
 			List<ActivityDto> result = new ArrayList<ActivityDto>();
 			while (resultSet.next()) {
-				ActivityDto act = makeActivityDto(transaction, resultSet);
+				ActivityDto act = makeActivityDto(transaction, resultSet, prods, dealProds);
 				result.add(act);
 				actCache.put(act);
 			}
@@ -467,4 +503,174 @@ public class ActivityDaoImpl implements ActivityDao {
 		}
 	}
 	private static String SEARCH_BY_CUSTOMER_NAME = "select distinct a.seq from t_activity a join t_contact c on a.contact_seq = c.seq where lower(c.name) like ?";
+	public List<ActivityDto> getActiveDealByContact(Transaction transaction, int seq) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_ACTIVE_DEAL_BY_CONTACT);
+			prepareStatement.setString(1, "completed");
+			prepareStatement.setString(2, "failed");
+			prepareStatement.setInt(3, seq);
+			resultSet = prepareStatement.executeQuery();
+
+			List<ActivityDto> result = new ArrayList<ActivityDto>();
+			while (resultSet.next()) {
+				ActivityDto act = makeActivityDto(transaction, resultSet);
+				result.add(act);
+				actCache.put(act);
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_ACTIVE_DEAL_BY_CONTACT = "select seq, contact_seq, start_date, status, remark, salesperson from t_activity where lower(status) <> ? and lower(status) <> ? and contact_seq=?";
+	public List<ActivityDto> getActiveDealByCompany(Transaction transaction, String company) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_ACTIVE_DEAL_BY_COMPANY);
+			prepareStatement.setString(1, "completed");
+			prepareStatement.setString(2, "failed");
+			prepareStatement.setString(3, "%" + company.toLowerCase() + "%");
+			resultSet = prepareStatement.executeQuery();
+
+			List<ActivityDto> result = new ArrayList<ActivityDto>();
+			while (resultSet.next()) {
+				ActivityDto act = makeActivityDto(transaction, resultSet);
+				result.add(act);
+				actCache.put(act);
+			}
+			return result;		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_ACTIVE_DEAL_BY_COMPANY = "select a.seq, a.contact_seq, a.start_date, a.status, a.remark, a.salesperson from t_activity a join t_contact c on a.contact_seq=c.seq where lower(a.status) <> ? and lower(a.status) <> ? and lower(c.company) like ?";
+	public List<ActivityDto> getActiveDealBySalesperson(Transaction transaction, String userId) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_ACTIVE_DEAL_BY_SALESPERSON);
+			prepareStatement.setString(1, "completed");
+			prepareStatement.setString(2, "failed");
+			prepareStatement.setString(3, userId);
+			resultSet = prepareStatement.executeQuery();
+
+			List<ActivityDto> result = new ArrayList<ActivityDto>();
+			while (resultSet.next()) {
+				ActivityDto act = makeActivityDto(transaction, resultSet);
+				result.add(act);
+				actCache.put(act);
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_ACTIVE_DEAL_BY_SALESPERSON = "select seq, contact_seq, start_date, status, remark, salesperson from t_activity where lower(status) <> ? and lower(status) <> ? and salesperson=?";
+
+	private Map<Integer, List<Integer>> getDealProducts(Transaction transaction, String userId, String status) throws IOException {
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(GET_DEAL_PRODUCTS_BY_USER);
+			prepareStatement.setString(1, userId);
+			prepareStatement.setString(2, status.toLowerCase());
+			resultSet = prepareStatement.executeQuery();
+
+			return makeDealProductMap(resultSet);
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	private Map<Integer, List<Integer>> makeDealProductMap(ResultSet resultSet) throws SQLException {
+		Map<Integer, List<Integer>> result = new Hashtable<Integer, List<Integer>>();
+		while (resultSet.next()) {
+			int dealSeq = resultSet.getInt(1);
+			int prodSeq = resultSet.getInt(2);
+			if (result.containsKey(dealSeq)) {
+				result.get(dealSeq).add(prodSeq);
+			} else {
+				result.put(dealSeq, new ArrayList<Integer>(Arrays.asList(prodSeq)));
+			}
+		}
+		return result;
+	}
+
+	private final String GET_DEAL_PRODUCTS_BY_USER = "select dp.deal_seq, dp.product_seq from t_deal_product dp where dp.deal_seq in (select seq from t_activity where salesperson=? and lower(status)=?)";
 }

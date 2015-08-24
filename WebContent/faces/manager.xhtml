@@ -64,8 +64,7 @@
 				<h:outputText value="#{event.from}">
 					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 				</h:outputText>
-			</p:column>
-			<p:column headerText="To">
+				<h:outputText value=" - " />
 				<h:outputText value="#{event.to}">
 					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 				</h:outputText>
@@ -76,52 +75,87 @@
 			<p:column headerText="Customer">
 				<h:outputText value="#{event.contact.name}" />
 			</p:column>
-			<p:column headerText="Salesperson">
+			<p:column headerText="Salesperson" width="150">
 				<h:outputText value="#{event.salesperson.name}" />
+			</p:column>
+			<p:column headerText="Location">
+				<h:outputText value="#{event.location}" />
+			</p:column>
+			<p:column headerText="Deal detail">
+				<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
+							actionListener="#{managerController.startViewDealDetail(event)}" icon="ui-icon-search" title="View" rendered="#{event.actId > 0}" />
 			</p:column>
 		</p:dataTable>
 		</p:fieldset>
 		<br />
+
+		<p:overlayPanel widgetVar="carOP" showEffect="fade" hideEffect="fade" dismissable="false" showCloseIcon="true" style="max-width: 700px">
+			<p:outputPanel id="carDetail" style="text-align:center;">
+			    <p:panelGrid  columns="2" rendered="#{not empty managerController.tempAct}" columnClasses="label,value">
+			        <h:outputText value="Start Date" />
+			        <h:outputText value="#{managerController.tempAct.startDate}">
+			        	<f:convertDateTime pattern="dd/MM/yyyy" />
+			        </h:outputText>
+
+			        <h:outputText value="Status" />
+			        <h:outputText value="#{managerController.tempAct.status}" />
+
+			        <h:outputText value="Note" />
+			        <h:outputText value="#{managerController.tempAct.remark}" escaped="false" />
+
+					<h:outputText value="Products" />
+					<p:dataList value="#{managerController.tempAct.products}" var="prod">#{prod.name}</p:dataList>
+		        </p:panelGrid>
+		    </p:outputPanel>
+		</p:overlayPanel>
+
 		<p:fieldset legend="Employee Search">
-			<p:panelGrid columns="3">
+			<p:panelGrid columns="2">
 				<p:panelGrid columns="2">
 					<p:outputLabel for="teamCombo" value="Select Team" />
 					<p:selectOneMenu id="teamCombo" value="#{managerController.team}"
 						editable="false">
 						<f:selectItem itemLabel="Select one" itemValue="-1" />
 						<f:selectItems value="#{databaseUtil.teams}" />
-						<p:ajax listener="#{managerController.reload}" update="form01" />
+						<p:ajax update=":form01:empTable" listener="#{managerController.updateTeamRoster}" />
 					</p:selectOneMenu>
+
+					<h:outputText value="Employee name" />
+					<p:autoComplete value="#{managerController.otherSalesperson}" minQueryLength="3" maxResults="13" forceSelection="true" completeMethod="#{searchController.suggestUser}" >
+						<p:ajax event="itemSelect" update=":form01:empTable" listener="#{managerController.updateTeamRosterSingle}" />
+					</p:autoComplete>
 				</p:panelGrid>
+
+				<p:dataTable id="empTable" rowIndexVar="row"
+						value="#{managerController.teamRoster}" var="sale" paginator="true"
+						paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+						rows="15" selection="#{managerController.selectedSale}"
+						>
+					<p:column headerText="Name" width="200">
+						<h:outputText value="#{sale.name}" />
+					</p:column>
+					<p:column headerText="Email" width="200">
+						<h:outputText value="#{sale.email}" />
+					</p:column>
+					<p:column headerText="Phone" width="100">
+						<h:outputText value="#{sale.phone}" />
+					</p:column>
+					<p:column table="Link">
+						<p:commandButton value="Expense" actionListener="#{managerController.viewExpense(sale)}" update=":form01" />
+						<p:spacer width="7px" />
+						<p:commandButton value="Schedule" actionListener="#{managerController.startViewMeeting(sale)}" update=":form01:empScheduleArea" />
+						<p:spacer width="7px" />
+						<p:commandButton value="Assign task" actionListener="#{managerController.startAssign(sale)}" update=":form01" />
+						<p:spacer width="7px" />
+						<p:commandButton value="Deals" actionListener="#{managerController.viewActivity(sale)}" update=":form01:activityArea" />
+						<p:spacer width="7px" />
+						<p:commandButton value="Sale Record" actionListener="#{managerController.startViewSaleRecord(sale)}" update=":form01:saleRecordArea" />
+					</p:column>
+				</p:dataTable>
 			</p:panelGrid>
-			<p:commandButton value="Assign sale target" rendered="#{managerController.team > 0}" actionListener="#{managerController.startAssignTarget}" update=":form01:saleTargetArea"/>
-			<p:dataTable id="empTable" rowIndexVar="row"
-					value="#{managerController.teamRoster}" var="sale" paginator="true"
-					paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-					rows="15" selection="#{managerController.selectedSale}"
-					selectionMode="single" rowKey="#{sale.id}"
-					rendered="#{managerController.team > 0}">
-				<p:column headerText="Name">
-					<h:outputText value="#{sale.name}" />
-				</p:column>
-				<p:column headerText="Email">
-					<h:outputText value="#{sale.email}" />
-				</p:column>
-				<p:column headerText="Phone">
-					<h:outputText value="#{sale.phone}" />
-				</p:column>
-				<p:column table="Link">
-					<p:commandButton value="Expense" actionListener="#{managerController.viewExpense(sale)}" update=":form01" />
-					<p:spacer width="7px" />
-					<p:commandButton value="Schedule" actionListener="#{managerController.updateEmpId(sale)}" update=":form01:schedule" />
-					<p:spacer width="7px" />
-					<p:commandButton value="Assign task" actionListener="#{managerController.startAssign(sale)}" update=":form01" />
-					<p:spacer width="7px" />
-					<p:commandButton value="Deals" actionListener="#{managerController.viewActivity(sale)}" update=":form01:activityArea" />
-					<p:spacer width="7px" />
-					<p:commandButton value="Sale Record" actionListener="#{managerController.startViewSaleRecord(sale)}" update=":form01:saleRecordArea" />
-				</p:column>
-			</p:dataTable>
+			<p:spacer height="7" />
+			<br/>
+			<p:commandButton value="Assign goal" actionListener="#{managerController.startAssignTarget}" update=":form01:saleTargetArea"/>
 			<p:fieldset legend="Employee Schedule">
 				<p:outputPanel id="schedule">
 					<p:schedule value="#{managerController.model}" draggable="false" resizable="false" style="max-width: 800px; margin-left:auto; margin-right: auto;"
@@ -131,14 +165,13 @@
 		</p:fieldset>
 
 		<p:panel id="toggleable" header="Statistics" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px">
-			<h:panelGrid columns="4">
+			<h:panelGrid columns="5">
 				<h:outputText value="From" />
 				<p:calendar value="#{statisticsController.fromDate}" pattern="dd/MM/yyyy" />
 				<h:outputText value="To" />
 				<p:calendar value="#{statisticsController.toDate}" pattern="dd/MM/yyyy" />
-
+				<p:commandButton value="Search" actionListener="#{statisticsController.search}" update=":form01:toggleable" />
 			</h:panelGrid>
-			<p:commandButton value="Search" actionListener="#{statisticsController.search}" update=":form01:toggleable" />
 
 			<p:tabView rendered="#{statisticsController.showing}" >
 				<p:tab title="By employee">
@@ -148,8 +181,9 @@
 						</p:column>
 						<p:column headerText="Revenue generated">
 							<h:outputText value="#{emp.total}" />
+							<h:outputText value="(#{emp.revenuePercent} %)" />
 						</p:column>
-						<p:column headerText="Deals started">
+						<p:column headerText="Deals completed">
 							<h:outputText value="#{emp.deals}" />
 						</p:column>
 						<p:column headerText="Calls made">
@@ -165,7 +199,7 @@
 						<p:column headerText="Revenue generated">
 							<h:outputText value="#{emp.total}" />
 						</p:column>
-						<p:column headerText="Deals started">
+						<p:column headerText="Deals completed">
 							<h:outputText value="#{emp.deals}" />
 						</p:column>
 						<p:column headerText="Calls made">
@@ -194,7 +228,12 @@
 		<p:dataTable id="tbl4" rowIndexVar="row" value="#{managerController.allDeal}" var="deal"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 				rows="10">
-			<p:column width="60">
+			<p:column width="20">
+				<f:facet name="header">
+					<p:selectBooleanCheckbox value="#{managerController.allDealSelect}">
+						<p:ajax update=":form01:tbl4, :form01:reassignButton" listener="#{managerController.updateAllDealSelect}" />
+					</p:selectBooleanCheckbox>
+				</f:facet>
 				<p:selectBooleanCheckbox value="#{deal.selected}">
 					<p:ajax update=":form01:reassignButton" listener="#{managerController.updateSomeDealSelected}" />
 				</p:selectBooleanCheckbox>
@@ -215,6 +254,20 @@
 		<p:outputPanel id="reassignButton">
 			<p:commandButton value="Reassign" actionListener="#{managerController.startBulkReassign}" update=":form01:assignOtherArea" rendered="#{managerController.someDealSelected}"/>
 		</p:outputPanel>
+
+		<p:panelGrid columns="3">
+			<h:outputText value="Contact name" />
+			<p:autoComplete value="#{managerController.contactNameSearch}" forceSelection="true" minQueryLength="3" maxResults="13" completeMethod="#{searchController.suggestContact}" />
+			<p:commandButton value="Search" actionListener="#{managerController.searchDealByContact}" update=":form01:tbl4" />
+
+			<h:outputText value="Company name" />
+			<p:inputText value="#{managerController.companyNameSearch}" />
+			<p:commandButton value="Search" actionListener="#{managerController.searchDealByCompany}" update=":form01:tbl4" />
+
+			<h:outputText value="Salesperson" />
+			<p:autoComplete value="#{managerController.salespersonName}" minQueryLength="3" maxResults="13" forceSelection="true" completeMethod="#{searchController.suggestUser}" />
+			<p:commandButton value="Search" actionListener="#{managerController.searchDealBySalesperson}" update=":form01:tbl4" />
+		</p:panelGrid>
 
 
 		<p:dialog id="assignDialog" closable="false" visible="#{managerController.assignMode}"
@@ -289,7 +342,17 @@
 					widgetVar="saleTargetDialog_w" modal="true" resizable="false" draggable="true" header="Sale target">
 				<p:messages />
 				<p:panelGrid columns="4">
-					<h:outputText value="Target" />
+					<h:outputText value="Team" />
+					<p:selectOneMenu value="#{managerController.targetTeam}">
+						<f:selectItem itemLabel="Select one" itemValue="-1" />
+						<f:selectItems value="#{databaseUtil.teams}" />
+						<f:selectItem itemLabel="All teams" itemValue="0" />
+						<p:ajax update="saleTargetArea" />
+					</p:selectOneMenu>
+					<h:outputText />
+					<h:outputText />
+
+					<h:outputText value="Sale goal" />
 					<p:selectOneMenu value="#{managerController.currentTarget.action}">
 						<f:selectItem itemLabel="Select" itemValue="Select" />
 						<f:selectItem itemLabel="Generate revenue of" itemValue="Generate revenue of" />
@@ -300,17 +363,20 @@
 					<h:outputText rendered="#{managerController.currentTarget.action eq null or managerController.currentTarget.action=='Select'}" />
 					<h:outputText value="SGD" rendered="#{managerController.currentTarget.action == 'Generate revenue of'}" />
 					<h:outputText value="Customers" rendered="#{managerController.currentTarget.action == 'Close deals with'}" />
+
 					<h:outputText value="From" />
 					<p:calendar value="#{managerController.currentTarget.fromDate}" pattern="dd/MM/yyyy" />
 					<h:outputText />
 					<h:outputText />
+
 					<h:outputText value="To" />
 					<p:calendar value="#{managerController.currentTarget.toDate}" pattern="dd/MM/yyyy" />
 					<h:outputText />
 					<h:outputText />
+
 				</p:panelGrid>
-				<p:commandButton value="Assign" actionListener="#{managerController.assignSaleTarget}" update=":form01:saleTargetArea" />
-				<p:commandButton value="Assign all teams" actionListener="#{statisticsController.assignSaleTargetAllTeam}" update=":form01:saleTargetArea" />
+				<p:commandButton value="Assign" actionListener="#{managerController.assignSaleTarget}" update=":form01:saleTargetArea" rendered="#{managerController.targetTeam ne 0}" />
+				<p:commandButton value="Assign all teams" actionListener="#{statisticsController.assignSaleTargetAllTeam}" update=":form01:saleTargetArea" rendered="#{managerController.targetTeam eq 0}" />
 				<p:commandButton value="Cancel" actionListener="#{managerController.cancelAssignTask}" update=":form01:saleTargetArea" />
 			</p:dialog>
 		</p:outputPanel>
@@ -341,7 +407,7 @@
 								<h:outputText value="#{prod.name}" />
 							</p:column>
 						</p:dataTable>
-						<p:commandButton value="Delete" actionListener="#{managerController.deleteSelected}" update=":form01" />
+						<p:commandButton value="Delete" actionListener="#{managerController.deleteSelected}" update="p1" />
 					</p:outputPanel>
 					<h:outputText value="Discount" />
 					<p:inputText value="#{managerController.newPromo.discount}" />
@@ -368,6 +434,16 @@
 				<p:dataTable id="tbl1" rowIndexVar="row" value="#{managerController.allAct}" var="act"
 						paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 						rows="10">
+					<p:column width="60">
+						<f:facet name="header">
+							<p:selectBooleanCheckbox value="#{managerController.allEmpDealSelect}">
+								<p:ajax update=":form01:tbl1, :form01:empButton" listener="#{managerController.updateAllEmpDealSelected}" />
+							</p:selectBooleanCheckbox>
+						</f:facet>
+						<p:selectBooleanCheckbox value="#{act.selected}" rendered="#{act.status ne 'Completed'}" >
+							<p:ajax update=":form01:empButton" listener="#{managerController.updateSomeEmpDealSelected}" />
+						</p:selectBooleanCheckbox>
+					</p:column>
 					<p:column headerText="Customer">
 						<h:outputText value="#{act.contact.name}" />
 					</p:column>
@@ -383,20 +459,25 @@
 						<h:outputText value="#{act.remark}" />
 					</p:column>
 				</p:dataTable>
+
+				<p:outputPanel id="empButton">
+					<p:commandButton value="Reassign group" actionListener="#{managerController.startReassignEmpDeal}" update=":form01:assignOtherArea" rendered="#{managerController.someEmpDealSelect}" />
+				</p:outputPanel>
 			</p:dialog>
 		</p:outputPanel>
 
 		<p:outputPanel id="assignOtherArea">
-			<p:dialog id="assignOtherDialog" closable="false" visible="#{managerController.assignToOtherMode or managerController.bulkReassignMode}"
+			<p:dialog id="assignOtherDialog" closable="false" visible="#{managerController.assignToOtherMode or managerController.bulkReassignMode or managerController.bulkEmpDealReassignMode}"
 					widgetVar="assignOtherDialog_w" modal="true" resizable="false" draggable="true" header="Assign deal">
 				<p:panelGrid columns="2">
 					<h:outputText value="Salesperson name" />
 					<p:autoComplete forceSelection="true" value="#{managerController.otherSalesperson}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestUser}" />
 				</p:panelGrid>
 
-				<p:commandButton value="Confirm" actionListener="#{managerController.assignToOther}" update=":form01" rendered="#{managerController.assignToOtherMode}" />
-				<p:commandButton value="ABCD" actionListener="#{managerController.confirmBulkReassign}" update=":form01" rendered="#{managerController.bulkReassignMode}" />
-				<p:commandButton value="Cancel" actionListener="#{managerController.cancelAssignToOther}" update=":form01" />
+				<p:commandButton value="Confirm" actionListener="#{managerController.assignToOther}" update=":form01:tbl4, :form01:assignOtherArea" rendered="#{managerController.assignToOtherMode}" />
+				<p:commandButton value="Confirm" actionListener="#{managerController.confirmBulkReassign}" update=":form01:assignOtherArea, :form01:tbl4" rendered="#{managerController.bulkReassignMode}" />
+				<p:commandButton value="Confirm" actionListener="#{managerController.confirmReassignEmpDealGroup}" update=":form01:assignOtherArea, :form01:activityArea" rendered="#{managerController.bulkEmpDealReassignMode}" />
+				<p:commandButton value="Cancel" actionListener="#{managerController.cancelAssignToOther}" update=":form01:assignOtherArea" />
 			</p:dialog>
 		</p:outputPanel>
 
@@ -422,6 +503,45 @@
 						<h:outputText value="#{invoice.amount}" />
 					</p:column>
 				</p:dataTable>
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:outputPanel id="empScheduleArea">
+			<p:dialog id="empScheduleDialog" closable="false" visible="#{managerController.viewEmpScheduleMode}" width="800"
+					widgetVar="empScheduleDialog_w" modal="true" resizable="false" draggable="true" header="Employee schedule">
+				<p:commandButton value="Close" actionListener="#{managerController.closeViewMeeting}" update=":form01:empScheduleArea" />
+				<br/>
+				<p:panelGrid columns="2">
+					<p:dataTable id="tbl5" rowIndexVar="row" value="#{managerController.empMeeting}" var="event"
+							paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+							rows="15" >
+						<p:column headerText="From">
+							<h:outputText value="#{event.from}">
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</h:outputText>
+							<h:outputText value=" - " />
+							<h:outputText value="#{event.to}">
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</h:outputText>
+						</p:column>
+						<p:column headerText="Detail">
+							<h:outputText value="#{event.detail}" />
+						</p:column>
+						<p:column headerText="Customer">
+							<h:outputText value="#{event.contact.name}" />
+						</p:column>
+						<p:column headerText="Salesperson" width="150">
+							<h:outputText value="#{event.salesperson.name}" />
+						</p:column>
+						<p:column headerText="Location">
+							<h:outputText value="#{event.location}" />
+						</p:column>
+						<p:column headerText="Deal detail">
+							<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
+										actionListener="#{managerController.startViewDealDetail(event)}" icon="ui-icon-search" title="View" rendered="#{event.actId > 0}" />
+						</p:column>
+					</p:dataTable>
+				</p:panelGrid>
 			</p:dialog>
 		</p:outputPanel>
 	</h:form>
