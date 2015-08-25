@@ -59,7 +59,7 @@
 			<p:dataTable id="tbl1" rowIndexVar="row" value="#{productController.products}" var="prod"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="10" selection="#{productController.selectedProd}" selectionMode="single" rowKey="#{prod.seq}">
-				<p:column headerText="Name">
+				<p:column headerText="Name" width="120">
 					<h:outputText value="#{prod.name}" />
 				</p:column>
 				<p:column headerText="Summary" style="width: 650px;">
@@ -68,7 +68,10 @@
 				<p:column headerText="Target">
 					<h:outputText value="#{prod.target}" />
 				</p:column>
-				<p:column headerText="Price">
+				<p:column headerText="Price per month" width="60">
+					<h:outputText value="#{productController.deducePrice(prod)}" />
+				</p:column>
+				<p:column headerText="Permanent Price" width="60">
 					<h:outputText value="#{productController.deducePrice(prod)}" />
 				</p:column>
 				<p:column headerText="Action">

@@ -190,6 +190,7 @@
 							<h:outputText value="#{emp.calls}" />
 						</p:column>
 					</p:dataTable>
+					<h:outputText value="Total: #{statisticsController.total} SGD, #{statisticsController.dealTotal} deals, #{statisticsController.callTotal} calls" />
 				</p:tab>
 				<p:tab title="By team">
 					<p:dataTable id="tbl2" rowIndexVar="row" value="#{statisticsController.teamstats}" var="emp">
@@ -206,6 +207,8 @@
 							<h:outputText value="#{emp.calls}" />
 						</p:column>
 					</p:dataTable>
+					<h:outputText value="Total: #{statisticsController.total} SGD, #{statisticsController.dealTotal} deals, #{statisticsController.callTotal} calls" />
+					<br/>
 					<p:commandButton value="Assign sale target" actionListener="#{managerController.startAssignTargetToAll}" update=":form01:saleTargetArea"/>
 				</p:tab>
 			</p:tabView>

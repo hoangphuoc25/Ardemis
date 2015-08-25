@@ -255,6 +255,10 @@ public class CallReportController implements Serializable {
 		callBackUnit = "day";
 		callBackAgainTime = null;
 
+		callee = null;
+		currentDeal = null;
+		contactName = "";
+
 		sessionManager.addGlobalMessageInfo("New call report added", null);
 
 		if (taskId != 0) {

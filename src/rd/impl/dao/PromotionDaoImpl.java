@@ -37,7 +37,7 @@ public class PromotionDaoImpl implements PromotionDao {
 	private static String ADD_PROMOTION 	= "insert into t_promo (seq, start_date, end_date, discount, name) values (?, ?, ?, ?, ?)";
 	private static String ADD_PROMO_PRODUCT = "insert into t_promo_product (promo_seq, product_seq) values (?, ?)";
 	private static String GET_BY_ID 		= "select seq, start_date, end_date, discount, name from t_promo where seq=?";
-	private static String GET_BY_PRODUCT 	= "select distinct p.seq from t_promo p join t_promo_product pp on p.seq=pp.promo_seq where pp.product_seq=?";
+	private static String GET_BY_PRODUCT 	= "select distinct p.seq from t_promo p join t_promo_product pp on p.seq=pp.promo_seq where pp.product_seq=? and p.start_date<=? and p.end_date>=?";
 	private static String DELETE_PROMOTION 	= "delete from t_promo where seq=?";
 	private static String DELETE_PROMO_PRODUCT = "delete from t_promo_product where promo_seq=?";
 	private static String GET_ACTIVE 		= "select seq, start_date, end_date, discount, name from t_promo where start_date <= ? and end_date >= ?";
@@ -132,6 +132,8 @@ public class PromotionDaoImpl implements PromotionDao {
 			Connection connection = transaction.getResource(Connection.class);
 			prepareStatement = connection.prepareStatement(GET_BY_PRODUCT);
 			prepareStatement.setInt(1, seq);
+			prepareStatement.setDate(2, new java.sql.Date((new java.util.Date()).getTime()));
+			prepareStatement.setDate(3, new java.sql.Date((new java.util.Date()).getTime()));
 			resultSet = prepareStatement.executeQuery();
 
 			List<PromotionDto> result = new ArrayList<PromotionDto>();
@@ -423,4 +425,41 @@ public class PromotionDaoImpl implements PromotionDao {
 		}
 	}
 	private static String GET_ACTIVE_PROMOTION_BY_PRODUCT = "select distinct p.seq from t_promo p join t_promo_product pp on p.seq=pp.promo_seq where pp.product_seq=? and p.start_date>? and p.end_date<=?";
+	public List<PromotionDto> searchPromotion(Transaction transaction, String partial) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_PROMOTION);
+			prepareStatement.setString(1, "%" + partial.toLowerCase() + "%");
+			resultSet = prepareStatement.executeQuery();
+
+			List<PromotionDto> result = new ArrayList<PromotionDto>();
+			while (resultSet.next()) {
+				result.add(makePromoDto(transaction, resultSet));
+			}
+			return result;
+
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String SEARCH_PROMOTION = "select seq, start_date, end_date, discount, name from t_promo where lower(name) like ?";
 }

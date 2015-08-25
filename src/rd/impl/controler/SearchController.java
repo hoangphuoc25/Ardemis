@@ -14,11 +14,13 @@ import rd.dto.CategoryDto;
 import rd.dto.CompanyDto;
 import rd.dto.ContactDto;
 import rd.dto.ProductDto;
+import rd.dto.PromotionDto;
 import rd.dto.UserDto;
 import rd.spec.service.CategoryService;
 import rd.spec.service.CompanyService;
 import rd.spec.service.ContactService;
 import rd.spec.service.ProductService;
+import rd.spec.service.PromotionService;
 import rd.spec.service.UserService;
 
 @Named
@@ -91,6 +93,17 @@ public class SearchController implements Serializable {
 		List<String> result = new ArrayList<String>();
 		for (ContactDto dto: temp) {
 			result.add(dto.getName() + " - " + dto.getCompany() + "(" + dto.getSeq() + ")");
+		}
+		return result;
+	}
+
+	@Inject PromotionService promoService;
+
+	public List<String> suggestBundle(String partial) throws IOException {
+		List<PromotionDto> temp = promoService.searchPromotion(partial);
+		List<String> result = new ArrayList<String>();
+		for (PromotionDto dto: temp) {
+			result.add(dto.getName() + "(" + dto.getSeq() + ")");
 		}
 		return result;
 	}

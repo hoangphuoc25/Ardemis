@@ -105,6 +105,8 @@
 					<p:commandButton value="Delete" actionListener="#{salespersonController.deleteContact(contact)}" update=":form01:panel1"/>
 					<p:spacer width="7" />
 					<p:commandButton value="Edit" actionListener="#{salespersonController.startEditContact(contact)}" update=":form01:contactArea" />
+					<p:spacer width="7" />
+					<p:commandButton value="Detail" actionListener="#{salespersonController.startViewContactDetail(contact)}" update=":form01:detailArea" />
 				</p:column>
 			</p:dataTable>
 		</p:panelGrid>
@@ -188,6 +190,43 @@
 
 				<p:commandButton value="Confirm" actionListener="#{salespersonController.editContact}" update=":form01" rendered="#{salespersonController.editContactMode}" />
 				<p:commandButton value="Cancel" actionListener="#{salespersonController.cancelEditContact}" update=":form01" rendered="#{salespersonController.editContactMode}" />
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:outputPanel id="detailArea">
+			<p:dialog id="detailDialog" closable="false" visible="#{salespersonController.viewContactDetailMode}" width="800"
+					widgetVar="detailDialog_w" modal="true" resizable="false" draggable="true" header="Customer detail">
+				<h4>Past purchases</h4>
+				<p:dataTable id="tbl1" rowIndexVar="row" value="#{salespersonController.pastPurchase}" var="invoice"
+						paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+						rows="4">
+					<p:column headerText="Date">
+						<h:outputText value="#{invoice.purchaseDate}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="Amount">
+						<h:outputText value="#{invoice.amount}" />
+					</p:column>
+					<p:column headerText="Date">
+						<p:dataList value="#{invoice.products}" var="prod">#{prod.name}</p:dataList>
+					</p:column>
+				</p:dataTable>
+				<h4>Past calls</h4>
+				<p:dataTable id="tbl2" rowIndexVar="row" value="#{salespersonController.pastCalls}" var="cr"
+						paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+						rows="4">
+					<p:column headerText="Time">
+						<h:outputText value="#{cr.callTime}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+					</p:column>
+					<p:column headerText="Detail">
+						<h:outputText value="#{cr.detail}" />
+					</p:column>
+				</p:dataTable>
+				<br/>
+				<p:commandButton value="Close" actionListener="#{salespersonController.closeViewContactDetail}" update=":form01:detailArea" />
 			</p:dialog>
 		</p:outputPanel>
 	</h:form>

@@ -102,6 +102,17 @@ public class InvoiceDaoImpl implements InvoiceDao {
 		return new InvoiceDto(seq, contact, purchaseDate, amount, products, sale);
 	}
 
+	private InvoiceDto makeInvoiceDtoStats(Transaction transaction,
+			ResultSet resultSet) throws SQLException, IOException {
+		int seq = resultSet.getInt(1);
+		Date purchaseDate = new Date(resultSet.getDate(3).getTime());
+		double amount = resultSet.getDouble(4);
+		UserDto sale = userDao.findUser(transaction, resultSet.getString(5));
+
+		return new InvoiceDto(seq, null, purchaseDate, amount, null, sale);
+	}
+
+
 	public InvoiceDto getById(Transaction transaction, int seq) throws IOException {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
@@ -847,4 +858,41 @@ public class InvoiceDaoImpl implements InvoiceDao {
 		}
 	}
 	private static String GET_PRODUCTS_BY_CUSTOMER = "select distinct pp.product_seq from t_invoice i join t_product_purchase pp on i.seq=pp.invoice_seq where i.contact_seq=?";
+	public List<InvoiceDto> getInvoiceBeforeAndAfterStats(Transaction transaction, Date afterDate, Date beforeDate) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		PreparedStatement prepareStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(SEARCH_INVOICE_BEFORE_AFTER);
+			prepareStatement.setDate(1, new java.sql.Date(afterDate.getTime()));
+			prepareStatement.setDate(2, new java.sql.Date(beforeDate.getTime()));
+			resultSet = prepareStatement.executeQuery();
+
+			List<InvoiceDto> result = new ArrayList<InvoiceDto>();
+			while (resultSet.next()) {
+				result.add(makeInvoiceDtoStats(transaction, resultSet));
+			}
+			return result;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		} finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+			if (prepareStatement != null) {
+				try {
+					prepareStatement.close();
+				} catch (SQLException e) {
+					logger.warn(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private static String GET_INVOICE_BEFORE_AND_AFTER_STATS = "";
 }

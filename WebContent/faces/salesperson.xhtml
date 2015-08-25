@@ -116,7 +116,7 @@
 				<h:outputText value="#{scheduleController.std.current} #{scheduleController.std.unit} (#{scheduleController.percentage} %)" />
 				<h:outputText value="" />
 				<h:outputText value="Remaining " />
-				<h:outputText value="#{scheduleController.std.target - scheduleController.std.current} #{scheduleController.std.unit}" />
+				<h:outputText value="#{scheduleController.std.target - scheduleController.std.current ge 0? scheduleController.std.target - scheduleController.std.current : 0} #{scheduleController.std.unit}" />
 
 				<p:menuButton value="Actions">
 					<p:menuitem value="See all active deals" url="activity.jsf" />
@@ -319,7 +319,7 @@
 					<p:commandButton value="Delete" actionListener="#{scheduleController.deleteTask(task)}" update=":form01:tasks" rendered="#{task.status != 'Done'}" />
 					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditTask(task)}" update=":form01" rendered="#{task.status != 'Done'}" />
 					<h:outputLink value="callReport.jsf?contactSeq=#{task.contact.seq}&amp;backMain=true&amp;dealId=#{task.actId}&amp;taskId=#{task.seq}"
-							style="color: blue;" rendered="#{(task.category == 'Follow-up call' or task.category == 'Call again' or task.category == 'Call') and task.status != 'Done'}">Call</h:outputLink>
+							style="color: blue;" rendered="#{(task.category == 'Follow-up call' or task.category == 'Call back again' or task.category == 'Call' or task.category == 'Call again') and task.status != 'Done'}">Call</h:outputLink>
 					<p:commandButton value="Mask as done" actionListener="#{scheduleController.markAsDone(task)}" upate=":form01:tasks" rendered="#{task.status != 'Done' and task.category == 'Email'}" />
 				</p:column>
 			</p:dataTable>
@@ -531,8 +531,8 @@
 					<h:outputText value="Salesperson" />
 					<p:autoComplete value="#{scheduleController.reassigneeName}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestUser}" />
 				</p:panelGrid>
-				<p:commandButton value="Confirm" actionListener="#{scheduleController.confirmReassignment}" update=":form01" rendered="#{scheduleController.someMeetingSelected}" />
-				<p:commandButton value="Confirm" actionListener="#{scheduleController.confirmTaskReassignment}" update=":form01" rendered="#{scheduleController.someTaskSelected}" />
+				<p:commandButton value="Confirm" actionListener="#{scheduleController.confirmReassignment}" update=":form01:tbl1, :form01:tbl2, :form01:reassignArea" rendered="#{scheduleController.someMeetingSelected and scheduleController.assignMeetingMode}" />
+				<p:commandButton value="Confirm" actionListener="#{scheduleController.confirmTaskReassignment}" update=":form01:tbl4, :form01:taskTbl, :form01:reassignArea" rendered="#{scheduleController.someTaskSelected and scheduleController.assignTaskMode}" />
 				<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelReassignment}" update=":form01:reassignArea" />
 			</p:dialog>
 		</p:outputPanel>

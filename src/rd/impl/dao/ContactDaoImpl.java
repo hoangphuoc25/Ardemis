@@ -37,6 +37,7 @@ public class ContactDaoImpl implements ContactDao {
 	private static String GET_BY_STATUS 			= "select seq, name, gender, phone, email, company, language, address, salesperson, contact_status, source from t_contact where lower(contact_status)=? order by seq desc";
 	private static String GET_NUMBER_OF_CONTACT_PER_SALE = "select count(*) from t_contact where lower(contact_status)='new' and salesperson=?";
 	private static String ADD_COMPANY_CONTACT 		= "insert into t_company_contact (company_seq, contact_seq) values (?, ?)";
+	private static String DELETE_COMPANY_CONTACT 		= "delete from t_company_contact where company_seq=? and contact_seq=?";
 
 	private UserDao userDao;
 
@@ -476,6 +477,10 @@ public class ContactDaoImpl implements ContactDao {
 
 		try {
 			Connection connection = transaction.getResource(Connection.class);
+			prepareStatement = connection.prepareStatement(DELETE_COMPANY_CONTACT);
+			prepareStatement.setInt(1, company.getSeq());
+			prepareStatement.setInt(2, contact.getSeq());
+			resultSet = prepareStatement.executeQuery();
 			prepareStatement = connection.prepareStatement(ADD_COMPANY_CONTACT);
 			prepareStatement.setInt(1, company.getSeq());
 			prepareStatement.setInt(2, contact.getSeq());

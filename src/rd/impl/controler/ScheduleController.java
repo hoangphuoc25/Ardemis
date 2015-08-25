@@ -923,6 +923,7 @@ public class ScheduleController implements Serializable {
 
 	public void startReassign() {
 		reassignMode = true;
+		assignMeetingMode = true;
 	}
 	public void confirmReassignment() throws IOException {
 		UserDto newAssignee = userService.findUserById(reassigneeName.split("[()]")[1]);
@@ -951,16 +952,23 @@ public class ScheduleController implements Serializable {
 				}
 			}
 		}
+		someMeetingSelected = false;
+		allSearchedMeetingsSelect = false;
+		allEventsSelect = false;
 		sessionManager.addGlobalMessageInfo("Meetings assigned", null);
 		reassignMode = false;
+		assignMeetingMode = false;
 	}
 	public void cancelReassignment() {
 		reassignMode = false;
+		assignMeetingMode = false;
+		assignTaskMode = false;
 	}
 
 	public void startReassignTask() {
 		reassignMode = true;
-		someMeetingSelected = false;
+		// someMeetingSelected = false;
+		assignTaskMode = true;
 	}
 
 	public boolean isSomeTaskSelected() {
@@ -1018,8 +1026,12 @@ public class ScheduleController implements Serializable {
 				}
 			}
 		}
+		someTaskSelected = false;
+		allTasksSelect = false;
+		allSearchedTasksSelect = false;
 		sessionManager.addGlobalMessageInfo("Tasks assigned", null);
 		reassignMode = false;
+		assignTaskMode = false;
 	}
 
 	public List<PromotionDto> getRelatedPromotions() {
@@ -1148,4 +1160,23 @@ public class ScheduleController implements Serializable {
 	public void setAllEventsSelect(boolean allEventsSelect) {
 		this.allEventsSelect = allEventsSelect;
 	}
+
+	public boolean isAssignMeetingMode() {
+		return assignMeetingMode;
+	}
+
+	public void setAssignMeetingMode(boolean assignMeetingMode) {
+		this.assignMeetingMode = assignMeetingMode;
+	}
+
+	public boolean isAssignTaskMode() {
+		return assignTaskMode;
+	}
+
+	public void setAssignTaskMode(boolean assignTaskMode) {
+		this.assignTaskMode = assignTaskMode;
+	}
+
+	private boolean assignTaskMode;
+	private boolean assignMeetingMode;
 }

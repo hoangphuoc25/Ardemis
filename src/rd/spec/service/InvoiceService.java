@@ -29,4 +29,5 @@ public interface InvoiceService {
 	public List<InvoiceDto> getInvoiceByProduct(int seq) throws IOException;
 	public int countInvoiceByUserAndTime(String username, Date startDate, Date endDate) throws IOException;
 	public List<ProductDto> getProductsByCustomer(int seq) throws IOException;
+	public List<InvoiceDto> getInvoiceBeforeAndAfterStats(Date afterDate, Date beforeDate) throws IOException;
 }

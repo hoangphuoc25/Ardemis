@@ -17,4 +17,5 @@ public interface PromotionService {
 	public int getSeq() throws IOException;
 	public List<ProductDto> getProductList(int seq) throws IOException;
 	public List<PromotionDto> getActivePromotionByProduct(int seq) throws IOException;
+	public List<PromotionDto> searchPromotion(String partial) throws IOException;
 }

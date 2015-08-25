@@ -99,7 +99,7 @@
 						<h:outputText value="Action" rendered="#{callReportController.callee.contactStatus == 'Qualified' or callReportController.callee.contactStatus == 'Pre-qualified'}"/>
 						<p:selectOneMenu value="#{callReportController.rating}" rendered="#{callReportController.callee.contactStatus == 'Qualified' or callReportController.callee.contactStatus == 'Pre-qualified'}" >
 							<f:selectItems value="#{callReportController.ratings}" />
-							<f:selectItem itemLabel="Close deal" itemValue="close"/>
+							<f:selectItem itemLabel="Close deal" itemValue="close" itemDisabled="#{callReportController.callee.contactStatus == 'Pre-qualified'}"/>
 							<p:ajax update="panel" process="panel" />
 						</p:selectOneMenu>
 
@@ -656,7 +656,7 @@
 						</p:dataList>
 					</p:column>
 					<p:column headerText="Actions" width="150">
-						<p:commandButton value="Extend purchase" actionListener="#{callReportController.startExtendPurchase}" update=":form01" />
+						<p:commandButton value="Extend order" actionListener="#{callReportController.startExtendPurchase}" update=":form01" />
 					</p:column>
 				</p:dataTable>
 				<p:commandButton value="Close" actionListener="#{callReportController.closeSearchContact}" update=":form01:searchContactArea" />

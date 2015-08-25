@@ -727,5 +727,43 @@ public class SalespersonController implements Serializable {
 		} else
 			return false;
 	}
+
+	public boolean isViewContactDetailMode() {
+		return viewContactDetailMode;
+	}
+
+	public void setViewContactDetailMode(boolean viewContactDetailMode) {
+		this.viewContactDetailMode = viewContactDetailMode;
+	}
+
+	public List<CallReportDto> getPastCalls() {
+		return pastCalls;
+	}
+
+	public void setPastCalls(List<CallReportDto> pastCalls) {
+		this.pastCalls = pastCalls;
+	}
+
+	public List<InvoiceDto> getPastPurchase() {
+		return pastPurchase;
+	}
+
+	public void setPastPurchase(List<InvoiceDto> pastPurchase) {
+		this.pastPurchase = pastPurchase;
+	}
+
+	private boolean viewContactDetailMode;
+	private List<InvoiceDto> pastPurchase;
+	private List<CallReportDto> pastCalls;
+
+	public void startViewContactDetail(ContactDto contact) throws IOException {
+		pastPurchase = invoiceService.getByCustomer(contact.getSeq());
+		pastCalls = crService.getByContact(contact.getSeq());
+		viewContactDetailMode = true;
+	}
+
+	public void closeViewContactDetail() {
+		viewContactDetailMode = false;
+	}
 }
 

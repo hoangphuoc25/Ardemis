@@ -138,7 +138,7 @@ public class StatisticsController implements Serializable {
 	}
 
 	public void searchBeforeAndAfter() throws IOException {
-		invoices = invoiceService.searchInvoiceBeforeAfter(fromDate, toDate);
+		invoices = invoiceService.getInvoiceBeforeAndAfterStats(fromDate, toDate);
 		System.out.println(invoices.size());
 	}
 
@@ -153,7 +153,7 @@ public class StatisticsController implements Serializable {
 			searchBeforeAndAfter();
 			System.out.println("fromandafter");
 		}
-		buildModels2();
+		buildModelTable();
 	}
 
 	@Inject CallReportService crService;
@@ -161,7 +161,7 @@ public class StatisticsController implements Serializable {
 	private List<WrStatisticsDto> stats = new ArrayList<WrStatisticsDto>();
 	private List<WrStatisticsDto> teamstats = new ArrayList<WrStatisticsDto>();
 
-	public void buildModels2() throws IOException {
+	public void buildModelTable() throws IOException {
 		empMap = new HashMap<String, Double>();
 		teamMap = new HashMap<Integer, Double>();
 		calculateTotal(invoices);
@@ -196,6 +196,8 @@ public class StatisticsController implements Serializable {
 				deals += invoiceService.countInvoiceByUserAndTime(user.getId(), fromDate, toDate);
 				calls += crService.countReportByUserAndTime(user.getId(), fromDate, toDate);
 			}
+			dealTotal += deals;
+			callTotal += calls;
 			double percent = Math.round(((double) amount / (double) total) * 10000) / 100;
 			getTeamstats().add(new WrStatisticsDto(null, amount, deals, calls, team, percent));
 		}
@@ -439,4 +441,22 @@ public class StatisticsController implements Serializable {
 		sessionManager.addGlobalMessageInfo("Sale goals assigned", null);
 	}
 
+	public int getDealTotal() {
+		return dealTotal;
+	}
+
+	public void setDealTotal(int dealTotal) {
+		this.dealTotal = dealTotal;
+	}
+
+	public int getCallTotal() {
+		return callTotal;
+	}
+
+	public void setCallTotal(int callTotal) {
+		this.callTotal = callTotal;
+	}
+
+	private int dealTotal;
+	private int callTotal;
 }

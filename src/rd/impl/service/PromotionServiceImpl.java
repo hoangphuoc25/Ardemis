@@ -149,4 +149,16 @@ public class PromotionServiceImpl implements PromotionService, Serializable {
 			throw e;
 		}
 	}
+	public List<PromotionDto> searchPromotion(String partial) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<PromotionDto> result = promoDao.searchPromotion(transaction, partial);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }

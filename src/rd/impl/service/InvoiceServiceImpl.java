@@ -267,4 +267,16 @@ public class InvoiceServiceImpl implements InvoiceService, Serializable {
 			throw e;
 		}
 	}
+	public List<InvoiceDto> getInvoiceBeforeAndAfterStats(Date afterDate, Date beforeDate) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<InvoiceDto> result = invoiceDao.getInvoiceBeforeAndAfterStats(transaction, afterDate, beforeDate);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
 }
