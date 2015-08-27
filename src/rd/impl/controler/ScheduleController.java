@@ -148,9 +148,9 @@ public class ScheduleController implements Serializable {
 		}
 
 		sessionManager.addGlobalMessageInfo("New schedule event added", null);
-		if (!checkConflict()) {
-			sessionManager.addGlobalMessageWarn("Warning: Conflict detected in your chedule.", null);
-		}
+//		if (!checkConflict()) {
+//			sessionManager.addGlobalMessageWarn("Warning: Conflict detected in your chedule.", null);
+//		}
 		from = null;
 		to = null;
 		title = "";
@@ -573,7 +573,7 @@ public class ScheduleController implements Serializable {
 	public void startAddNewAct(ScheduleTaskDto task) throws IOException {
 		// getNewAct().setCustomer(task.getCustomer());
 		newAct.setContact(task.getContact());
-		newAct.setStatus("Contacted");
+		newAct.setStatus("Qualified");
 		addActivityMode = true;
 
 		firstMeeting = new MeetingDto();
@@ -1177,6 +1177,43 @@ public class ScheduleController implements Serializable {
 		this.assignTaskMode = assignTaskMode;
 	}
 
+	public MeetingDto getEditingMeeting() {
+		if (editingMeeting == null) {
+			editingMeeting = new MeetingDto();
+		}
+		return editingMeeting;
+	}
+
+	public void setEditingMeeting(MeetingDto editingMeeting) {
+		this.editingMeeting = editingMeeting;
+	}
+
+	public boolean isEditMeetingMode() {
+		return editMeetingMode;
+	}
+
+	public void setEditMeetingMode(boolean editMeetingMode) {
+		this.editMeetingMode = editMeetingMode;
+	}
+
 	private boolean assignTaskMode;
 	private boolean assignMeetingMode;
+	private MeetingDto editingMeeting;
+	private boolean editMeetingMode;
+
+	public void startEditMeeting(MeetingDto event) {
+		this.editingMeeting = event;
+		editMeetingMode = true;
+	}
+
+	public void editMeeting() throws IOException {
+		meetingService.editMeeting(editingMeeting);
+		editMeetingMode = false;
+
+		sessionManager.addGlobalMessageInfo("Info updated", null);
+	}
+
+	public void cancelEditMeeting() {
+		editMeetingMode = false;
+	}
 }

@@ -178,7 +178,7 @@ public class CallReportController implements Serializable {
 			}
 			if (getCurrentDeal() == null) {
 				int actSeq = actService.getSeq();
-				ActivityDto act = new ActivityDto(actSeq, callee, new Date(), "Contacted", "Deal started", sessionManager.getLoginUser(), selectedProdList);
+				ActivityDto act = new ActivityDto(actSeq, callee, new Date(), "Qualified", "Deal started", sessionManager.getLoginUser(), selectedProdList);
 				actService.addActivity(act);
 				sessionManager.addGlobalMessageInfo("New deal added", null);
 
@@ -238,7 +238,7 @@ public class CallReportController implements Serializable {
 		if (callee.getContactStatus().equalsIgnoreCase("qualified")) {
 			int compSeq = compService.getSeq();
 			if (compService.searchCompanyByNameExact(callee.getName()) == null) {
-				CompanyDto comp = new CompanyDto(compSeq, callee.getCompany(), "", "", "", 1970, "", "", "", "Contacted", sessionManager.getLoginUser(), callee.getAddress());
+				CompanyDto comp = new CompanyDto(compSeq, callee.getCompany(), "", "", "", 1970, "", "", "", "Qualified", sessionManager.getLoginUser(), callee.getAddress());
 				compService.insertCompany(comp);
 				contactService.addCompanyContact(callee, comp);
 			} else {

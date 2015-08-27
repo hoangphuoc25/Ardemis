@@ -102,7 +102,8 @@
 		<h:messages infoClass="alert alert-info" fatalClass="alert alert-danger" errorClass="alert alert-danger" warnClass="alert alert-warning"/>
 		<br/>
 		<p:outputPanel id="firstMessage">
-			<a href="#form01:tbl3">You have <span class="badge badge-success">#{scheduleController.newNotes}</span> unread message(s).</a>
+			<h:outputLink value="#form01:tbl3" rendered="#{scheduleController.newNotes ne 0}">You have #{scheduleController.newNotes} unread messages.</h:outputLink>
+
 		</p:outputPanel>
 
 		<h:outputText value="#{scheduleController.reminder}" style="color: red" />
@@ -177,6 +178,13 @@
 				<p:column headerText="Location">
 					<h:outputText value="#{event.location}" />
 				</p:column>
+				<p:column headerText="Action">
+					<p:commandButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01:tbl1" />
+					<p:spacer width="7" />
+					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditMeeting(event)}" update=":form01:editMeetingArea" />
+					<p:spacer width="7" />
+					<a href="activity.jsf?seq=#{event.actId}" style="color: blue; text-decoraton: underline;">Update deal</a>
+				</p:column>
 			</p:dataTable>
 			<p:dataTable id="tbl2" rowIndexVar="row" value="#{scheduleController.events}" var="event" rendered="#{not scheduleController.scheduleSearchMode}"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
@@ -215,7 +223,10 @@
 							actionListener="#{scheduleController.startViewDetail(event)}" icon="ui-icon-search" title="View" rendered="#{event.actId > 0}" />
 				</p:column>
 				<p:column headerText="Action">
-					<p:commandButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01" />
+					<p:commandButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01:tbl2" />
+					<p:spacer width="7" />
+					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditMeeting(event)}" update=":form01:editMeetingArea" />
+					<p:spacer width="7" />
 					<a href="activity.jsf?seq=#{event.actId}" style="color: blue; text-decoraton: underline;">Update deal</a>
 				</p:column>
 			</p:dataTable>
@@ -276,6 +287,13 @@
 				</p:column>
 				<p:column headerText="Status" styleClass="#{task.status == 'Overdue'? 'newMsg' : null}" >
 					<h:outputText value="#{task.status}" />
+				</p:column>
+				<p:column headerText="Action">
+					<p:commandButton value="Delete" actionListener="#{scheduleController.deleteTask(task)}" update=":form01:tasks" rendered="#{task.status != 'Done'}" />
+					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditTask(task)}" update=":form01:editTaskDialog" rendered="#{task.status != 'Done'}" />
+					<h:outputLink value="callReport.jsf?contactSeq=#{task.contact.seq}&amp;backMain=true&amp;dealId=#{task.actId}&amp;taskId=#{task.seq}"
+							style="color: blue;" rendered="#{(task.category == 'Follow-up call' or task.category == 'Call back again' or task.category == 'Call' or task.category == 'Call again') and task.status != 'Done'}">Call</h:outputLink>
+					<p:commandButton value="Mask as done" actionListener="#{scheduleController.markAsDone(task)}" upate=":form01:tasks" rendered="#{task.status != 'Done' and task.category == 'Email'}" />
 				</p:column>
 			</p:dataTable>
 			<p:dataTable id="taskTbl" rowIndexVar="row" value="#{scheduleController.tasks}" var="task" rendered="#{not scheduleController.taskSearchMode}"
@@ -428,7 +446,7 @@
 			</p:column>
 			<p:column>
 				<p:commandButton value="Mark as read" actionListener="#{scheduleController.markRead(note)}" update=":form01:tbl3, :form01:firstMessage" rendered="#{note.status == 'UNREAD'}" />
-				<p:commandButton value="Respond" actionListener="#{scheduleController.startRespond(note)}" update=":form01" />
+				<p:commandButton value="Respond" actionListener="#{scheduleController.startRespond(note)}" update=":form01:denyDialog" />
 			</p:column>
 		</p:dataTable>
 
@@ -484,8 +502,8 @@
 				<h:outputText value="Detail" />
 				<p:inputTextarea value="#{scheduleController.editingTask.detail}" />
 			</p:panelGrid>
-			<p:commandButton value="Confirm" actionListener="#{scheduleController.editTask}" update=":form01" />
-			<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelEditTask}" update=":form01" />
+			<p:commandButton value="Confirm" actionListener="#{scheduleController.editTask}" update=":form01:tbl4, :form01:taskTbl, :form01:editTaskDialog" />
+			<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelEditTask}" update=":form01:editTaskDialog" />
 		</p:dialog>
 
 		<p:dialog id="newActDialog" closable="false" visible="#{scheduleController.addActivityMode}"
@@ -534,6 +552,31 @@
 				<p:commandButton value="Confirm" actionListener="#{scheduleController.confirmReassignment}" update=":form01:tbl1, :form01:tbl2, :form01:reassignArea" rendered="#{scheduleController.someMeetingSelected and scheduleController.assignMeetingMode}" />
 				<p:commandButton value="Confirm" actionListener="#{scheduleController.confirmTaskReassignment}" update=":form01:tbl4, :form01:taskTbl, :form01:reassignArea" rendered="#{scheduleController.someTaskSelected and scheduleController.assignTaskMode}" />
 				<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelReassignment}" update=":form01:reassignArea" />
+			</p:dialog>
+		</p:outputPanel>
+
+		<p:outputPanel id="editMeetingArea">
+			<p:dialog id="editMeetingDialog" closable="false" visible="#{scheduleController.editMeetingMode}"
+					widgetVar="editMeetingDialog_w" modal="true" resizable="false" draggable="true" header="Edit Meeting">
+				<p:panelGrid columns="2">
+					<h:outputText value="Customer" />
+					<h:outputText value="#{scheduleController.editingMeeting.contact.name}" />
+
+					<h:outputText value="Start time" />
+					<p:calendar value="#{scheduleController.editingMeeting.from}" pattern="dd/MM/yyyy HH:mm" />
+
+					<h:outputText value="End time" />
+					<p:calendar value="#{scheduleController.editingMeeting.to}" pattern="dd/MM/yyyy HH:mm" />
+
+					<h:outputText value="Detail" />
+					<p:inputTextarea value="#{scheduleController.editingMeeting.detail}" />
+
+					<h:outputText value="Location" />
+					<p:inputTextarea value="#{scheduleController.editingMeeting.location}" />
+				</p:panelGrid>
+				<p:commandButton value="Confirm" actionListener="#{scheduleController.editMeeting}" update=":form01:tbl2, :form01:tbl1, :form01:editMeetingArea" />
+				<p:spacer width="7" />
+				<p:commandButton value="Cancel" actionListener="#{scheduleController.cancelEditMeeting}" update=":form01:editMeetingArea" />
 			</p:dialog>
 		</p:outputPanel>
 	</h:form>

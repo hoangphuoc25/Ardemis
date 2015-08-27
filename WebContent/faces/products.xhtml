@@ -130,8 +130,7 @@
 			<p:commandButton value="Clear" actionListener="#{productController.clearProdSearch}" update=":form01" />
 		</p:panelGrid>
 
-
-		<p:fieldset legend="All promotions" id="allpromo">
+		<h3>All promotions</h3>
 			<p:dataTable id="tbl2" rowIndexVar="row" value="#{productController.allPromo}" var="promo"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="8">
@@ -145,19 +144,21 @@
 						<f:convertDateTime pattern="dd/MM/yyyy" />
 					</h:outputText>
 				</p:column>
+				<p:column headerText="Name">
+					<h:outputText value="#{promo.name}" />
+				</p:column>
 				<p:column headerText="Products">
 					<h:outputText value="#{productController.getProductList(promo)}" />
 				</p:column>
 				<p:column headerText="Discount">
-					<h:outputText value="#{promo.discount}" />
+					<h:outputText value="#{promo.discount} %" />
 				</p:column>
 				<p:column headerText="Package price">
 					<h:outputText value="#{productController.calcPrice(promo)}" />
 				</p:column>
 			</p:dataTable>
-			<p:commandButton value="Create promotion" actionListener="#{productController.startCreatePromotion}" update=":form01:promotionArea"
+			<p:commandButton value="Add new promotion" actionListener="#{productController.startCreatePromotion}" update=":form01:promotionArea"
 				rendered="#{facesContext.externalContext.isUserInRole('admin') or facesContext.externalContext.isUserInRole('manager') or facesContext.externalContext.isUserInRole('support')}" />
-		</p:fieldset>
 
 		<p:outputPanel id="promotionArea">
 			<p:dialog id="promoDialog" closable="false" visible="#{productController.addPromoMode}"
@@ -194,8 +195,8 @@
 			<h:panelGrid columns="4">
 				<h:outputText value="Product name" />
 				<p:autoComplete value="#{productController.promoProdSearch}" minQueryLength="3" maxResults="10" forceSelection="true" completeMethod="#{productController.suggestProdForPromoSearch}" />
-				<p:commandButton value="Search for promo" actionListener="#{productController.searchPromoByProduct}" update=":form01:allpromo" />
-				<p:commandButton value="Clear" actionListener="#{productController.clearPromoSearch}" update=":form01:allpromo" />
+				<p:commandButton value="Search for promo" actionListener="#{productController.searchPromoByProduct}" update=":form01:tbl2" />
+				<p:commandButton value="Clear" actionListener="#{productController.clearPromoSearch}" update=":form01:tbl2" />
 			</h:panelGrid>
 		</p:outputPanel>
 

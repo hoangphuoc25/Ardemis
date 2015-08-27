@@ -85,7 +85,12 @@
 			<p:dataTable id="tbl1" rowIndexVar="row" value="#{activityController.allAct}" var="act"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="10">
-				<p:column width="60">
+				<p:column width="30">
+					<f:facet name="header">
+						<p:selectBooleanCheckbox value="#{activityController.allDealsSelected}">
+							<p:ajax update=":form01:tbl1, :form01:dealButtons" listener="#{activityController.updateAllDealsSelected}" />
+						</p:selectBooleanCheckbox>
+					</f:facet>
 					<p:selectBooleanCheckbox value="#{act.selected}">
 						<p:ajax update=":form01:dealButtons" listener="#{activityController.updateActivitySelected}" />
 					</p:selectBooleanCheckbox>

@@ -972,4 +972,48 @@ public class ManagerController implements Serializable {
 	public void closeViewMeeting() {
 		viewEmpScheduleMode = false;
 	}
+
+	public boolean isAssignEmpSaleTargetMode() {
+		return assignEmpSaleTargetMode;
+	}
+
+	public void setAssignEmpSaleTargetMode(boolean assignEmpSaleTargetMode) {
+		this.assignEmpSaleTargetMode = assignEmpSaleTargetMode;
+	}
+
+	private boolean assignEmpSaleTargetMode;
+	private SaleTargetDto empSt;
+
+	public void startAssignEmpSaleTarget(UserDto user) throws IOException {
+		assignEmpSaleTargetMode = true;
+		setEmpSt(stService.getSaleTarget(user.getId()));
+		if (empSt == null) {
+			System.out.println("empSt null");
+		}
+	}
+	public void closeAssignEmpSaleTarget() {
+		assignEmpSaleTargetMode = false;
+	}
+	public void confirmAssignSaleTarget() throws IOException {
+		stService.updateSaleTarget(getEmpSt());
+		sessionManager.addGlobalMessageInfo("Sale target updated", null);
+		assignEmpSaleTargetMode = false;
+	}
+
+	public SaleTargetDto getEmpSt() {
+		if (empSt == null) {
+			empSt = new SaleTargetDto();
+		}
+		return empSt;
+	}
+
+	public void setEmpSt(SaleTargetDto empSt) {
+		this.empSt = empSt;
+	}
+
+	public void startViewDeal(ActivityDto act) throws IOException {
+		tempAct = act;
+		List<ProductDto> prods = actService.getProductByDeal(tempAct.getSeq());
+		tempAct.setProducts(prods);
+	}
 }

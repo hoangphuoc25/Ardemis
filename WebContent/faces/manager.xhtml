@@ -150,18 +150,12 @@
 						<p:commandButton value="Deals" actionListener="#{managerController.viewActivity(sale)}" update=":form01:activityArea" />
 						<p:spacer width="7px" />
 						<p:commandButton value="Sale Record" actionListener="#{managerController.startViewSaleRecord(sale)}" update=":form01:saleRecordArea" />
+						<p:spacer width="7px" />
+						<p:commandButton value="Assign sale target" actionListener="#{managerController.startAssignEmpSaleTarget(sale)}" update=":form01:empSaleTargetArea" />
 					</p:column>
 				</p:dataTable>
 			</p:panelGrid>
 			<p:spacer height="7" />
-			<br/>
-			<p:commandButton value="Assign goal" actionListener="#{managerController.startAssignTarget}" update=":form01:saleTargetArea"/>
-			<p:fieldset legend="Employee Schedule">
-				<p:outputPanel id="schedule">
-					<p:schedule value="#{managerController.model}" draggable="false" resizable="false" style="max-width: 800px; margin-left:auto; margin-right: auto;"
-						rendered="#{not empty managerController.empId}" />
-				</p:outputPanel>
-			</p:fieldset>
 		</p:fieldset>
 
 		<p:panel id="toggleable" header="Statistics" toggleable="true" closable="true" toggleSpeed="500" closeSpeed="500" widgetVar="panel" style="margin-bottom:20px">
@@ -214,7 +208,8 @@
 			</p:tabView>
 		</p:panel>
 		<p:commandButton value="Create promotion" actionListener="#{managerController.startCreatePromotion}" update=":form01:promotionArea" />
-		<br/>
+		<p:spacer width="7"/>
+		<p:commandButton value="Assign goal" actionListener="#{managerController.startAssignTarget}" update=":form01:saleTargetArea"/>
 
 		<p:ajaxStatus style="text-align: center;">
 			<f:facet name="start">
@@ -252,6 +247,9 @@
 			</p:column>
 			<p:column>
 				<p:commandButton value="Reassign" actionListener="#{managerController.startAssignToOther(deal)}" update=":form01:assignOtherArea"/>
+				<p:spacer width="7"/>
+				<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
+										actionListener="#{managerController.startViewDeal(deal)}" icon="ui-icon-search" title="View" />
 			</p:column>
 		</p:dataTable>
 		<p:outputPanel id="reassignButton">
@@ -547,6 +545,41 @@
 				</p:panelGrid>
 			</p:dialog>
 		</p:outputPanel>
+
+		<p:outputPanel id="empSaleTargetArea">
+			<p:dialog id="empSaleTargetDialog" closable="false" visible="#{managerController.assignEmpSaleTargetMode}"
+					widgetVar="empSaleTargetDialog_w" modal="true" resizable="false" draggable="true" header="Sale target">
+				<p:messages />
+				<p:panelGrid columns="4">
+
+					<h:outputText value="Sale goal" />
+					<p:selectOneMenu value="#{managerController.empSt.action}">
+						<f:selectItem itemLabel="Select" itemValue="Select" />
+						<f:selectItem itemLabel="Generate revenue of" itemValue="Generate revenue of" />
+						<f:selectItem itemLabel="Close deals with" itemValue="Close deals with" />
+						<p:ajax update="empSaleTargetArea" listener="#{managerController.updateUnit}" />
+					</p:selectOneMenu>
+					<p:inputText value="#{managerController.empSt.target}" />
+					<h:outputText rendered="#{managerController.empSt.action eq null or managerController.empSt.action=='Select'}" />
+					<h:outputText value="SGD" rendered="#{managerController.empSt.action == 'Generate revenue of'}" />
+					<h:outputText value="Customers" rendered="#{managerController.empSt.action == 'Close deals with'}" />
+
+					<h:outputText value="From" />
+					<p:calendar value="#{managerController.empSt.fromDate}" pattern="dd/MM/yyyy" />
+					<h:outputText />
+					<h:outputText />
+
+					<h:outputText value="To" />
+					<p:calendar value="#{managerController.empSt.toDate}" pattern="dd/MM/yyyy" />
+					<h:outputText />
+					<h:outputText />
+
+				</p:panelGrid>
+				<p:commandButton value="Assign" actionListener="#{managerController.confirmAssignSaleTarget}" update=":form01:empSaleTargetArea"/>
+				<p:commandButton value="Cancel" actionListener="#{managerController.closeAssignEmpSaleTarget}" update=":form01:empSaleTargetArea" />
+			</p:dialog>
+		</p:outputPanel>
+
 	</h:form>
 	</div>
 </h:body>

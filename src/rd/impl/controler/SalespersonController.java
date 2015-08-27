@@ -249,7 +249,7 @@ public class SalespersonController implements Serializable {
 	public String logout() {
 		conversationEnd();
 		sessionManager.logoff();
-		return "../main.jsf?faces-redirect=true";
+		return "../portal.jsf?faces-redirect=true";
 	}
 
 	public String getShowingMode() {

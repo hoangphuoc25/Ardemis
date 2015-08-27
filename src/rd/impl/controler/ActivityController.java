@@ -700,5 +700,23 @@ public class ActivityController implements Serializable {
 	public void setReassigneeName(String reassigneeName) {
 		this.reassigneeName = reassigneeName;
 	}
+
+	public boolean isAllDealsSelected() {
+		return allDealsSelected;
+	}
+
+	public void setAllDealsSelected(boolean allDealsSelected) {
+		this.allDealsSelected = allDealsSelected;
+	}
+
+	private boolean allDealsSelected;
+
+	public void updateAllDealsSelected() {
+		for (ActivityDto act: allAct) {
+			if (!act.getStatus().equalsIgnoreCase("Completed"))
+				act.setSelected(allDealsSelected);
+		}
+		someDealSelected = allDealsSelected;
+	}
 }
 
