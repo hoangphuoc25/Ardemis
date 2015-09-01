@@ -338,6 +338,14 @@ public class ScheduleController implements Serializable {
 	public SaleTargetDto getStd() throws IOException {
 		if (std == null) {
 			std = stService.getSaleTarget(sessionManager.getLoginUser().getId());
+			int dayPassed = (int) (((new Date()).getTime() - std.getFromDate().getTime()) / 86400);
+			int totalDays = (int) ((std.getToDate().getTime() - std.getFromDate().getTime()) / 86400);
+			double percentTime = Math.floor((double) dayPassed / (double) totalDays * 10000) / 100;
+			if (percentTime < getPercentage()) {
+				std.setStatus("good");
+			} else {
+				std.setStatus("need attention");
+			}
 		}
 		return std;
 	}
@@ -921,9 +929,23 @@ public class ScheduleController implements Serializable {
 	private String reassigneeName;
 	private boolean someTaskSelected;
 
-	public void startReassign() {
+	public void startReassign() throws IOException {
 		reassignMode = true;
 		assignMeetingMode = true;
+		List<MeetingDto> temp = new ArrayList<MeetingDto>();
+		if (scheduleSearchMode)
+			for (MeetingDto meeting: searchedMeetings) {
+				if (meeting.isSelected()) {
+					temp.add(meeting);
+				}
+			}
+		else
+			for (MeetingDto meeting: events) {
+				if (meeting.isSelected()) {
+					temp.add(meeting);
+				}
+			}
+		updateSuggestedAssignee(temp);
 	}
 	public void confirmReassignment() throws IOException {
 		UserDto newAssignee = userService.findUserById(reassigneeName.split("[()]")[1]);
@@ -965,10 +987,25 @@ public class ScheduleController implements Serializable {
 		assignTaskMode = false;
 	}
 
-	public void startReassignTask() {
+	public void startReassignTask() throws IOException {
 		reassignMode = true;
 		// someMeetingSelected = false;
 		assignTaskMode = true;
+		List<ScheduleTaskDto> temp = new ArrayList<ScheduleTaskDto>();
+		if (taskSearchMode)
+			for (ScheduleTaskDto dto: searchedTasks) {
+				if (dto.isSelected()) {
+					temp.add(dto);
+				}
+			}
+		else {
+			for (ScheduleTaskDto dto: tasks) {
+				if (dto.isSelected()) {
+					temp.add(dto);
+				}
+			}
+		}
+		updateSuggestedAssigneeTask(temp);
 	}
 
 	public boolean isSomeTaskSelected() {
@@ -1216,4 +1253,62 @@ public class ScheduleController implements Serializable {
 	public void cancelEditMeeting() {
 		editMeetingMode = false;
 	}
+
+	public int getRemainingDays() {
+		if (remainingDays == 0)
+			remainingDays = (int) ((std.getToDate().getTime() - (new Date()).getTime())/ 86400000);
+		return remainingDays;
+	}
+
+	public void setRemainingDays(int remainingDays) {
+		this.remainingDays = remainingDays;
+	}
+
+	private int remainingDays;
+
+	public void updateSuggestedAssignee(List<MeetingDto> list) throws IOException {
+		List<Pair<Date, Integer>> time = new ArrayList<Pair<Date, Integer>>();
+		for (MeetingDto dto: list) {
+			time.add(new Pair<Date, Integer>(dto.getFrom(), 1));
+			time.add(new Pair<Date, Integer>(dto.getTo(), 2));
+		}
+		Collections.sort(time, new Comparator<Pair<Date, Integer>>() {
+			public int compare(Pair<Date, Integer> first, Pair<Date, Integer> second) {
+				if (first.getFirst().compareTo(second.getFirst()) != 0) {
+					return first.getFirst().compareTo(second.getFirst());
+				} else {
+					return first.getSecond().compareTo(second.getSecond());
+				}
+			}
+		});
+
+		suggestedAssignee = meetingService.searchUserFreeInTimeInterval(time.get(0).getFirst(), time.get(time.size() - 1).getFirst(), list);
+	}
+
+	public void updateSuggestedAssigneeTask(List<ScheduleTaskDto> list) throws IOException {
+		List<Pair<Date, Integer>> time = new ArrayList<Pair<Date, Integer>>();
+		for (ScheduleTaskDto dto: list) {
+			time.add(new Pair<Date, Integer>(dto.getTime(), 1));
+		}
+		Collections.sort(time, new Comparator<Pair<Date, Integer>>() {
+			public int compare(Pair<Date, Integer> first, Pair<Date, Integer> second) {
+				if (first.getFirst().compareTo(second.getFirst()) != 0) {
+					return first.getFirst().compareTo(second.getFirst());
+				} else {
+					return first.getSecond().compareTo(second.getSecond());
+				}
+			}
+		});
+		suggestedAssignee = meetingService.searchUserFreeInTimeIntervalTask(time.get(0).getFirst(), time.get(time.size() - 1).getFirst(), list);
+	}
+
+	public List<UserDto> getSuggestedAssignee() {
+		return suggestedAssignee;
+	}
+
+	public void setSuggestedAssignee(List<UserDto> suggestedAssignee) {
+		this.suggestedAssignee = suggestedAssignee;
+	}
+
+	private List<UserDto> suggestedAssignee;
 }

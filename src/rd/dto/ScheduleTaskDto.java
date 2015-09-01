@@ -57,7 +57,7 @@ public class ScheduleTaskDto {
 	}
 
 	public ScheduleTaskDto() {
-		this.status = "pending";
+		this.status = "Pending";
 	}
 
 	public String getUsername() {

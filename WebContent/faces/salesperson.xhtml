@@ -89,7 +89,6 @@
 			</p:submenu>
 			<p:menuitem value="Products" url="../faces/products.jsf" />
 			<p:menuitem value="Customers" url="../faces/contactList.jsf" />
-			<p:menuitem value="Expense" url="../faces/expense.jsf" />
 			<p:submenu label="Reports">
 				<p:menuitem value="Call Report" url="../faces/calls.jsf" />
 				<p:menuitem value="Add call report" url="../faces/callReport.jsf" />
@@ -108,7 +107,7 @@
 
 		<h:outputText value="#{scheduleController.reminder}" style="color: red" />
 
-		<p:fieldset legend="Your sale misson">
+		<p:fieldset legend="Your sale target">
 			<p:panelGrid columns="3">
 				<h:outputText value="Your sale goal" />
 				<h:outputText value="#{scheduleController.std.action} #{scheduleController.std.target} #{scheduleController.std.unit}" />
@@ -117,24 +116,20 @@
 				<h:outputText value="#{scheduleController.std.current} #{scheduleController.std.unit} (#{scheduleController.percentage} %)" />
 				<h:outputText value="" />
 				<h:outputText value="Remaining " />
-				<h:outputText value="#{scheduleController.std.target - scheduleController.std.current ge 0? scheduleController.std.target - scheduleController.std.current : 0} #{scheduleController.std.unit}" />
+				<h:outputText value="#{scheduleController.std.target - scheduleController.std.current ge 0? scheduleController.std.target - scheduleController.std.current : 0} #{scheduleController.std.unit} (#{100 - scheduleController.percentage} %)" />
 
 				<p:menuButton value="Actions">
 					<p:menuitem value="See all active deals" url="activity.jsf" />
 					<p:menuitem value="Find new customer" url="contactList.jsf?status=new" target="_blank" />
 				</p:menuButton>
-				<h:outputText value="From" />
-				<h:outputText value="#{scheduleController.std.fromDate}">
-					<f:convertDateTime pattern="dd/MM/yyyy" />
-				</h:outputText>
+
+				<h:outputText value="Remaining time" />
+				<h:outputText value="#{scheduleController.remainingDays} days" />
 				<h:outputText value="" />
 
-				<h:outputText value="To" />
-				<h:outputText value="#{scheduleController.std.toDate}">
-					<f:convertDateTime pattern="dd/MM/yyyy" />
-				</h:outputText>
+				<h:outputText value="Progress" />
+				<h:outputText value="#{scheduleController.std.status}" styleClass="#{scheduleController.std.status == 'good'? 'alert-info' : 'alert-danger'}" />
 				<h:outputText value="" />
-
 			</p:panelGrid>
 		</p:fieldset>
 
@@ -169,7 +164,7 @@
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 					</h:outputText>
 				</p:column>
-				<p:column headerText="Detail">
+				<p:column headerText="Subject">
 					<h:outputText value="#{event.detail}" />
 				</p:column>
 				<p:column headerText="Customer">
@@ -179,10 +174,10 @@
 					<h:outputText value="#{event.location}" />
 				</p:column>
 				<p:column headerText="Action">
-					<p:commandButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01:tbl1" />
-					<p:spacer width="7" />
-					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditMeeting(event)}" update=":form01:editMeetingArea" />
-					<p:spacer width="7" />
+				    <p:splitButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01:tbl1">
+						<p:menuitem value="Edit" actionListener="#{scheduleController.startEditMeeting(event)}" update=":form01:editMeetingArea" />
+				    </p:splitButton>
+					<p:commandButton value="Reassign" actionListener="#{scheduleController.updateSuggestedAssignee(event)}" update=":form01:reassignArea" />
 					<a href="activity.jsf?seq=#{event.actId}" style="color: blue; text-decoraton: underline;">Update deal</a>
 				</p:column>
 			</p:dataTable>
@@ -201,15 +196,15 @@
 				</p:column>
 				<p:column headerText="Time">
 					<h:outputText value="#{event.from}">
-						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						<f:convertDateTime pattern="HH:mm" />
 					</h:outputText>
 					<h:outputText value=" - " />
 					<h:outputText value="#{event.to}">
-						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						<f:convertDateTime pattern="HH:mm" />
 					</h:outputText>
 				</p:column>
 
-				<p:column headerText="Detail">
+				<p:column headerText="Subject">
 					<h:outputText value="#{event.detail}" />
 				</p:column>
 				<p:column headerText="Customer">
@@ -223,10 +218,10 @@
 							actionListener="#{scheduleController.startViewDetail(event)}" icon="ui-icon-search" title="View" rendered="#{event.actId > 0}" />
 				</p:column>
 				<p:column headerText="Action">
-					<p:commandButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01:tbl2" />
-					<p:spacer width="7" />
-					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditMeeting(event)}" update=":form01:editMeetingArea" />
-					<p:spacer width="7" />
+				    <p:splitButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01:tbl2">
+						<p:menuitem value="Edit" actionListener="#{scheduleController.startEditMeeting(event)}" update=":form01:editMeetingArea" />
+				    </p:splitButton>
+				    <p:commandButton value="Reassign" actionListener="#{scheduleController.updateSuggestedAssignee(event)}" update=":form01:reassignArea" />
 					<a href="activity.jsf?seq=#{event.actId}" style="color: blue; text-decoraton: underline;">Update deal</a>
 				</p:column>
 			</p:dataTable>
@@ -268,7 +263,7 @@
 						<p:ajax listener="#{scheduleController.updateTaskButtons}" update=":form01:taskButtons" />
 					</p:selectBooleanCheckbox>
 				</p:column>
-				<p:column headerText="Action">
+				<p:column headerText="Action" width="100" >
 					<h:outputText value="#{task.category}" />
 				</p:column>
 				<p:column headerText="Customer">
@@ -282,15 +277,17 @@
 						<f:convertDateTime pattern="dd/M/yyyy HH:mm" />
 					</h:outputText>
 				</p:column>
-				<p:column headerText="Detail">
+				<p:column headerText="Subject">
 					<h:outputText value="#{task.detail}" />
 				</p:column>
-				<p:column headerText="Status" styleClass="#{task.status == 'Overdue'? 'newMsg' : null}" >
+				<p:column headerText="Status" width="80">
 					<h:outputText value="#{task.status}" />
 				</p:column>
 				<p:column headerText="Action">
-					<p:commandButton value="Delete" actionListener="#{scheduleController.deleteTask(task)}" update=":form01:tasks" rendered="#{task.status != 'Done'}" />
-					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditTask(task)}" update=":form01:editTaskDialog" rendered="#{task.status != 'Done'}" />
+					<p:splitButton value="Delete" actionListener="#{scheduleController.deleteTask(task)}" update=":form01:tasks" rendered="#{task.status != 'Done'}">
+						<p:menuitem value="Edit" actionListener="#{scheduleController.startEditTask(task)}" update=":form01:editTaskDialog" rendered="#{task.status != 'Done'}" />
+					</p:splitButton>
+					<p:commandButton value="Reassign" actionListener="#{scheduleController.startReassign(task)}" update=":form01:reassignArea" />
 					<h:outputLink value="callReport.jsf?contactSeq=#{task.contact.seq}&amp;backMain=true&amp;dealId=#{task.actId}&amp;taskId=#{task.seq}"
 							style="color: blue;" rendered="#{(task.category == 'Follow-up call' or task.category == 'Call back again' or task.category == 'Call' or task.category == 'Call again') and task.status != 'Done'}">Call</h:outputLink>
 					<p:commandButton value="Mask as done" actionListener="#{scheduleController.markAsDone(task)}" upate=":form01:tasks" rendered="#{task.status != 'Done' and task.category == 'Email'}" />
@@ -299,7 +296,7 @@
 			<p:dataTable id="taskTbl" rowIndexVar="row" value="#{scheduleController.tasks}" var="task" rendered="#{not scheduleController.taskSearchMode}"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="10">
-				<p:column width="80">
+				<p:column width="30">
 					<f:facet name="header">
 						<p:selectBooleanCheckbox value="#{scheduleController.allTasksSelect}">
 							<p:ajax update=":form01:taskTbl, :form01:taskButtons" listener="#{scheduleController.updateAllTasksSelect}" />
@@ -309,7 +306,7 @@
 						<p:ajax listener="#{scheduleController.updateTaskButtons}" update=":form01:taskButtons" />
 					</p:selectBooleanCheckbox>
 				</p:column>
-				<p:column headerText="Action">
+				<p:column headerText="Action" width="150" >
 					<h:outputText value="#{task.category}" />
 				</p:column>
 				<p:column headerText="Customer">
@@ -318,18 +315,18 @@
 					<h:outputText value="Contact no: #{task.contact.phone}" />
 
 				</p:column>
-				<p:column headerText="Time">
+				<p:column headerText="Time" width="200">
 					<h:outputText value="#{task.time}">
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 					</h:outputText>
 				</p:column>
-				<p:column headerText="Detail">
+				<p:column headerText="Subject">
 					<h:outputText value="#{task.detail}" />
 				</p:column>
-				<p:column headerText="Status" styleClass="#{task.status == 'Overdue'? 'newMsg' : null}" >
+				<p:column headerText="Status" width="80">
 					<h:outputText value="#{task.status}" styleClass="#{task.status == 'Overdue'? 'overdue' : (task.status=='Done'? 'completed' : null)}"/>
 				</p:column>
-				<p:column headerText="Deal detail">
+				<p:column headerText="Deal detail" width="150">
 					<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
 							actionListener="#{scheduleController.startViewDealDetail(task)}" icon="ui-icon-search" title="View" rendered="#{task.actId gt 0}" />
 				</p:column>
@@ -348,6 +345,17 @@
 				<p:commandButton value="Reassign" actionListener="#{scheduleController.startReassignTask}" update=":form01:reassignArea" rendered="#{scheduleController.someTaskSelected}" />
 			</p:outputPanel>
 		</p:panel>
+
+		<p:ajaxStatus style="text-align: center;">
+			<f:facet name="start">
+				<h:outputText value="Loading" />
+				<br />
+				<p:graphicImage value="/images/loading.gif" />
+			</f:facet>
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
 
 		<p:overlayPanel widgetVar="carOP" showEffect="fade" hideEffect="fade" dismissable="false" showCloseIcon="true" style="max-width: 700px">
 			<p:outputPanel id="carDetail" style="text-align:center;">
@@ -548,6 +556,9 @@
 				<p:panelGrid columns="2">
 					<h:outputText value="Salesperson" />
 					<p:autoComplete value="#{scheduleController.reassigneeName}" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestUser}" />
+
+					<h:outputText value="Colleages free on that time" />
+					<p:dataList value="#{scheduleController.suggestedAssignee}" var="user">#{user.name}</p:dataList>
 				</p:panelGrid>
 				<p:commandButton value="Confirm" actionListener="#{scheduleController.confirmReassignment}" update=":form01:tbl1, :form01:tbl2, :form01:reassignArea" rendered="#{scheduleController.someMeetingSelected and scheduleController.assignMeetingMode}" />
 				<p:commandButton value="Confirm" actionListener="#{scheduleController.confirmTaskReassignment}" update=":form01:tbl4, :form01:taskTbl, :form01:reassignArea" rendered="#{scheduleController.someTaskSelected and scheduleController.assignTaskMode}" />

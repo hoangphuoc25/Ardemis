@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +38,7 @@ import rd.spec.service.ProductService;
 import rd.spec.service.SaleTargetService;
 import rd.spec.service.ScheduleTaskService;
 import rd.spec.service.UserService;
+import rd.utils.Pair;
 
 @Named
 @ConversationScoped
@@ -110,8 +113,11 @@ public class ActivityController implements Serializable {
 			if (dealSeq > 0) {
 				allAct = new ArrayList<ActivityDto>();
 				allAct.add(actService.getById(dealSeq));
-			} else
-				allAct = actService.findByStatus(showingMode, sessionManager.getLoginUser().getId());
+			} else {
+				allAct = actService.findByStatus("qualified", sessionManager.getLoginUser().getId());
+				allAct.addAll(actService.findByStatus("negotiating", sessionManager.getLoginUser().getId()));
+			}
+				// allAct = actService.findByStatus(showingMode, sessionManager.getLoginUser().getId());
 		}
 		return allAct;
 	}
@@ -442,11 +448,14 @@ public class ActivityController implements Serializable {
 		this.showingMode = showingMode;
 	}
 
-	private String showingMode = "Qualified";
+	private String showingMode = "Active";
 
 	public void updateAllAct() throws IOException {
 		if (showingMode.equalsIgnoreCase("all")) {
 			allAct = actService.getByUser(sessionManager.getLoginUser().getId());
+		} else if (showingMode.equalsIgnoreCase("active")) {
+			allAct = actService.findByStatus("qualified", sessionManager.getLoginUser().getId());
+			allAct.addAll(actService.findByStatus("negotiating", sessionManager.getLoginUser().getId()));
 		} else {
 			System.out.println(showingMode);
 			allAct = actService.findByStatus(showingMode, sessionManager.getLoginUser().getId());
@@ -504,10 +513,65 @@ public class ActivityController implements Serializable {
 			sessionManager.addGlobalMessageFatal("Time is required", null);
 			return;
 		}
+		if (suggestNextAvailableTime(newTask).getTime() != 0) {
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+			sessionManager.addGlobalMessageInfo("You're in a meeting at that time. Next available time is " + sdf.format(suggestNextAvailableTime(newTask)), null);
+			return;
+		}
 		taskService.addEvent(newTask);
 		newTask = new ScheduleTaskDto();
 		sessionManager.addGlobalMessageInfo("New task added", null);
 		addTaskMode = false;
+	}
+
+	public Date suggestNextAvailableTime(ScheduleTaskDto task) throws IOException {
+		List<MeetingDto> meetingsSameDay = meetingService.getMeetingByDayAndUser(sessionManager.getLoginUser().getId(), task.getTime());
+		List<Pair<Date, Integer>> time = new ArrayList<Pair<Date, Integer>>();
+		for (MeetingDto dto: meetingsSameDay) {
+			time.add(new Pair<Date, Integer>(dto.getFrom(), 1));
+			time.add(new Pair<Date, Integer>(dto.getTo(), 2));
+		}
+		time.add(new Pair<Date, Integer>(task.getTime(), 0));
+		Collections.sort(time, new Comparator<Pair<Date, Integer>>() {
+			public int compare(Pair<Date, Integer> first, Pair<Date, Integer> second) {
+				if (first.getFirst().compareTo(second.getFirst()) != 0) {
+					return first.getFirst().compareTo(second.getFirst());
+				} else {
+					return first.getSecond().compareTo(second.getSecond());
+				}
+			}
+		});
+		int count = 0;
+		for (int i = 0; i < time.size(); i++) {
+			Pair<Date, Integer> p = time.get(i);
+			if (p.getSecond() == 1) {
+				count++;
+			} else if (p.getSecond() == 2) {
+				count --;
+			} else if (p.getSecond() == 0) {
+				if (count == 0) {
+					return new Date(0);
+				} else {
+					for (int k = i + 1; k < time.size(); k++) {
+						if (time.get(k).getFirst().compareTo(time.get(i).getFirst()) == 0 && time.get(k).getSecond() == 2) {
+							return new Date(0);
+						} else if (time.get(k).getFirst().compareTo(p.getFirst()) > 0) {
+							break;
+						}
+					}
+					for (int k = i + 1; k < time.size(); k++) {
+						if (time.get(k).getSecond() == 1)
+							count++;
+						else if (time.get(k).getSecond() == 2)
+							count--;
+						if (count == 0) {
+							return time.get(k).getFirst();
+						}
+					}
+				}
+			}
+		}
+		return new Date(0);
 	}
 
 	public void cancelAddTask() {

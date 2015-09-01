@@ -8,6 +8,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import rd.dto.MeetingDto;
+import rd.dto.ScheduleTaskDto;
+import rd.dto.UserDto;
 import rd.spec.dao.MeetingDao;
 import rd.spec.dao.Transaction;
 import rd.spec.service.MeetingService;
@@ -143,6 +145,42 @@ public class MeetingServiceImpl implements MeetingService, Serializable {
 		try{
 			transaction.begin();
 			List<MeetingDto> result = meetingDao.getByIntervalAndUser(transaction, startDate, endDate, username);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<UserDto> searchUserFreeInTimeInterval(Date from, Date to) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<UserDto> result = meetingDao.searchUserFreeInTimeInterval(transaction, from, to);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<UserDto> searchUserFreeInTimeInterval(Date from, Date to, List<MeetingDto> list) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<UserDto> result = meetingDao.searchUserFreeInTimeInterval(transaction, from, to, list);
+			transaction.commit();
+			return result;
+		} catch (IOException e) {
+			transaction.rollback();
+			throw e;
+		}
+	}
+	public List<UserDto> searchUserFreeInTimeIntervalTask(Date from, Date to, List<ScheduleTaskDto> list) throws IOException {
+		// TODO: STUB CODE, MUST MODIFY, DELETE THIS LINE WHEN DONE
+		try{
+			transaction.begin();
+			List<UserDto> result = meetingDao.searchUserFreeInTimeIntervalTask(transaction, from, to, list);
 			transaction.commit();
 			return result;
 		} catch (IOException e) {

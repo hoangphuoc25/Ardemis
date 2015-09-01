@@ -526,8 +526,10 @@ public class SalespersonController implements Serializable {
 	public void updateContactList() throws IOException {
 		if (showingMode.equals("all"))
 			contactList = contactService.getAll();
-		else if (showingMode.equalsIgnoreCase("new"))
+		else if (showingMode.equalsIgnoreCase("new")) {
 			contactList = contactService.getByStatusAndUser(showingMode, sessionManager.getLoginUser().getId());
+			contactList.addAll(contactService.getByStatusAndUser("pre-qualified", sessionManager.getLoginUser().getId()));
+		}
 		else
 			contactList = contactService.getByStatus(showingMode);
 		purchasedProduct = "";

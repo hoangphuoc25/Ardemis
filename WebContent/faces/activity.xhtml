@@ -64,24 +64,22 @@
 			</p:dialog>
 		</p:outputPanel>
 
-		<p:commandButton value="Add new deal" actionListener="#{activityController.startAddNewDeal}" update=":form01:newDealArea" />
-
-
 		<br/>
 		<h:panelGrid columns="2">
 			<h:outputText value="Showing"/>
 			<p:selectOneMenu value="#{activityController.showingMode}">
 				<f:selectItem itemLabel="All deals" itemValue="all" />
-				<f:selectItem itemLabel="Qualified" itemValue="Qualified" />
-				<f:selectItem itemLabel="Completed" itemValue="Completed" />
-				<f:selectItem itemLabel="Negotiating" itemValue="Negotiating" />
-				<f:selectItem itemLabel="Failed" itemValue="Failed" />
+				<f:selectItem itemLabel="Active deals" itemValue="Active" />
+				<f:selectItem itemLabel="Qualified deals" itemValue="Qualified" />
+				<f:selectItem itemLabel="Completed deals" itemValue="Completed" />
+				<f:selectItem itemLabel="Negotiating deals" itemValue="Negotiating" />
+				<f:selectItem itemLabel="Failed deals" itemValue="Failed" />
 				<p:ajax event="change" listener="#{activityController.updateAllAct}" update=":form01" />
 			</p:selectOneMenu>
 		</h:panelGrid>
 
 
-		<p:fieldset legend="All deals">
+		<p:fieldset legend="#{activityController.showingMode} deals">
 			<p:dataTable id="tbl1" rowIndexVar="row" value="#{activityController.allAct}" var="act"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="10">
@@ -143,6 +141,8 @@
 			<p:commandButton value="Cancel" actionListener="#{activityController.cancelSearchByCustomer}" update="tbl1" />
 		</h:panelGrid>
 
+		<p:commandButton value="Add new deal" actionListener="#{activityController.startAddNewDeal}" update=":form01:newDealArea" />
+		<p:spacer width="7" />
 		<p:commandButton value="Go back" actionListener="#{activityController.goBack}"/>
 
 		<p:ajaxStatus style="text-align: center;">
@@ -221,7 +221,7 @@
 				<p:calendar value="#{activityController.newMeeting.from}" pattern="MM/dd/yyyy HH:mm" />
 				<h:outputText value="To" />
 				<p:calendar value="#{activityController.newMeeting.to}" pattern="MM/dd/yyyy HH:mm" />
-				<h:outputText value="Detail" />
+				<h:outputText value="Subject" />
 				<p:inputText value="#{activityController.newMeeting.detail}" />
 				<h:outputText value="Meeting location"/>
 				<p:outputPanel id="p4">
@@ -254,7 +254,7 @@
 				<h:outputText value="Time" />
 				<p:calendar value="#{activityController.newTask.time}" pattern="dd/MM/yyyy HH:mm" />
 
-				<h:outputText value="Detail" />
+				<h:outputText value="Subject" />
 				<p:inputTextarea value="#{activityController.newTask.detail}" />
 			</p:panelGrid>
 			<p:commandButton value="Add" actionListener="#{activityController.addTask}" update=":form01:newTaskDialog"/>
@@ -281,7 +281,7 @@
 							<p:column headerText="Action">
 								<h:outputText value="#{call.rating}" />
 							</p:column>
-							<p:column headerText="Detail">
+							<p:column headerText="Subject">
 								<h:outputText value="#{call.detail}" />
 							</p:column>
 
@@ -300,7 +300,7 @@
 									<f:convertDateTime pattern="dd/MM/yyyy" />
 								</h:outputText>
 							</p:column>
-							<p:column headerText="Detail">
+							<p:column headerText="Subject">
 								<h:outputText value="#{task.detail}" />
 							</p:column>
 						</p:dataTable>

@@ -300,6 +300,7 @@ public class UserDaoImpl implements UserDao {
 			while (resultSet.next()) {
 				UserDto userDto = makeUserDto(transaction, resultSet);
 				items.add(userDto);
+				userCache.put(userDto);
 			}
 			return items;
 		} catch (SQLException e) {
@@ -413,6 +414,7 @@ public class UserDaoImpl implements UserDao {
 			UserDto result = new UserDto();
 			while (resultSet.next()) {
 				result = makeUserDto(transaction, resultSet);
+				userCache.put(result);
 			}
 			return result;
 		} catch (SQLException e) {

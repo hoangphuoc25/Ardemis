@@ -10,6 +10,7 @@ public class SaleTargetDto {
 	private UserDto sale;
 	private int current;
 	private String unit;
+	private String status;
 
 	public SaleTargetDto(UserDto sale, String action, int target, Date fromDate, Date toDate, int current, String unit) {
 		this.target = target;
@@ -78,5 +79,13 @@ public class SaleTargetDto {
 
 	public void setAction(String action) {
 		this.action = action;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }

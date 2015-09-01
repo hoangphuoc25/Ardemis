@@ -13,6 +13,7 @@ public class MeetingDto {
 	private ContactDto contact;
 	private int actId;
 	private boolean selected;
+	private String status;
 
 	public Date getFrom() {
 		return from;
@@ -106,5 +107,13 @@ public class MeetingDto {
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }
