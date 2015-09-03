@@ -14,6 +14,7 @@ public class MeetingDto {
 	private int actId;
 	private boolean selected;
 	private String status;
+	private String estimatedTravelTime;
 
 	public Date getFrom() {
 		return from;
@@ -115,5 +116,13 @@ public class MeetingDto {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getEstimatedTravelTime() {
+		return estimatedTravelTime;
+	}
+
+	public void setEstimatedTravelTime(String estimatedTravelTime) {
+		this.estimatedTravelTime = estimatedTravelTime;
 	}
 }

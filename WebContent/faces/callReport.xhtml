@@ -60,13 +60,16 @@
 		        <div class="ui-grid-col-4">
 					<h3 style="font-family: Helvetica">Call record</h3>
 
-					<p:panelGrid columns="2">
+					<p:panelGrid columns="3">
 					</p:panelGrid>
 					<p:panelGrid id="panel" columns="2">
 						<h:outputText value="Contact name"/>
 						<p:autoComplete minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestContact}" value="#{callReportController.contactName}">
 							<p:ajax listener="#{callReportController.updateCallee}" event="itemSelect" update="panel"/>
 						</p:autoComplete>
+
+						<h:outputText value="Contact number" rendered="#{callReportController.callee != null}" />
+						<h:outputLink style="color: blue" value="skype:#{callReportController.callingNumber}" rendered="#{callReportController.callee != null}">#{callReportController.callee.phone}</h:outputLink>
 
 						<h:outputText value="Call time"/>
 						<p:calendar value="#{callReportController.callTime}" pattern="MM/dd/yyyy HH:mm"/>
@@ -130,6 +133,7 @@
 					<h:panelGrid columns="2">
 						<p:commandButton value="Submit" actionListener="#{callReportController.addNewReport}" update=":form01:panel" />
 						<p:commandButton value="Back" action="#{callReportController.goBack}" rendered="#{callReportController.back or callReportController.backMain}" />
+
 					</h:panelGrid>
 
 					<h:panelGrid columns="2">
@@ -501,7 +505,7 @@
 					<h:outputText value="Meeting end*" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
 					<p:calendar value="#{callReportController.newMeeting.to}" rendered="#{callReportController.rating == 'Follow-up meeting'}" pattern="dd/MM/yyyy HH:mm" />
 
-					<h:outputText value="Meeting detail" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
+					<h:outputText value="Subject" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
 					<p:inputTextarea value="#{callReportController.newMeeting.detail}" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
 
 					<h:outputText value="Meeting location" rendered="#{callReportController.rating == 'Follow-up meeting'}" />
@@ -554,11 +558,11 @@
 				<p:panelGrid columns="2">
 					<h:outputText value="Product" />
 					<p:outputPanel id="p7">
-						<p:autoComplete forceSelection="true" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestProduct}" value="#{quotesController.prodSearch}">
-							<p:ajax update="p7" event="itemSelect" listener="#{quotesController.addProdToList}" />
+						<p:autoComplete forceSelection="true" minQueryLength="3" maxResults="10" completeMethod="#{searchController.suggestProduct}" value="#{callReportController.quoteProductSearch}">
+							<p:ajax update="p7" event="itemSelect" listener="#{callReportController.addProdToQuoteList}" />
 						</p:autoComplete>
 
-						<p:dataTable rowIndexVar="row" value="#{quotesController.prodList}" var="prod">
+						<p:dataTable rowIndexVar="row" value="#{callReportController.quotesProductList}" var="prod">
 							<p:column headerText="Select" width="30">
 								<p:selectBooleanCheckbox value="#{prod.selected}" />
 							</p:column>
@@ -578,21 +582,23 @@
 									<f:selectItem itemLabel="12 months" itemValue="12" />
 									<f:selectItem itemLabel="24 months" itemValue="24" />
 									<f:selectItem itemLabel="Permanent" itemValue="0" />
-									<p:ajax update=":form01:p7" listener="#{quotesController.calculateTotal}" />
+									<p:ajax update=":form01:p7" listener="#{callReportController.calculateTotal}" />
 								</p:selectOneMenu>
 							</p:column>
 							<p:column headerText="Quantity">
 								<p:spinner value="#{prod.quantity}" min="1">
-									<p:ajax update=":form01:p7" listener="#{quotesController.calculateTotal}" />
+									<p:ajax update=":form01:p7" listener="#{callReportController.calculateTotal}" />
 								</p:spinner>
 							</p:column>
 						</p:dataTable>
 						<h:outputText value="Total: $" />
-						<h:outputText value="#{quotesController.total}">
+						<h:outputText value="#{callReportController.quotesTotal}">
 							<f:convertNumber pattern="###,###" />
 						</h:outputText>
 						<br/>
-						<p:commandButton value="Delete" actionListener="#{quotesController.removeSelected}" update="p7" />
+						<p:commandButton value="Delete" actionListener="#{callReportController.removeProductFromQuoteList}" update="p7" />
+						<br/>
+						<h:outputLink value="mailto:#{callReportController.emailLink}" rendered="#{callReportController.callee != null}">Send to customer</h:outputLink>
 					</p:outputPanel>
 				</p:panelGrid>
 				<p:commandButton value="Close" actionListener="#{callReportController.closeQuotes}" update=":form01:quotesArea" />

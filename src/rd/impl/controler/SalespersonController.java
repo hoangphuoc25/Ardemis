@@ -439,7 +439,7 @@ public class SalespersonController implements Serializable {
 		}
 		if (assigneeName == null || assigneeName.isEmpty()) {
 			newContact.setAssignee(sessionManager.getLoginUser());
-			contactList.add(newContact);
+			contactList.add(0, newContact);
 		} else {
 			UserDto assignee = userService.findUserById(assigneeName.split("[()]")[1]);
 			newContact.setAssignee(assignee);

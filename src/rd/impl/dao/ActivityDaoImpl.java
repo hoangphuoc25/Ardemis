@@ -51,11 +51,11 @@ public class ActivityDaoImpl implements ActivityDao {
 	private static String ADD_ACTIVITY 		= "insert into t_activity (seq, contact_seq, start_date, status, remark, salesperson) values (?, ?, ?, ?, ?, ?)";
 	private static String GET_BY_ID 		= "select seq, contact_seq, start_date, status, remark, salesperson from t_activity where seq=?";
 	private static String GET_SEQ 			= "select max(seq) + 1 from t_activity";
-	private static String GET_BY_USER 		= "select seq, contact_seq, start_date, status, remark, salesperson from t_activity where salesperson=?";
+	private static String GET_BY_USER 		= "select seq, contact_seq, start_date, status, remark, salesperson from t_activity where salesperson=? order by seq desc";
 	private static String DELETE_ACTIVITY 	= "delete from t_activity where seq=?";
 	private static String UPDATE_ACTIVITY 	= "update t_activity set contact_seq=?, start_date=?, status=?, remark=?, salesperson=? where seq=?";
-	private static String FIND_BY_STATUS 	= "select seq, contact_seq, start_date, status, remark, salesperson from t_activity where salesperson=? and lower(status)=?";
-	private static String GET_ACTIVE_DEAL 	= "select seq, contact_seq, start_date, status, remark, salesperson from t_activity where lower(status) <> ? and lower(status) <> ?";
+	private static String FIND_BY_STATUS 	= "select seq, contact_seq, start_date, status, remark, salesperson from t_activity where salesperson=? and lower(status)=? order by seq desc";
+	private static String GET_ACTIVE_DEAL 	= "select seq, contact_seq, start_date, status, remark, salesperson from t_activity where lower(status) <> ? and lower(status) <> ? order by seq desc";
 	private static String ADD_DEAL_PRODUCT	= "insert into t_deal_product (deal_seq, product_seq) values (?, ?)";
 	private static String DELETE_DEAL_PRODUCT= "delete from t_deal_product where deal_seq=?";
 	private static String GET_PRODUCT_BY_DEAL = "select distinct product_seq from t_deal_product where deal_seq=?";

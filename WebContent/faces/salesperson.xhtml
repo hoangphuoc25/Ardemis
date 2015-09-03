@@ -109,27 +109,21 @@
 
 		<p:fieldset legend="Your sale target">
 			<p:panelGrid columns="3">
-				<h:outputText value="Your sale goal" />
+				<h:outputText value="Your goal" />
 				<h:outputText value="#{scheduleController.std.action} #{scheduleController.std.target} #{scheduleController.std.unit}" />
 				<h:outputText value="" />
-				<h:outputText value="Your current sale record" />
-				<h:outputText value="#{scheduleController.std.current} #{scheduleController.std.unit} (#{scheduleController.percentage} %)" />
-				<h:outputText value="" />
-				<h:outputText value="Remaining " />
-				<h:outputText value="#{scheduleController.std.target - scheduleController.std.current ge 0? scheduleController.std.target - scheduleController.std.current : 0} #{scheduleController.std.unit} (#{100 - scheduleController.percentage} %)" />
 
+				<h:outputText value="Progress" />
+				<p:outputPanel>
+					<h:outputText value="Achieved #{scheduleController.std.current} #{scheduleController.std.unit} (#{scheduleController.percentage} %)" />
+					<h:outputText value=" over #{scheduleController.daysPassed} days (#{scheduleController.percentTimePassed}%)" />
+					<br/>
+					<h:outputText value="#{scheduleController.std.status}" styleClass="#{scheduleController.std.status == 'Good progress'? 'alert-info' : 'alert-danger'}" />
+				</p:outputPanel>
 				<p:menuButton value="Actions">
 					<p:menuitem value="See all active deals" url="activity.jsf" />
 					<p:menuitem value="Find new customer" url="contactList.jsf?status=new" target="_blank" />
 				</p:menuButton>
-
-				<h:outputText value="Remaining time" />
-				<h:outputText value="#{scheduleController.remainingDays} days" />
-				<h:outputText value="" />
-
-				<h:outputText value="Progress" />
-				<h:outputText value="#{scheduleController.std.status}" styleClass="#{scheduleController.std.status == 'good'? 'alert-info' : 'alert-danger'}" />
-				<h:outputText value="" />
 			</p:panelGrid>
 		</p:fieldset>
 
@@ -142,10 +136,55 @@
 				<p:commandButton value="Search" actionListener="#{scheduleController.searchSchedule}" update="toggleable" />
 				<p:commandButton value="Reset" actionListener="#{scheduleController.resetSearchSchedule}" update="toggleable" />
 			</h:panelGrid>
+			<p:dataTable id="tbl2" rowIndexVar="row" value="#{scheduleController.events}" var="event" rendered="#{not scheduleController.scheduleSearchMode}"
+					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
+					rows="8" styleClass="myTable" sortBy="#{event.from}">
+				<p:column width="30">
+					<f:facet name="header">
+						<p:selectBooleanCheckbox value="#{scheduleController.allEventsSelect}">
+							<p:ajax update=":form01:tbl2, :form01:buttons" listener="#{scheduleController.updateAllEventsSelect}" />
+						</p:selectBooleanCheckbox>
+					</f:facet>
+					<p:selectBooleanCheckbox value="#{event.selected}">
+						<p:ajax update=":form01:buttons" listener="#{scheduleController.updateButtons}" />
+					</p:selectBooleanCheckbox>
+				</p:column>
+				<p:column headerText="Time" width="100">
+					<h:outputText value="#{event.from}">
+						<f:convertDateTime pattern="HH:mm" />
+					</h:outputText>
+					<h:outputText value=" - " />
+					<h:outputText value="#{event.to}">
+						<f:convertDateTime pattern="HH:mm" />
+					</h:outputText>
+				</p:column>
+
+				<p:column headerText="Subject">
+					<h:outputText value="#{event.detail}" />
+				</p:column>
+				<p:column headerText="Customer">
+					<h:outputText value="#{event.contact.name}" />
+				</p:column>
+				<p:column headerText="Location">
+					<h:outputText value="#{event.location}" />
+					<br/>
+					<h:outputText value="Estimated travel time: #{event.estimatedTravelTime}" />
+				</p:column>
+				<p:column headerText="Deal detail" width="120">
+					<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
+							actionListener="#{scheduleController.startViewDetail(event)}" icon="fa fa-search" title="View" rendered="#{event.actId > 0}" />
+				</p:column>
+				<p:column headerText="Action">
+				    <p:splitButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01:tbl2">
+						<p:menuitem value="Edit" actionListener="#{scheduleController.startEditMeeting(event)}" update=":form01:editMeetingArea" />
+				    </p:splitButton>
+					<a href="activity.jsf?seq=#{event.actId}" style="color: blue; text-decoraton: underline;">Update deal</a>
+				</p:column>
+			</p:dataTable>
 			<p:dataTable id="tbl1" rowIndexVar="row" value="#{scheduleController.searchedMeetings}" var="event" rendered="#{scheduleController.scheduleSearchMode}"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="8"  sortBy="#{event.from}">
-				<p:column width="80">
+				<p:column width="30">
 					<f:facet name="header">
 						<p:selectBooleanCheckbox value="#{scheduleController.allSearchedMeetingsSelect}">
 							<p:ajax update=":form01:tbl1, :form01:buttons" listener="#{scheduleController.updateAllSearchedMeetingsSelect}" />
@@ -172,56 +211,13 @@
 				</p:column>
 				<p:column headerText="Location">
 					<h:outputText value="#{event.location}" />
+					<br/>
+					<h:outputText value="Estimated travel time: #{event.estimatedTravelTime}" />
 				</p:column>
 				<p:column headerText="Action">
 				    <p:splitButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01:tbl1">
 						<p:menuitem value="Edit" actionListener="#{scheduleController.startEditMeeting(event)}" update=":form01:editMeetingArea" />
 				    </p:splitButton>
-					<p:commandButton value="Reassign" actionListener="#{scheduleController.updateSuggestedAssignee(event)}" update=":form01:reassignArea" />
-					<a href="activity.jsf?seq=#{event.actId}" style="color: blue; text-decoraton: underline;">Update deal</a>
-				</p:column>
-			</p:dataTable>
-			<p:dataTable id="tbl2" rowIndexVar="row" value="#{scheduleController.events}" var="event" rendered="#{not scheduleController.scheduleSearchMode}"
-					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-					rows="8" styleClass="myTable" sortBy="#{event.from}">
-				<p:column width="80">
-					<f:facet name="header">
-						<p:selectBooleanCheckbox value="#{scheduleController.allEventsSelect}">
-							<p:ajax update=":form01:tbl2, :form01:buttons" listener="#{scheduleController.updateAllEventsSelect}" />
-						</p:selectBooleanCheckbox>
-					</f:facet>
-					<p:selectBooleanCheckbox value="#{event.selected}">
-						<p:ajax update=":form01:buttons" listener="#{scheduleController.updateButtons}" />
-					</p:selectBooleanCheckbox>
-				</p:column>
-				<p:column headerText="Time">
-					<h:outputText value="#{event.from}">
-						<f:convertDateTime pattern="HH:mm" />
-					</h:outputText>
-					<h:outputText value=" - " />
-					<h:outputText value="#{event.to}">
-						<f:convertDateTime pattern="HH:mm" />
-					</h:outputText>
-				</p:column>
-
-				<p:column headerText="Subject">
-					<h:outputText value="#{event.detail}" />
-				</p:column>
-				<p:column headerText="Customer">
-					<h:outputText value="#{event.contact.name}" />
-				</p:column>
-				<p:column headerText="Location">
-					<h:outputText value="#{event.location}" />
-				</p:column>
-				<p:column headerText="Deal detail">
-					<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
-							actionListener="#{scheduleController.startViewDetail(event)}" icon="ui-icon-search" title="View" rendered="#{event.actId > 0}" />
-				</p:column>
-				<p:column headerText="Action">
-				    <p:splitButton value="Delete" actionListener="#{scheduleController.remove(event)}" update=":form01:tbl2">
-						<p:menuitem value="Edit" actionListener="#{scheduleController.startEditMeeting(event)}" update=":form01:editMeetingArea" />
-				    </p:splitButton>
-				    <p:commandButton value="Reassign" actionListener="#{scheduleController.updateSuggestedAssignee(event)}" update=":form01:reassignArea" />
 					<a href="activity.jsf?seq=#{event.actId}" style="color: blue; text-decoraton: underline;">Update deal</a>
 				</p:column>
 			</p:dataTable>
@@ -253,7 +249,7 @@
 			<p:dataTable id="tbl4" rowIndexVar="row" value="#{scheduleController.searchedTasks}" var="task" rendered="#{scheduleController.taskSearchMode}"
 					paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 					rows="8">
-				<p:column width="80">
+				<p:column width="30">
 					<f:facet name="header">
 						<p:selectBooleanCheckbox value="#{scheduleController.allSearchedTasksSelect}">
 							<p:ajax update=":form01:tbl4, :form01:taskButtons" listener="#{scheduleController.updateAllSearchedTasksSelect}" />
@@ -269,8 +265,8 @@
 				<p:column headerText="Customer">
 					<h:outputText value="#{task.contact.name}" />
 					<br/>
-					<h:outputText value="Contact no: #{task.contact.phone}" />
-
+					<h:outputText value="Contact no: #{task.contact.phone}" rendered="#{task.category == 'Follow-up call' or task.category == 'Call back again' or task.category == 'Call' or task.category == 'Call again'}"/>
+					<h:outputText value="Email: #{task.contact.email}" rendered="#{task.category == 'Email'}" />
 				</p:column>
 				<p:column headerText="Time">
 					<h:outputText value="#{task.time}">
@@ -290,7 +286,8 @@
 					<p:commandButton value="Reassign" actionListener="#{scheduleController.startReassign(task)}" update=":form01:reassignArea" />
 					<h:outputLink value="callReport.jsf?contactSeq=#{task.contact.seq}&amp;backMain=true&amp;dealId=#{task.actId}&amp;taskId=#{task.seq}"
 							style="color: blue;" rendered="#{(task.category == 'Follow-up call' or task.category == 'Call back again' or task.category == 'Call' or task.category == 'Call again') and task.status != 'Done'}">Call</h:outputLink>
-					<p:commandButton value="Mask as done" actionListener="#{scheduleController.markAsDone(task)}" upate=":form01:tasks" rendered="#{task.status != 'Done' and task.category == 'Email'}" />
+					<p:commandButton style="color: blue" value="Mark as done" actionListener="#{scheduleController.markAsDone(task)}" upate=":form01:tasks" rendered="#{task.status != 'Done' and task.category == 'Email'}" />
+					<h:outputLink style="color: blue" value="mailto:#{task.contact.email}" rendered="#{task.category == 'Email'}">Send email</h:outputLink>
 				</p:column>
 			</p:dataTable>
 			<p:dataTable id="taskTbl" rowIndexVar="row" value="#{scheduleController.tasks}" var="task" rendered="#{not scheduleController.taskSearchMode}"
@@ -312,7 +309,8 @@
 				<p:column headerText="Customer">
 					<h:outputText value="#{task.contact.name}" />
 					<br/>
-					<h:outputText value="Contact no: #{task.contact.phone}" />
+					<h:outputText value="Contact no: #{task.contact.phone}" rendered="#{task.category == 'Follow-up call' or task.category == 'Call back again' or task.category == 'Call' or task.category == 'Call again'}"/>
+					<h:outputText value="Email: #{task.contact.email}" rendered="#{task.category == 'Email'}" />
 
 				</p:column>
 				<p:column headerText="Time" width="200">
@@ -326,16 +324,18 @@
 				<p:column headerText="Status" width="80">
 					<h:outputText value="#{task.status}" styleClass="#{task.status == 'Overdue'? 'overdue' : (task.status=='Done'? 'completed' : null)}"/>
 				</p:column>
-				<p:column headerText="Deal detail" width="150">
+				<p:column headerText="Deal detail" width="120">
 					<p:commandButton update=":form01:carDetail" oncomplete="PF('carOP').show('#{component.clientId}')"
-							actionListener="#{scheduleController.startViewDealDetail(task)}" icon="ui-icon-search" title="View" rendered="#{task.actId gt 0}" />
+							actionListener="#{scheduleController.startViewDealDetail(task)}" icon="fa fa-search" title="View" rendered="#{task.actId gt 0}" />
 				</p:column>
 				<p:column headerText="Action">
-					<p:commandButton value="Delete" actionListener="#{scheduleController.deleteTask(task)}" update=":form01:tasks" rendered="#{task.status != 'Done'}" />
-					<p:commandButton value="Edit" actionListener="#{scheduleController.startEditTask(task)}" update=":form01" rendered="#{task.status != 'Done'}" />
+					<p:splitButton value="Edit" actionListener="#{scheduleController.startEditTask(task)}" update=":form01" rendered="#{task.status != 'Done'}">
+						<p:menuitem value="Delete" actionListener="#{scheduleController.deleteTask(task)}" update=":form01:tasks" rendered="#{task.status != 'Done'}" />
+					</p:splitButton>
 					<h:outputLink value="callReport.jsf?contactSeq=#{task.contact.seq}&amp;backMain=true&amp;dealId=#{task.actId}&amp;taskId=#{task.seq}"
 							style="color: blue;" rendered="#{(task.category == 'Follow-up call' or task.category == 'Call back again' or task.category == 'Call' or task.category == 'Call again') and task.status != 'Done'}">Call</h:outputLink>
 					<p:commandButton value="Mask as done" actionListener="#{scheduleController.markAsDone(task)}" upate=":form01:tasks" rendered="#{task.status != 'Done' and task.category == 'Email'}" />
+					<h:outputLink style="color: blue" value="mailto:#{task.contact.email}" rendered="#{task.category == 'Email'}">Send email</h:outputLink>
 				</p:column>
 			</p:dataTable>
 			<br/>
@@ -378,7 +378,7 @@
 					<p:dataList value="#{scheduleController.relatedPromotions}" var="promo">
 						#{promo.name}
 						<p:commandButton update=":form01:promoDetail" oncomplete="PF('promoOP').show('#{component.clientId}')"
-							actionListener="#{scheduleController.startViewPromoDetail(promo)}" icon="ui-icon-search" title="View" />
+							actionListener="#{scheduleController.startViewPromoDetail(promo)}" icon="fa fa-search" title="View" />
 					</p:dataList>
 
 					<h:outputText value="Related products" />

@@ -1,7 +1,11 @@
 package rd.impl.controler;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -21,6 +25,11 @@ import javax.inject.Named;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultScheduleModel;
 import org.primefaces.model.ScheduleModel;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import rd.dto.ActivityDto;
 import rd.dto.CompanyDto;
@@ -224,6 +233,11 @@ public class ScheduleController implements Serializable {
 	public List<MeetingDto> getEvents() throws IOException {
 		if (events == null) {
 			events = meetingService.getMeetingToday(sessionManager.getLoginUser().getId());
+
+			for (int i = 0; i < events.size(); i++) {
+				int travelTime = 20 + (int)(Math.random()*40);
+				events.get(i).setEstimatedTravelTime(travelTime + " minutes");
+			}
 		}
 		return events;
 	}
@@ -340,11 +354,11 @@ public class ScheduleController implements Serializable {
 			std = stService.getSaleTarget(sessionManager.getLoginUser().getId());
 			int dayPassed = (int) (((new Date()).getTime() - std.getFromDate().getTime()) / 86400);
 			int totalDays = (int) ((std.getToDate().getTime() - std.getFromDate().getTime()) / 86400);
-			double percentTime = Math.floor((double) dayPassed / (double) totalDays * 10000) / 100;
-			if (percentTime < getPercentage()) {
-				std.setStatus("good");
+			percentTimePassed = Math.floor((double) dayPassed / (double) totalDays * 10000) / 100;
+			if (percentTimePassed < getPercentage()) {
+				std.setStatus("Good progress");
 			} else {
-				std.setStatus("need attention");
+				std.setStatus("Need attention");
 			}
 		}
 		return std;
@@ -1254,9 +1268,9 @@ public class ScheduleController implements Serializable {
 		editMeetingMode = false;
 	}
 
-	public int getRemainingDays() {
+	public int getRemainingDays() throws IOException {
 		if (remainingDays == 0)
-			remainingDays = (int) ((std.getToDate().getTime() - (new Date()).getTime())/ 86400000);
+			remainingDays = (int) ((getStd().getToDate().getTime() - (new Date()).getTime())/ 86400000);
 		return remainingDays;
 	}
 
@@ -1264,7 +1278,28 @@ public class ScheduleController implements Serializable {
 		this.remainingDays = remainingDays;
 	}
 
+	public int getDaysPassed() throws IOException {
+		if (daysPassed == 0) {
+			daysPassed = (int) (((new Date()).getTime() - getStd().getFromDate().getTime())/ 86400000);
+		}
+		return daysPassed;
+	}
+
+	public void setDaysPassed(int daysPassed) {
+		this.daysPassed = daysPassed;
+	}
+
+	public double getPercentTimePassed() {
+		return percentTimePassed;
+	}
+
+	public void setPercentTimePassed(double percentTimePassed) {
+		this.percentTimePassed = percentTimePassed;
+	}
+
 	private int remainingDays;
+	private int daysPassed;
+	private double percentTimePassed;
 
 	public void updateSuggestedAssignee(List<MeetingDto> list) throws IOException {
 		List<Pair<Date, Integer>> time = new ArrayList<Pair<Date, Integer>>();
@@ -1311,4 +1346,23 @@ public class ScheduleController implements Serializable {
 	}
 
 	private List<UserDto> suggestedAssignee;
+
+	public String gmaptest(String ori, String dest) throws IOException {
+		String link = "http://maps.googleapis.com/maps/api/distancematrix/json?origins="+ori+"&destinations="+dest+"&mode=driving&sensor=false";
+		link = link.replace(" ", "%20");
+		System.out.println(link);
+		URL url = new URL(link);
+	    HttpURLConnection request = (HttpURLConnection) url.openConnection();
+	    request.connect();
+	    System.out.println(link);
+
+	    JsonParser jp = new JsonParser(); //from gson
+	    JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
+	    JsonObject rootobj = root.getAsJsonObject(); //May be an array, may be an object.
+	    JsonArray rows = rootobj.getAsJsonArray("rows");
+	    JsonArray elements = rows.get(0).getAsJsonObject().get("elements").getAsJsonArray();
+	    JsonObject duration = elements.get(0).getAsJsonObject().get("duration").getAsJsonObject();
+	    String text = duration.get("text").getAsString();
+	    return text;
+	}
 }

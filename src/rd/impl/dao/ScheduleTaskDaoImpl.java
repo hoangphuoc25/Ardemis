@@ -34,7 +34,7 @@ public class ScheduleTaskDaoImpl implements ScheduleTaskDao {
 	private static String GET_BY_USER_TODAY = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where username=? and time>=? and time<? order by time asc";
 	private static String GET_BY_COMPANY = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where contact_seq=?";
 	private static String GET_BY_CONTACT = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where contact_seq=?";
-	private static String GET_BY_DEAL 	 = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where activity_seq=?";
+	private static String GET_BY_DEAL 	 = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where activity_seq=? order by time desc";
 	private static String GET_TASK_NEXT_WEEK_BY_USER = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where username=? and time>=? and time<? order by time asc";
 	private static String GET_BY_USER_AND_DATE = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where username=? and time>=? and time<? order by time asc";
 	private static String GET_BY_USER_AND_STATUS = "select seq, category, contact_seq, time, username, detail, activity_seq, status from t_event where username=? and status=?";

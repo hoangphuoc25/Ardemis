@@ -33,6 +33,7 @@ public class DatabaseUtil {
 	private List<String> ticketStatus;
 	private Map<Integer, TeamDto> teamList;
 	private List<SelectItem> teams;
+	private List<String> industry;
 
 	@Inject private RoleService roleService;
 	@Inject private TeamService teamService;
@@ -175,6 +176,17 @@ public class DatabaseUtil {
 
 	public void setTeams(List<SelectItem> teams) {
 		this.teams = teams;
+	}
+
+	public List<String> getIndustry() {
+		if (industry == null) {
+			industry = new ArrayList<String>(Arrays.asList("accountant / tax firm", "automotive", "design service", "goverment sector", "consulting", "material", "hardware engineering"));
+		}
+		return industry;
+	}
+
+	public void setIndustry(List<String> industry) {
+		this.industry = industry;
 	}
 
 	private List<SelectItem> prods;

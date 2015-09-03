@@ -39,15 +39,15 @@ public class CallReportDaoImpl implements CallReportDao {
 		this.contactDao = contactDao;
 	}
 
-	private static String GET_ALL 				= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq from t_call_report order by call_time desc";
+	private static String GET_ALL 				= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq from t_call_report order by seq desc";
 	private static String DELETE_CALL_REPORT 	= "delete from t_call_report where seq=?";
 	private static String GET_SEQ 				= "select max(seq)+1 from t_call_report";
 	private static String ADD_REPORT 			= "insert into t_call_report (seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq) values (?, ?, ?, ?, ?, ?, ?, ?)";
 	private static String GET_BY_ID 			= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq from t_call_report where seq=?";
 	private static String UPDATE_CALL_REPORT 	= "update t_call_report set contact_seq=?, call_time=?, detail=?, rating=?, sale_id=?, call_back=?, activity_seq=? where seq=?";
 	private static String GET_BY_COMPANY_ID 	= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq from t_call_report where contact_seq=? order by call_time desc";
-	private static String GET_BY_CONTACT 		= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq from t_call_report where contact_seq=?";
-	private static String GET_BY_DEAL 			= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq from t_call_report where activity_seq=?";
+	private static String GET_BY_CONTACT 		= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq from t_call_report where contact_seq=? order by seq desc";
+	private static String GET_BY_DEAL 			= "select seq, contact_seq, call_time, detail, rating, sale_id, call_back, activity_seq from t_call_report where activity_seq=? order by seq desc";
 	private static String COUNT_REPORT_BY_USER_AND_TIME = "select count(distinct seq) from t_call_report where sale_id=? and call_time>=? and call_time<?";
 
 	public void addReport(Transaction transaction, CallReportDto report) throws IOException {

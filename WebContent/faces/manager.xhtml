@@ -62,14 +62,14 @@
 				rows="15">
 			<p:column headerText="From">
 				<h:outputText value="#{event.from}">
-					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					<f:convertDateTime pattern="HH:mm" />
 				</h:outputText>
 				<h:outputText value=" - " />
 				<h:outputText value="#{event.to}">
-					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					<f:convertDateTime pattern="HH:mm" />
 				</h:outputText>
 			</p:column>
-			<p:column headerText="Detail">
+			<p:column headerText="Subject">
 				<h:outputText value="#{event.detail}" />
 			</p:column>
 			<p:column headerText="Customer">
@@ -140,17 +140,17 @@
 					<p:column headerText="Phone" width="100">
 						<h:outputText value="#{sale.phone}" />
 					</p:column>
-					<p:column table="Link">
+					<p:column headerText="Action">
 						<p:commandButton value="Expense" actionListener="#{managerController.viewExpense(sale)}" update=":form01" />
-						<p:spacer width="7px" />
+						<p:spacer width="5px" />
 						<p:commandButton value="Schedule" actionListener="#{managerController.startViewMeeting(sale)}" update=":form01:empScheduleArea" />
-						<p:spacer width="7px" />
+						<p:spacer width="5px" />
 						<p:commandButton value="Assign task" actionListener="#{managerController.startAssign(sale)}" update=":form01" />
-						<p:spacer width="7px" />
+						<p:spacer width="5px" />
 						<p:commandButton value="Deals" actionListener="#{managerController.viewActivity(sale)}" update=":form01:activityArea" />
-						<p:spacer width="7px" />
+						<p:spacer width="5px" />
 						<p:commandButton value="Sale Record" actionListener="#{managerController.startViewSaleRecord(sale)}" update=":form01:saleRecordArea" />
-						<p:spacer width="7px" />
+						<p:spacer width="5px" />
 						<p:commandButton value="Assign sale target" actionListener="#{managerController.startAssignEmpSaleTarget(sale)}" update=":form01:empSaleTargetArea" />
 					</p:column>
 				</p:dataTable>
@@ -277,7 +277,7 @@
 			<p:panelGrid columns="2">
 				<h:outputText value="Assignee" />
 				<h:outputText value="#{managerController.assignee.name}" />
-				<h:outputText value="Detail" />
+				<h:outputText value="Subject" />
 				<p:inputTextarea value="#{managerController.taskDetail}" />
 			</p:panelGrid>
 			<br/>
@@ -285,7 +285,7 @@
 			<p:commandButton value="Cancel" actionListener="#{managerController.cancel}" onclick="assignDialog_w.hide()" />
 		</p:dialog>
 
-		<p:dialog id="expenseDialog" closable="false" visible="#{managerController.viewExpenseMode}"
+		<p:dialog id="expenseDialog" closable="false" visible="#{managerController.viewExpenseMode}" width="800"
 				widgetVar="expenseDialog_w" modal="true" resizable="false" draggable="true" header="Expense">
 			<p:commandButton value="Close" actionListener="#{managerController.cancelViewExpense}" update=":form01" />
 			<p:commandButton value="Download as Excel" ajax="false" >
@@ -516,7 +516,7 @@
 				<p:panelGrid columns="2">
 					<p:dataTable id="tbl5" rowIndexVar="row" value="#{managerController.empMeeting}" var="event"
 							paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
-							rows="15" >
+							rows="8" >
 						<p:column headerText="From">
 							<h:outputText value="#{event.from}">
 								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
@@ -526,7 +526,7 @@
 								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 							</h:outputText>
 						</p:column>
-						<p:column headerText="Detail">
+						<p:column headerText="Subject">
 							<h:outputText value="#{event.detail}" />
 						</p:column>
 						<p:column headerText="Customer">

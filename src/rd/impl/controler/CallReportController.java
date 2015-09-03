@@ -1,7 +1,13 @@
 package rd.impl.controler;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -20,6 +26,11 @@ import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import rd.dto.ActivityDto;
 import rd.dto.CallReportDto;
@@ -178,7 +189,8 @@ public class CallReportController implements Serializable {
 			}
 			if (getCurrentDeal() == null) {
 				int actSeq = actService.getSeq();
-				ActivityDto act = new ActivityDto(actSeq, callee, new Date(), "Qualified", "Deal started", sessionManager.getLoginUser(), selectedProdList);
+				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+				ActivityDto act = new ActivityDto(actSeq, callee, new Date(), "Qualified", sdf.format(new Date()) + ": Deal started", sessionManager.getLoginUser(), selectedProdList);
 				actService.addActivity(act);
 				sessionManager.addGlobalMessageInfo("New deal added", null);
 
@@ -1252,6 +1264,7 @@ public class CallReportController implements Serializable {
 		}
 		relatedPromotions.addAll(tempSet);
 		relatedProducts.addAll(tempSet2);
+
 	}
 
 	public void startViewPromoDetail(PromotionDto promo) throws IOException {
@@ -1290,5 +1303,114 @@ public class CallReportController implements Serializable {
 	public void findRelatedTasks() throws IOException {
 		relatedCallRecords = crService.getByContact(callee.getSeq());
 		relatedTasks = stService.getByContact(callee.getSeq());
+	}
+
+	public String getCallingNumber() {
+		if (callee != null) {
+			callingNumber = callee.getPhone().replace(" ", "");
+		}
+		return callingNumber;
+	}
+
+	public void setCallingNumber(String callingNumber) {
+		this.callingNumber = callingNumber;
+	}
+
+	public List<ProductDto> getQuotesProductList() {
+		return quotesProductList;
+	}
+
+	public void setQuotesProductList(List<ProductDto> quotesProductList) {
+		this.quotesProductList = quotesProductList;
+	}
+
+	public int getQuotesTotal() {
+		return quotesTotal;
+	}
+
+	public void setQuotesTotal(int quotesTotal) {
+		this.quotesTotal = quotesTotal;
+	}
+
+	public String getQuoteProductSearch() {
+		return quoteProductSearch;
+	}
+
+	public void setQuoteProductSearch(String quoteProductSearch) {
+		this.quoteProductSearch = quoteProductSearch;
+	}
+
+	private String callingNumber;
+
+	private List<ProductDto> quotesProductList = new ArrayList<ProductDto>();
+	private int quotesTotal;
+	private String quoteProductSearch;
+	private String emailLink;
+
+	public void calculateTotal() {
+		quotesTotal = 0;
+		for (ProductDto dto: quotesProductList) {
+			if (dto.getDuration() == 0) {
+				quotesTotal += dto.getPermanentPrice() * dto.getQuantity();
+			} else {
+				quotesTotal += dto.getPrice() * dto.getQuantity() * dto.getDuration();
+			}
+		}
+	}
+
+	public void addProdToQuoteList() throws NumberFormatException, IOException {
+		ProductDto temp = prodService.getProductById(Integer.parseInt(quoteProductSearch.split("[()]")[1]));
+		selectedProdList.add(temp);
+		quotesProductList.add(temp);
+		calculateTotal();
+		if (callee != null)
+			updateEmailLink();
+		quoteProductSearch = "";
+	}
+
+	public void removeProductFromQuoteList() {
+		for (int i = quotesProductList.size() - 1; i >= 0; i--) {
+			if (quotesProductList.get(i).isSelected()) {
+				quotesProductList.remove(i);
+			}
+		}
+		calculateTotal();
+	}
+
+	public void updateEmailLink() throws IOException {
+		emailLink = "";
+		if (callee != null) {
+			emailLink += callee.getEmail();
+		}
+		emailLink += "?Subject=Product quotes";
+		emailLink += "&body=";
+		emailLink += "Dear ";
+		if (callee.getGender().equalsIgnoreCase("male")) {
+			emailLink += "Mr. ";
+		} else {
+			emailLink += "Ms. ";
+		}
+		emailLink += callee.getName() +  ",\n";
+		emailLink += "Thank you for your interest in our products. Below is our offer price for the products you requested:\n\n";
+		emailLink += "Product Name                 |    License type              |    Quantity    | Price per license (SGD)  |  Price (SGD)\n";
+		for (ProductDto dto: quotesProductList) {
+			if (dto.getDuration() == 0)
+				emailLink += dto.getName() + "   |   Permanent license   |   " + dto.getQuantity() + " | " + dto.getPermanentPrice() + "  | " + dto.getPermanentPrice()*dto.getQuantity() + "\n";
+			else
+				emailLink += dto.getName() + "   |   " + dto.getDuration() +"-months license         |   " + dto.getQuantity() + " | " + dto.getPrice() + " | "  +dto.getPrice()*dto.getDuration()*dto.getQuantity() + "\n";
+		}
+		emailLink += "Total : " + quotesTotal + "SGD. \n";
+		emailLink += "\nYours sincerely,\n";
+		emailLink += sessionManager.getLoginUser().getName();
+		emailLink.replace(" ", "%20");
+		emailLink.replace("\n", "%0D%0A");
+	}
+
+	public String getEmailLink() {
+		return emailLink;
+	}
+
+	public void setEmailLink(String emailLink) {
+		this.emailLink = emailLink;
 	}
 }

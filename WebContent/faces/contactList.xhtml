@@ -70,6 +70,19 @@
 		<h:messages infoClass="alert alert-success" errorClass="alert alert-error" fatalClass="alert alert-block" />
 		<br/>
 		<p:commandButton value="Add new customer" actionListener="#{salespersonController.startAddContact}" update=":form01:contactArea" />
+		<h:panelGrid columns="2">
+			<h:outputText value="Showing" />
+			<p:selectOneMenu value="#{salespersonController.showingMode}">
+				<f:selectItem itemLabel="All customers" itemValue="all" />
+				<f:selectItem itemLabel="Uncontacted customers" itemValue="new" />
+				<f:selectItem itemLabel="Pre-qualified customers" itemValue="pre-qualified" />
+				<f:selectItem itemLabel="Qualified customers" itemValue="qualified" />
+				<f:selectItem itemLabel="Unqualified customers" itemValue="unqualified" />
+				<f:selectItem itemLabel="Unresponsive customers" itemValue="unresponsive" />
+				<p:ajax event="change" listener="#{salespersonController.updateContactList}" update=":form01:panel1" />
+			</p:selectOneMenu>
+		</h:panelGrid>
+		<br/>
 
 		<p:panelGrid id="panel1" columns="1">
 			<p:dataTable id="table1" rowIndexVar="row" value="#{salespersonController.contactList}" var="contact"
@@ -111,19 +124,7 @@
 			</p:dataTable>
 		</p:panelGrid>
 
-		<h:panelGrid columns="2">
-			<h:outputText value="Showing" />
-			<p:selectOneMenu value="#{salespersonController.showingMode}">
-				<f:selectItem itemLabel="All customers" itemValue="all" />
-				<f:selectItem itemLabel="Uncontacted customers" itemValue="new" />
-				<f:selectItem itemLabel="Pre-qualified customers" itemValue="pre-qualified" />
-				<f:selectItem itemLabel="Qualified customers" itemValue="qualified" />
-				<f:selectItem itemLabel="Unqualified customers" itemValue="unqualified" />
-				<f:selectItem itemLabel="Unresponsive customers" itemValue="unresponsive" />
-				<p:ajax event="change" listener="#{salespersonController.updateContactList}" update=":form01:panel1" />
-			</p:selectOneMenu>
-		</h:panelGrid>
-		<br/>
+
 
 		<p:panelGrid columns="3">
 			<h:outputText value="Contact name" />
