@@ -56,7 +56,7 @@
 			<a href="#form01:tbl3">You have <span class="badge badge-success">#{managerController.newNotes}</span> unread message(s).</a>
 		</p:outputPanel>
 		<br/>
-		<p:fieldset legend="Employee' today schedule">
+		<p:fieldset legend="Employees' today schedule">
 		<p:dataTable id="tbl2" rowIndexVar="row" value="#{managerController.eventList}" var="event"
 				paginator="true" paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink}"
 				rows="15">
@@ -141,11 +141,7 @@
 						<h:outputText value="#{sale.phone}" />
 					</p:column>
 					<p:column headerText="Action">
-						<p:commandButton value="Expense" actionListener="#{managerController.viewExpense(sale)}" update=":form01" />
-						<p:spacer width="5px" />
 						<p:commandButton value="Schedule" actionListener="#{managerController.startViewMeeting(sale)}" update=":form01:empScheduleArea" />
-						<p:spacer width="5px" />
-						<p:commandButton value="Assign task" actionListener="#{managerController.startAssign(sale)}" update=":form01" />
 						<p:spacer width="5px" />
 						<p:commandButton value="Deals" actionListener="#{managerController.viewActivity(sale)}" update=":form01:activityArea" />
 						<p:spacer width="5px" />
